@@ -60,8 +60,16 @@ flutter:
     - assets/Images/poke_bowl_with_cheese.png
     - assets/Images/salmon_in_teriyaki_sauce.png
     - assets/Images/toast_with_blueberries_and_banana.png
-    - assets/Icons/person_icon.svg
-    - assets/Icons/pizza_icon.svg
+    - assets/Icons/pizza_grey.png
+    - assets/Icons/pizza_green.png
+    - assets/Icons/person_green.png
+    - assets/Icons/person_grey.png
+    - assets/Icons/heart_green.png
+    - assets/Icons/heart_grey.png
+    - assets/Icons/fridge_green.png
+    - assets/Icons/fridge_grey.png
+    - assets/Icons/lock_grey.png
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
