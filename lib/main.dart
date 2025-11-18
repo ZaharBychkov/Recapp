@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:otus_food_app/recipe_manager.dart';
 import 'package:otus_food_app/recipe_list.dart';
 import 'login_sceen.dart';
+import 'registration_sceen.dart';
 
 void main() {
   runApp(const MyApp());
