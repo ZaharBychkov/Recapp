@@ -85,26 +85,16 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
     return SizedBox(
       width: size.width * 0.66,
       height: size.height * 0.305,
-      child: Stack(
-        fit: StackFit.expand,                         //Дети стека растягиваются на всю область SizedBox
-        alignment: Alignment.center,
-        children: [
-          Image.asset(                                // Простой и надёжный способ показать картинку
-            'assets/Images/food_background.png',
-            fit: BoxFit.contain,                      // Рястягиваем все изображение
-          ),
-
-          CustomPaint(
-            painter: TextImagePainter(
-              text: 'OTUS\nFOOD',
-              fontSize: size.width * 0.21,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Roboto',
-              image: _backgroundImage!,               // Используем уже готовое декодированное изображение для отрисовки
-            ),
-          ),
-        ],
+      child: CustomPaint(
+        painter: TextImagePainter(
+          text: 'OTUS\nFOOD',
+          fontSize: size.width * 0.23,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Roboto',
+          image: _backgroundImage!,
+        ),
       ),
     );
+
   }
 }

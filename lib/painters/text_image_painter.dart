@@ -1,22 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
-class ImagePainter extends CustomPainter {
-  final ui.Image image;
-
-  ImagePainter({required this.image});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..filterQuality = FilterQuality.high;
-    canvas.drawImage(image, Offset.zero, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
 class TextImagePainter extends CustomPainter {
   final String text;
   final double fontSize;
@@ -34,6 +18,12 @@ class TextImagePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+
+    // 1. Создаём слой
+    canvas.saveLayer(rect, Paint());
+
+    // 2. Рисуем ТЕКСТ как маску (НЕ прозрачный!)
     final textPainter = TextPainter(
       text: TextSpan(
         text: text,
@@ -41,36 +31,35 @@ class TextImagePainter extends CustomPainter {
           fontSize: fontSize,
           fontFamily: fontFamily,
           fontWeight: fontWeight,
-          color: Colors.black,
+          color: Colors.white, // ВАЖНО: белый
         ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     );
 
-    textPainter.layout(minWidth: 0, maxWidth: size.width);
+    textPainter.layout(maxWidth: size.width);
 
     final offset = Offset(
-      (size.width - textPainter.size.width) / 2,
-      (size.height - textPainter.size.height) / 2,
+      (size.width - textPainter.width) / 2,
+      (size.height - textPainter.height) / 2,
     );
 
-    final pictureRecorder = ui.PictureRecorder();
-    final pathCanvas = Canvas(pictureRecorder);
-    textPainter.paint(pathCanvas, offset);
+    textPainter.paint(canvas, offset);
 
-    final picture = pictureRecorder.endRecording();
-    final path = Path();
-    path.addRect(Rect.fromLTWH(0, 0, size.width, size.height)); // или другой способ получения path
+    // 3. Рисуем изображение ВНУТРИ текста
+    final imagePaint = Paint()
+      ..blendMode = BlendMode.srcIn
+      ..filterQuality = FilterQuality.high;
 
-    canvas.save();
-    canvas.clipPath(path);
     canvas.drawImageRect(
       image,
       Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Paint()..filterQuality = FilterQuality.high,
+      rect,
+      imagePaint,
     );
+
+    // 4. Восстанавливаем слой
     canvas.restore();
   }
 
