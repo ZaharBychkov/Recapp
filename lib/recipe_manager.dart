@@ -21,7 +21,7 @@ class RecipeManager {
           "Кунжут: по вкусу",
         ],
         45,
-        "assets/salmon_in_teriyaki_sauce.png",
+        "assets/Images/salmon_in_teriyaki_sauce.png",
       ),
       Recipe(
         2,
@@ -39,7 +39,7 @@ class RecipeManager {
           "Масло для жарки: 1 ст. ложка",
         ],
         60,
-        "assets/burger_with_two_cutlets.png",
+        "assets/Images/burger_with_two_cutlets.png",
       ),
       Recipe(
         3,
@@ -57,7 +57,7 @@ class RecipeManager {
           "Масло для жарки: 2 ст. ложки",
         ],
         75,
-        "assets/georgian_beef_steak.png",
+        "assets/Images/georgian_beef_steak.png",
       ),
       Recipe(
         4,
@@ -73,7 +73,7 @@ class RecipeManager {
           "Томатный соус: 3 ст. ложки",
         ],
         25,
-        "assets/homemade_pizza_margarita.png",
+        "assets/Images/homemade_pizza_margarita.png",
       ),
       Recipe(
         5,
@@ -91,7 +91,7 @@ class RecipeManager {
           "Перец: по вкусу",
         ],
         25,
-        "assets/pasta_with_seafood.png",
+        "assets/Images/pasta_with_seafood.png",
       ),
       Recipe(
         6,
@@ -108,7 +108,7 @@ class RecipeManager {
           "Соль: по вкусу",
         ],
         30,
-        "assets/poke_bowl_with_cheese.png",
+        "assets/Images/poke_bowl_with_cheese.png",
       ),
       Recipe(
         7,
@@ -123,7 +123,7 @@ class RecipeManager {
           "Кокосовая стружка: 1 ч. ложка (по желанию)",
         ],
         45,
-        "assets/toast_with_blueberries_and_banana.png",
+        "assets/Images/toast_with_blueberries_and_banana.png",
       ),
     ];
     return testList;

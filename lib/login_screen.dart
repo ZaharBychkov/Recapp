@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import '../widgets/png_icon.dart'; // Импортируем новый виджет
 
-class RegistrationScreen extends StatelessWidget {
+class LoginScreen extends StatelessWidget {
   final formKey = GlobalKey<FormState>();
   final loginController = TextEditingController();
   final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -114,47 +113,9 @@ class RegistrationScreen extends StatelessWidget {
                     )
                 ), //Завершение блока двух полей
 
-                SizedBox(height: MediaQuery.of(context).size.height * 0.017),
-
-                Container(//Поле ввода "пароль еще раз"
-                  width: MediaQuery.of(context).size.width * 0.542,
-                  height: MediaQuery.of(context).size.height * 0.0517,
-                  decoration: BoxDecoration(
-                    color:Colors.white,
-                    borderRadius: BorderRadius.circular(10),//
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(width: 8),
-
-                      Image.asset(
-                        'assets/Icons/lock_grey.png',
-                        width: MediaQuery.of(context).size.width * 0.056,
-                        height: MediaQuery.of(context).size.height * 0.056,
-                      ),
-                      SizedBox(width: 8),
-                      Expanded( // Занимаем оставшееся место под текст
-                        child: TextField( // Поле ввода
-                          controller: confirmPasswordController, // Привязываем контроллер
-                          obscureText: true, // Маскируем пароль
-                          decoration: InputDecoration( // Оформление поля
-                            hintText: 'пароль еще раз', // Текст подсказка
-                            hintStyle: TextStyle( // Стиль текста подсказки
-                              color: Color(0xFFC2C2C2),
-                              fontSize: MediaQuery.of(context).size.width * 0.0374,
-                              fontFamily: 'Roboto',
-                            ),
-                            border: InputBorder.none, // Убираем рамку
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
                 SizedBox(height: MediaQuery.of(context).size.height * 0.026),
 
-                Container(//Кнопка регистрации
+                Container(//Кнопка войти
                   width: MediaQuery.of(context).size.width * 0.542,
                   height: MediaQuery.of(context).size.height * 0.0517,
                   decoration: BoxDecoration(
@@ -163,7 +124,7 @@ class RegistrationScreen extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      'Регистрация',
+                      'Войти',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: MediaQuery.of(context).size.width * 0.0374,
@@ -172,13 +133,13 @@ class RegistrationScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),//Конец блока регистрации
+                ),//Конец блока войти
 
                 SizedBox(height: MediaQuery.of(context).size.height * 0.026),
                 Spacer(),//Заполнить все пространство между кнопкой и нижней понелью
 
                 Text(
-                  'Войти в приложение',
+                  'Зарегистрироваться',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: MediaQuery.of(context).size.width * 0.0374,
@@ -197,45 +158,45 @@ class RegistrationScreen extends StatelessWidget {
         color: Colors.white,
         child: Row(
           children: [
-            Expanded(//Занимаем все доступное пространство внутри Row
+            Expanded(
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center, //Центрирование по вертикали
+                child: Column( // бъединяем иконку и текст
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                  PngIcon(
-                    asset: 'assets/Icons/pizza_grey.png',
-                    size: MediaQuery.of(context).size.width * 0.056,
-                  ),
-                  Text(
-                    'Рецепты',
-                    style: TextStyle(
-                      color: Color(0xFFC2C2C2),
-                      fontSize: MediaQuery.of(context).size.width * 0.0234,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w400,
-                      )
+                    PngIcon(
+                      asset: 'assets/Icons/pizza_grey.png',
+                      size: MediaQuery.of(context).size.width * 0.056,
+                    ),
+                    Text(
+                      'Рецепты',
+                      style: TextStyle(
+                        color: Color(0xFFC2C2C2),
+                        fontSize: MediaQuery.of(context).size.width * 0.0234,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                  PngIcon(
-                    asset: 'assets/Icons/person_green.png',
-                    size: MediaQuery.of(context).size.width * 0.056,
-                  ),
-                  Text(
-                    'Вход',
-                  style: TextStyle(
-                    color: Color(0xFF2ECC71),
-                      fontSize: MediaQuery.of(context).size.width * 0.0234,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w400,
-                      )
+            Expanded(
+              child: Center(
+                child: Column( // ← Объединяем иконку и текст
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    PngIcon(
+                      asset: 'assets/Icons/person_green.png',
+                      size: MediaQuery.of(context).size.width * 0.056,
+                    ),
+                    Text(
+                      'Вход',
+                      style: TextStyle(
+                        color: Color(0xFF2ECC71),
+                        fontSize: MediaQuery.of(context).size.width * 0.0234,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ],
                 ),
