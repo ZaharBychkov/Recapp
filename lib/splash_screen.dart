@@ -53,8 +53,8 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF66FF99),
-              Color(0xFF2ECC71),
+              Color(0xFF2ECC71), // Светлый зелёный — #2ECC71
+              Color(0xFF165932), // Тёмный зелёный — #165932
             ],
           ),
         ),

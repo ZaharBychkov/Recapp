@@ -19,6 +19,9 @@ class TextImagePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
+    final scale = 1.05;
+    final scaledWidth = image.width.toDouble() * scale;
+    final scaleHeight = image.height.toDouble() * scale;
 
     // 1. Создаём слой
     canvas.saveLayer(rect, Paint());
@@ -54,7 +57,7 @@ class TextImagePainter extends CustomPainter {
 
     canvas.drawImageRect(
       image,
-      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      Rect.fromLTWH(0, 0, scaledWidth, scaleHeight),
       rect,
       imagePaint,
     );

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'splash_screen.dart';
 import 'registration_screen.dart';
+import 'recipe_list_screen.dart';
+import 'recipe_detail_screen.dart';
+import 'recipe_manager.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,6 +14,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final recipeManager = RecipeManager();
+    final firstRecipe = recipeManager.getRecipes()[0];
+
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -20,7 +27,7 @@ class MyApp extends StatelessWidget {
       // home: Scaffold(//home - начальный экран приложения
       //   body: RecipeList(recipes: RecipeManager().getRecipes()),//Основное содержимое
       // )
-          home: SplashScreen(),
+          home: RecipeDetailScreen(recipe: firstRecipe),
     );
   }
 }
