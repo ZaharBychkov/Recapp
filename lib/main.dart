@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       // home: Scaffold(//home - начальный экран приложения
       //   body: RecipeList(recipes: RecipeManager().getRecipes()),//Основное содержимое
       // )
-          home: RecipeDetailScreen(recipe: firstRecipe),
+          home: RecipeListScreen(),
     );
   }
 }

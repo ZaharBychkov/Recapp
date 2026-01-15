@@ -70,6 +70,7 @@ flutter:
     - assets/Icons/fridge_grey.png
     - assets/Icons/lock_grey.png
     - assets/Images/food_background.png
+    - assets/Icons/clock.png
 
 
   # The following line ensures that the Material Icons font is
