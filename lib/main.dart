@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'splash_screen.dart';
 import 'registration_screen.dart';
-import 'recipe_list_screen.dart';
+import 'recipe_list_screen_universal.dart';
 import 'recipe_detail_screen.dart';
 import 'recipe_manager.dart';
 
