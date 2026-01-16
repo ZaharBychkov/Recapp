@@ -65,46 +65,48 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                           SizedBox(width: MediaQuery.of(context).size.width * 0.03), //Отступ между изображением и текстом
 
                           // Текстовая часть
+                          //Железобетонно ставим все элементы
                           Expanded(
                             flex: 33,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,     //Выравниваение текста по левому краю
-                              mainAxisAlignment: MainAxisAlignment.center,      //Выравниване по центру и по вертикали (название вверху, время внизу)
+                            child: Stack(
                               children: [
-                                // Название рецепта
-                                Text(
-                                  recipe.title, //
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: MediaQuery.of(context).size.width * 0.05,  //Размер области которую заполняет текст по ширине
-                                    fontFamily: 'Roboto',
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.0,                                        //Растояние между строк (по умолчанию 1.2)
-                                  ),
-                                  maxLines: 2,                                            //Максимум 2 строки
-                                  overflow: TextOverflow.ellipsis,                        //Если текст не поместился - добавить многоточие
-                                ),
-
-                                SizedBox(height: MediaQuery.of(context).size.height * 0.01), //
-
-                                // Время приготовления
-                                Row( //
-                                  children: [
-                                    Image.asset(
-                                      'assets/Icons/clock.png',
-                                      width: 18,
-                                    ),
-                                    SizedBox(width: 8),             //Растояние между иконкой и текстом
-                                    Text(
-                                      '${recipe.prepTime} мин', //  Время приготовления из recipe
+                                Positioned(                                                 //Точно позиционируем дочерние элементы в стеке
+                                  top: MediaQuery.of(context).size.height * 0.025,          //Отступ сверху
+                                  left: 0,
+                                  right: 0,
+                                  child: Padding(                                            //Добавление внутренних отступов
+                                    padding: const EdgeInsets.only(right: 4),               //Отступ только справа 12 пикселей
+                                    child: Text(
+                                      recipe.title,
+                                      maxLines: 2,                                            //Максимальное количество строк
+                                      overflow: TextOverflow.ellipsis,                        //Если текст не помещается - добавить многоточие
                                       style: TextStyle(
-                                        color: Color(0xFF2ECC71),
-                                        fontSize: MediaQuery.of(context).size.width * 0.04,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.w500,
+                                        fontSize: MediaQuery.of(context).size.width * 0.06,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1.0,
+                                        leadingDistribution: TextLeadingDistribution.even,     //Распределение свообдного места между строками
                                       ),
                                     ),
-                                  ],
+                                  ),
+                                ),
+
+                                Positioned(                                                     //Второй элемент
+                                  bottom: MediaQuery.of(context).size.height * 0.025,           //Отступ снизу
+                                  left: 0,
+                                  child: Row(
+                                    children: [
+                                      Image.asset('assets/Icons/clock.png', width: 20),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '${recipe.prepTime} мин',
+                                        style: TextStyle(
+                                          color: Color(0xFF2ECC71),
+                                          fontSize: MediaQuery.of(context).size.width * 0.04,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
