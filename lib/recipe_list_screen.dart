@@ -4,53 +4,112 @@ import '../models/recipe.dart';
 
 class RecipeListScreen extends StatefulWidget {
   @override
-  //Создаем стэйт (управляющего для данного класса)
   _RecipeListScreenState createState() => _RecipeListScreenState();
 }
 
-//Привязываем стэйт к классу
 class _RecipeListScreenState extends State<RecipeListScreen> {
-  late List<Recipe> recipes;
+  late List<Recipe> recipes;                                     //Переменная  recipe - список рецептов, который будет заполнен при инициализации
 
-  //Инициализируем стэйт(управляющего) передаем ему данные для работы
   @override
   void initState() {
     super.initState();
-    recipes = RecipeManager().getRecipes();//Передаем список рецептов из другого файла
+    recipes = RecipeManager().getRecipes();                      //Получаем список рецептов из RecipeManager для recipe
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFECECEC),
-      body: SafeArea(
+      backgroundColor: Color(0xFFECECEC),                                   //Фон всего экрана
+      body: SafeArea(                                            //Основное содержимое экрана body
         child: Padding(
           padding: EdgeInsets.symmetric(
-              horizontal: MediaQuery.of(context).size.width * 0.0374
+            horizontal: MediaQuery.of(context).size.width * 0.0374, //Отступы размер 0.0374 от ширины симметрично
           ),
+          //Вертикальный контейнер для размещения списка
           child: Column(
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.026,),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.026), //Пустое пространство сверху
+              //Занимаем все оставшееся пространство внутри контейнера
               Expanded(
-                child: ListView.builder(
-                  itemCount: recipes.length,//Передаем количество картинок
-                  //Context - ссылка на виджет в котором он находится чтобы itemBuilder понимал где он
-                  //index - индекс для картинок
-                  itemBuilder: (context, index) {
-                    final recipe = recipes[index];
-                    return Container(//Контейнер в который будут устанавливаться изображения
-                      margin: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).size.height * 0.017,
+                child: ListView.builder(                //Прокручиваемый список
+                  itemCount: recipes.length,            //Берем количество эелементов из менеджера рецептов
+                  itemBuilder: (context, index) {       //Создаем список, на вход берем контекст экрана и индексы рецептов
+                    final recipe = recipes[index];     // recipe - рецепт по списку из мэнеджера
+                    return Container(                                         // Возвращаем контейнеры для каждого элемента по индексу index
+                      margin: EdgeInsets.only(                                //Добавим нижний отсуп после каждого отдельного контейнера
+                        bottom: MediaQuery.of(context).size.height * 0.017,   //Отступ 0.017 от высоты экрана
                       ),
-                      width: MediaQuery.of(context).size.width * 0.925,
+                      width: MediaQuery.of(context).size.width * 0.925,        //Размеры контейнера
                       height: MediaQuery.of(context).size.height * 0.147,
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),//Обрезает сам контеинер
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),//Обрезает child - картинку
-                        child: Image.asset(//asset - устновка изображения
-                          recipe.imagePath,//Берет изображение по пути
-                          fit: BoxFit.cover,//Заполняет весь контейнер изображением обрезая лишнее
-                        ),
+                      decoration: BoxDecoration(                               //Закгругление контейнеров
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,                                    //Белый фон контейнера
+                      ),
+                      child: Row(                                               //Создаем ряд в контейнере с двумя элементами Expanded для изображения
+                        children: [                                             //и Expanded - Column для текста с иконкой и временм
+                          Expanded(
+                            flex: 20,
+                            child: ClipRRect(                                   //Обрезаем изобраежние также как и сам контейнер чтобы небыло отсрых уголов
+                              borderRadius: BorderRadius.only(                  //only - значит нужно конкретно указать углы для скругления, в отличии от circular
+                                topLeft: Radius.circular(10),                   //Верхний левый
+                                bottomLeft: Radius.circular(10),                //Левый нижний
+                            ),
+                            child: Image.asset(                                 //Загружаем изображение
+                              recipe.imagePath,                                 //Берем изображение по пути
+                              fit: BoxFit.cover,                                //Заполняем весь контейнер обрезаем то что не влазит
+                              height: double.infinity,                          //Занимаем всю высоту  контейнера
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(width: MediaQuery.of(context).size.width * 0.03), //Отступ между изображением и текстом
+
+                          // Текстовая часть
+                          Expanded(
+                            flex: 33,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,     //Выравниваение текста по левому краю
+                              mainAxisAlignment: MainAxisAlignment.center,      //Выравниване по центру и по вертикали (название вверху, время внизу)
+                              children: [
+                                // Название рецепта
+                                Text(
+                                  recipe.title, //
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: MediaQuery.of(context).size.width * 0.05,  //Размер области которую заполняет текст по ширине
+                                    fontFamily: 'Roboto',
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.0,                                        //Растояние между строк (по умолчанию 1.2)
+                                  ),
+                                  maxLines: 2,                                            //Максимум 2 строки
+                                  overflow: TextOverflow.ellipsis,                        //Если текст не поместился - добавить многоточие
+                                ),
+
+                                SizedBox(height: MediaQuery.of(context).size.height * 0.01), //
+
+                                // Время приготовления
+                                Row( //
+                                  children: [
+                                    Image.asset(
+                                      'assets/Icons/clock.png',
+                                      width: 18,
+                                    ),
+                                    SizedBox(width: 8),             //Растояние между иконкой и текстом
+                                    Text(
+                                      '${recipe.prepTime} мин', //  Время приготовления из recipe
+                                      style: TextStyle(
+                                        color: Color(0xFF2ECC71),
+                                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                                        fontFamily: 'Roboto',
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
