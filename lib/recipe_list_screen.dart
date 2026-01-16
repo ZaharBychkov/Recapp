@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../recipe_manager.dart';
 import '../models/recipe.dart';
+import '../utils/time_formatter.dart';
 
 class RecipeListScreen extends StatefulWidget {
   @override
@@ -98,7 +99,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                                       Image.asset('assets/Icons/clock.png', width: 20),
                                       const SizedBox(width: 8),
                                       Text(
-                                        '${recipe.prepTime} мин',
+                                        formatTime(recipe.prepTimeSeconds),
                                         style: TextStyle(
                                           color: Color(0xFF2ECC71),
                                           fontSize: MediaQuery.of(context).size.width * 0.04,

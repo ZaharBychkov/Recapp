@@ -20,7 +20,7 @@ class RecipeManager {
           "Филе лосося: 680 г",
           "Кунжут: по вкусу",
         ],
-        45,
+        45 * 60,
         "assets/Images/salmon_in_teriyaki_sauce.png",
       ),
       Recipe(
@@ -38,7 +38,7 @@ class RecipeManager {
           "Горчица: 1 ч. ложка",
           "Масло для жарки: 1 ст. ложка",
         ],
-        60,
+        60 * 60,
         "assets/Images/burger_with_two_cutlets.png",
       ),
       Recipe(
@@ -56,7 +56,7 @@ class RecipeManager {
           "Перец: по вкусу",
           "Масло для жарки: 2 ст. ложки",
         ],
-        75,
+        75 * 60,
         "assets/Images/georgian_beef_steak.png",
       ),
       Recipe(
@@ -72,7 +72,7 @@ class RecipeManager {
           "Соль: щепотка",
           "Томатный соус: 3 ст. ложки",
         ],
-        25,
+        25 * 60,
         "assets/Images/homemade_pizza_margarita.png",
       ),
       Recipe(
@@ -90,7 +90,7 @@ class RecipeManager {
           "Соль: по вкусу",
           "Перец: по вкусу",
         ],
-        25,
+        25 * 60,
         "assets/Images/pasta_with_seafood.png",
       ),
       Recipe(
@@ -107,7 +107,7 @@ class RecipeManager {
           "СеSAMe масло: 1 ч. ложка",
           "Соль: по вкусу",
         ],
-        30,
+        30 * 60,
         "assets/Images/poke_bowl_with_cheese.png",
       ),
       Recipe(
@@ -122,7 +122,7 @@ class RecipeManager {
           "Сливочное масло: 1 ч. ложка",
           "Кокосовая стружка: 1 ч. ложка (по желанию)",
         ],
-        45,
+        45 * 60,
         "assets/Images/toast_with_blueberries_and_banana.png",
       ),
     ];

@@ -2,10 +2,10 @@ class Recipe {
   int id;
   String title;
   String description;
-  int prepTime;
+  int prepTimeSeconds;
   List<String> ingredients;
   String imagePath;
 
-  Recipe(this.id, this.title, this.description, this.ingredients, this.prepTime, this.imagePath);
+  Recipe(this.id, this.title, this.description, this.ingredients, this.prepTimeSeconds, this.imagePath);
 }
 
