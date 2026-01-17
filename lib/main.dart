@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'splash_screen.dart';
-import 'registration_screen.dart';
-import 'recipe_list_screen_universal.dart';
 import 'recipe_detail_screen.dart';
+import 'models/recipe.dart';
 import 'recipe_manager.dart';
 
 void main() {
@@ -14,20 +12,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final recipeManager = RecipeManager();
-    final firstRecipe = recipeManager.getRecipes()[0];
-
+    // Берём первый рецепт из менеджера
+    final recipes = RecipeManager().getRecipes();
 
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-         primarySwatch: Colors.green,
-         scaffoldBackgroundColor: Colors.white,
+        primarySwatch: Colors.green,
+        scaffoldBackgroundColor: Colors.white,
       ),
-      // home: Scaffold(//home - начальный экран приложения
-      //   body: RecipeList(recipes: RecipeManager().getRecipes()),//Основное содержимое
-      // )
-          home: RecipeListScreen(),
+      home: RecipeDetailScreen(recipe: recipes[2],),
     );
   }
 }

@@ -3,20 +3,36 @@ import '../models/recipe.dart'; //
 import '../utils/time_formatter.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
-  final Recipe recipe; //
+  final Recipe recipe;
 
   const RecipeDetailScreen({super.key, required this.recipe});
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFECECEC),
-      appBar: AppBar(
+      backgroundColor: Color(0xFFFFFFFF),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white, 
+            boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              offset: Offset(0, 2),
+              blurRadius: 2,
+            ),
+            ],
+          ),
+      child: AppBar(
         backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        centerTitle: true,                                      
         title: Text(
           'Рецепт', //
           style: TextStyle(
-            color: Colors.black,
+            color: Color(0xFF165932),
             fontSize: MediaQuery.of(context).size.width * 0.045,
             fontFamily: 'Roboto',
             fontWeight: FontWeight.w600,
@@ -33,6 +49,8 @@ class RecipeDetailScreen extends StatelessWidget {
           ),
         ],
       ),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(
@@ -42,6 +60,45 @@ class RecipeDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                recipe.title,
+                style: TextStyle(
+                  fontSize: MediaQuery.of(context).size.width * 0.06,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                  fontFamily: 'Roboto',
+                  height: 1.2,
+                ),
+                maxLines: null,
+                //overflow: TextOverflow.visible,
+                softWrap: true
+              ),
+
+              SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 4),
+                  Image.asset(
+                    'assets/Icons/clock.png',
+                    width: 20,
+                    height: 20,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    formatTime(recipe.prepTimeSeconds),
+                    style: TextStyle(
+                      color: Color(0xFF2ECC71),
+                      fontSize: MediaQuery.of(context).size.width * 0.035,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: MediaQuery.of(context).size.height * 0.015),
               // Изображение рецепта
               Container(
                 width: double.infinity,
@@ -60,30 +117,11 @@ class RecipeDetailScreen extends StatelessWidget {
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
-              // Время приготовления
-              Row(
-                children: [
-                  Icon(Icons.timer, color: Color(0xFF2ECC71), size: 20),
-                  SizedBox(width: 5),
-                  Text(
-                    formatTime(recipe.prepTimeSeconds), //
-                    style: TextStyle(
-                      color: Color(0xFF2ECC71),
-                      fontSize: MediaQuery.of(context).size.width * 0.035,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-
               // Ингредиенты
               Text(
                 'Ингредиенты',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Color(0xFF165932),
                   fontSize: MediaQuery.of(context).size.width * 0.04,
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.w600,
@@ -94,39 +132,52 @@ class RecipeDetailScreen extends StatelessWidget {
 
               // Контейнер для работы с ингредиентами
               Container(
-                padding: EdgeInsets.all(12),
+                padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Color(0xFFD9D9D9)),
+                  border: Border.all(
+                    color: Color(0xFFA0A0A0),
+                    width: 1.5,
+                  ),
                 ),
                 child: Column(
                   children: recipe.ingredients.map((ingredient) {
                     return Padding(
-                      padding: EdgeInsets.only(bottom: 8),
+                      padding: EdgeInsets.only(bottom: 5),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center, // Центрируем по вертикали
                         children: [
-                          Expanded(
-                            child: Text(
-                              ingredient,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: MediaQuery.of(context).size.width * 0.03,
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w400,
-                              ),
+                          Container(
+                            width: 6,
+                            height: 6,
+                            margin: EdgeInsets.only(right: 12), // Отступ справа
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              shape: BoxShape.circle,
                             ),
                           ),
                           Text(
-                            '', //
+                            ingredient.name,
                             style: TextStyle(
-                              color: Colors.grey,
+                              color: Colors.black,
                               fontSize: MediaQuery.of(context).size.width * 0.03,
                               fontFamily: 'Roboto',
                               fontWeight: FontWeight.w400,
                             ),
                           ),
+
+                          Spacer(), //Рястягиваем что прибить количество ингредиента к правому краю
+
+                          Text(
+                            ingredient.measurement,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize:  MediaQuery.of(context).size.width * 0.033,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w400,
+                            )
+                          )
                         ],
                       ),
                     );
