@@ -1,5 +1,6 @@
 import 'models/recipe.dart';
 import 'models/ingredient.dart';
+import 'models/step.dart';
 
 class RecipeManager {
   List<Recipe> getRecipes() {
@@ -23,6 +24,33 @@ class RecipeManager {
         ],
         45 * 60,
         "assets/Images/salmon_in_teriyaki_sauce.png",
+        [
+          Step(
+            stepNumber: 1,
+            description: "В маленькой кастрюле соедините соевый соус, 6 столовых ложек воды, мёд, сахар, измельчённый чеснок, имбирь и лимонный сок.",
+            timeInSeconds: 6 * 60,
+          ),
+          Step(
+            stepNumber: 2,
+            description: "Поставьте на средний огонь и, помешивая, доведите до лёгкого кипения.",
+            timeInSeconds: 7 * 60,
+          ),
+          Step(
+            stepNumber: 3,
+            description: "Смешайте оставшуюся воду с крахмалом. Добавьте в кастрюлю и перемешайте.",
+            timeInSeconds: 6 * 60,
+          ),
+          Step(
+            stepNumber: 4,
+            description: "Готовьте, непрерывно помешивая венчиком, 1 минуту. Снимите с огня и немного остудите.",
+            timeInSeconds: 1 * 60,
+          ),
+          Step(
+            stepNumber: 5,
+            description: "Смажьте форму маслом и выложите туда рыбу. Полейте её соусом.",
+            timeInSeconds: 6 * 60,
+          ),
+        ],
       ),
       Recipe(
         2,
@@ -41,6 +69,33 @@ class RecipeManager {
         ],
         60 * 60,
         "assets/Images/burger_with_two_cutlets.png",
+        [
+          Step(
+            stepNumber: 1,
+            description: "Разогрейте сковороду на среднем огне и слегка смажьте маслом.",
+            timeInSeconds: 2 * 60,
+          ),
+          Step(
+            stepNumber: 2,
+            description: "Обжарьте котлеты по 4 минуты с каждой стороны до золотистой корочки.",
+            timeInSeconds: 8 * 60,
+          ),
+          Step(
+            stepNumber: 3,
+            description: "Добавьте ломтики сыра на котлеты за 1 минуту до готовности.",
+            timeInSeconds: 1 * 60,
+          ),
+          Step(
+            stepNumber: 4,
+            description: "Поджарьте булочки на сухой сковороде до хруста.",
+            timeInSeconds: 2 * 60,
+          ),
+          Step(
+            stepNumber: 5,
+            description: "Соберите бургер: булочка, кетчуп, котлеты, овощи, вторая булочка.",
+            timeInSeconds: 3 * 60,
+          ),
+        ],
       ),
       Recipe(
         3,
@@ -59,6 +114,33 @@ class RecipeManager {
         ],
         75 * 60,
         "assets/Images/georgian_beef_steak.png",
+        [
+          Step(
+            stepNumber: 1,
+            description: "Нарежьте мясо на толстые стейки толщиной 2-3 см.",
+            timeInSeconds: 5 * 60,
+          ),
+          Step(
+            stepNumber: 2,
+            description: "Посолите, поперчите и посыпьте хмели-сунели.",
+            timeInSeconds: 2 * 60,
+          ),
+          Step(
+            stepNumber: 3,
+            description: "Разогрейте сковороду с маслом на сильном огне.",
+            timeInSeconds: 3 * 60,
+          ),
+          Step(
+            stepNumber: 4,
+            description: "Обжарьте стейки по 4 минуты с каждой стороны.",
+            timeInSeconds: 8 * 60,
+          ),
+          Step(
+            stepNumber: 5,
+            description: "Добавьте сливочное масло, чеснок и лук. Полейте стейки соусом.",
+            timeInSeconds: 5 * 60,
+          ),
+        ],
       ),
       Recipe(
         4,
@@ -75,6 +157,33 @@ class RecipeManager {
         ],
         25 * 60,
         "assets/Images/homemade_pizza_margarita.png",
+        [
+          Step(
+            stepNumber: 1,
+            description: "Разогрейте духовку до 220°C.",
+            timeInSeconds: 10 * 60,
+          ),
+          Step(
+            stepNumber: 2,
+            description: "Раскатайте тесто в круглую форму.",
+            timeInSeconds: 5 * 60,
+          ),
+          Step(
+            stepNumber: 3,
+            description: "Смажьте тесто томатным соусом и посыпьте тёртой моцареллой.",
+            timeInSeconds: 3 * 60,
+          ),
+          Step(
+            stepNumber: 4,
+            description: "Выпекайте в духовке 12 минут до золотистой корочки.",
+            timeInSeconds: 12 * 60,
+          ),
+          Step(
+            stepNumber: 5,
+            description: "Выньте из духовки и украсьте свежим базиликом.",
+            timeInSeconds: 1 * 60,
+          ),
+        ],
       ),
       Recipe(
         5,
@@ -93,6 +202,33 @@ class RecipeManager {
         ],
         25 * 60,
         "assets/Images/pasta_with_seafood.png",
+        [
+          Step(
+            stepNumber: 1,
+            description: "Отварите спагетти в подсоленной воде до состояния al dente.",
+            timeInSeconds: 10 * 60,
+          ),
+          Step(
+            stepNumber: 2,
+            description: "Разогрейте сковороду с оливковым маслом.",
+            timeInSeconds: 2 * 60,
+          ),
+          Step(
+            stepNumber: 3,
+            description: "Обжарьте чеснок до аромата, добавьте морепродукты.",
+            timeInSeconds: 5 * 60,
+          ),
+          Step(
+            stepNumber: 4,
+            description: "Влейте сливки, посолите, поперчите. Протушите 3 минуты.",
+            timeInSeconds: 3 * 60,
+          ),
+          Step(
+            stepNumber: 5,
+            description: "Добавьте пасту и перемешайте. Украсьте петрушкой.",
+            timeInSeconds: 2 * 60,
+          ),
+        ],
       ),
       Recipe(
         6,
@@ -110,6 +246,33 @@ class RecipeManager {
         ],
         30 * 60,
         "assets/Images/poke_bowl_with_cheese.png",
+        [
+          Step(
+            stepNumber: 1,
+            description: "Отварите рис до готовности и остудите.",
+            timeInSeconds: 15 * 60,
+          ),
+          Step(
+            stepNumber: 2,
+            description: "Нарежьте тунец, авокадо и огурец крупными кубиками.",
+            timeInSeconds: 5 * 60,
+          ),
+          Step(
+            stepNumber: 3,
+            description: "Смешайте соевый соус с кунжутным маслом.",
+            timeInSeconds: 2 * 60,
+          ),
+          Step(
+            stepNumber: 4,
+            description: "Выложите рис в миску, сверху добавьте ингредиенты.",
+            timeInSeconds: 3 * 60,
+          ),
+          Step(
+            stepNumber: 5,
+            description: "Полейте соусом и посыпьте сыром фета.",
+            timeInSeconds: 1 * 60,
+          ),
+        ],
       ),
       Recipe(
         7,
@@ -125,6 +288,33 @@ class RecipeManager {
         ],
         45 * 60,
         "assets/Images/toast_with_blueberries_and_banana.png",
+        [
+          Step(
+            stepNumber: 1,
+            description: "Поджарьте хлеб в тостере до хруста.",
+            timeInSeconds: 3 * 60,
+          ),
+          Step(
+            stepNumber: 2,
+            description: "Намажьте тосты сливочным маслом.",
+            timeInSeconds: 1 * 60,
+          ),
+          Step(
+            stepNumber: 3,
+            description: "Нарежьте банан кружочками и выложите на тосты.",
+            timeInSeconds: 2 * 60,
+          ),
+          Step(
+            stepNumber: 4,
+            description: "Посыпьте черникой и полейте мёдом.",
+            timeInSeconds: 1 * 60,
+          ),
+          Step(
+            stepNumber: 5,
+            description: "Посыпьте кокосовой стружкой по желанию.",
+            timeInSeconds: 1 * 60,
+          ),
+        ],
       ),
     ];
   }

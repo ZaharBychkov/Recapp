@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import '../models/recipe.dart'; //
+import '../models/recipe.dart';
 import '../utils/time_formatter.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
   final Recipe recipe;
 
   const RecipeDetailScreen({super.key, required this.recipe});
-
 
   @override
   Widget build(BuildContext context) {
@@ -16,39 +15,39 @@ class RecipeDetailScreen extends StatelessWidget {
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white, 
+            color: Colors.white,
             boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              offset: Offset(0, 2),
-              blurRadius: 2,
-            ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                offset: Offset(0, 2),
+                blurRadius: 2,
+              ),
             ],
           ),
-      child: AppBar(
-        backgroundColor: Colors.white,
-        scrolledUnderElevation: 0,
-        centerTitle: true,                                      
-        title: Text(
-          'Рецепт', //
-          style: TextStyle(
-            color: Color(0xFF165932),
-            fontSize: MediaQuery.of(context).size.width * 0.045,
-            fontFamily: 'Roboto',
-            fontWeight: FontWeight.w600,
+          child: AppBar(
+            backgroundColor: Colors.white,
+            scrolledUnderElevation: 0,
+            centerTitle: true,
+            title: Text(
+              'Рецепт',
+              style: TextStyle(
+                color: Color(0xFF165932),
+                fontSize: MediaQuery.of(context).size.width * 0.045,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => Navigator.pop(context),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.share, color: Colors.black),
+                onPressed: () {},
+              ),
+            ],
           ),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.share, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
-      ),
         ),
       ),
       body: SafeArea(
@@ -70,8 +69,7 @@ class RecipeDetailScreen extends StatelessWidget {
                   height: 1.2,
                 ),
                 maxLines: null,
-                //overflow: TextOverflow.visible,
-                softWrap: true
+                softWrap: true,
               ),
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.015),
@@ -99,7 +97,7 @@ class RecipeDetailScreen extends StatelessWidget {
               ),
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.015),
-              // Изображение рецепта
+
               Container(
                 width: double.infinity,
                 height: MediaQuery.of(context).size.height * 0.28,
@@ -109,7 +107,7 @@ class RecipeDetailScreen extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.asset(
-                    recipe.imagePath, //
+                    recipe.imagePath,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -117,7 +115,6 @@ class RecipeDetailScreen extends StatelessWidget {
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
-              // Ингредиенты
               Text(
                 'Ингредиенты',
                 style: TextStyle(
@@ -130,7 +127,6 @@ class RecipeDetailScreen extends StatelessWidget {
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
 
-              // Контейнер для работы с ингредиентами
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -146,12 +142,12 @@ class RecipeDetailScreen extends StatelessWidget {
                     return Padding(
                       padding: EdgeInsets.only(bottom: 5),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center, // Центрируем по вертикали
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
                             width: 6,
                             height: 6,
-                            margin: EdgeInsets.only(right: 12), // Отступ справа
+                            margin: EdgeInsets.only(right: 12),
                             decoration: BoxDecoration(
                               color: Colors.black,
                               shape: BoxShape.circle,
@@ -166,18 +162,16 @@ class RecipeDetailScreen extends StatelessWidget {
                               fontWeight: FontWeight.w400,
                             ),
                           ),
-
-                          Spacer(), //Рястягиваем что прибить количество ингредиента к правому краю
-
+                          Spacer(),
                           Text(
                             ingredient.measurement,
                             style: TextStyle(
                               color: Colors.grey[600],
-                              fontSize:  MediaQuery.of(context).size.width * 0.033,
+                              fontSize: MediaQuery.of(context).size.width * 0.033,
                               fontFamily: 'Roboto',
                               fontWeight: FontWeight.w400,
-                            )
-                          )
+                            ),
+                          ),
                         ],
                       ),
                     );
@@ -187,50 +181,128 @@ class RecipeDetailScreen extends StatelessWidget {
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
-              // Описание (вместо шагов)
               Text(
-                'Описание',
+                'Шаги приготовления',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: MediaQuery.of(context).size.width * 0.04,
                   fontFamily: 'Roboto',
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
 
-              // Текст описания
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Color(0xFFD9D9D9)),
-                ),
-                child: Text(
-                  recipe.description, //
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: MediaQuery.of(context).size.width * 0.03,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
+              //Шаги приготовления
+              Column(
+                children: recipe.steps.map((step) {
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.925,
+                      height: MediaQuery.of(context).size.height * 0.147,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Center(
+                              child: Container(
+                                width: 24, // Ширина 24px
+                                height: 27, // Высота 27px
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200], // Цвет #C2C2C2
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '${step.stepNumber}',
+                                    style: TextStyle(
+                                      fontFamily: 'Roboto', // Шрифт Roboto
+                                      fontWeight: FontWeight.w900, // Жирность 900 (Black)
+                                      fontSize: 40, // Размер 40px
+                                      height: 27 / 40,
+                                      letterSpacing: 0, // Letter spacing 0%
+                                      color: Colors.grey[400],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          Expanded(
+                            flex: 5,
+                            child: Center(
+                              child: Text(
+                                step.description,
+                                style: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: MediaQuery.of(context).size.width * 0.03,
+                                  fontFamily: 'Roboto',
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                  Transform.scale(
+                                  scale: 1.7,
+                                  child: Checkbox(
+                                    value: step.isCompleted,
+                                    onChanged: (value) {
+                                    // setState нельзя использовать в Stateless
+                                    },
+                                  activeColor: Colors.grey[600],
+                                  checkColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                  side: BorderSide(
+                                    color: Colors.grey[600]!,
+                                    width: 2,
+                                  ),
+                                  splashRadius: 15,
+                                ),
+                                ),
+                                Text(
+                                  formatTimeMMSS(step.timeInSeconds),
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: MediaQuery.of(context).size.width * 0.025,
+                                    fontFamily: 'Roboto',
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
-              // Кнопка "начать готовить"
-              SizedBox(
-                width: double.infinity,
+              Center(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8,
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF2ECC71),
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Color(0xFF165932),
+                    padding: EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   child: Text(
@@ -243,6 +315,7 @@ class RecipeDetailScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+              ),
               ),
             ],
           ),
