@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: FridgeScreen;
+      home: FridgeScreen(),
       //RecipeDetailScreen(recipe: recipes[2],),
     );
   }

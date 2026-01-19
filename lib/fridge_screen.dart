@@ -20,18 +20,6 @@ class _FridgeScreenState extends State<FridgeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF5F5F5),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Холодильник',
-          style: TextStyle(
-            color: Color(0xFF165932),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(
@@ -115,28 +103,28 @@ class _FridgeScreenState extends State<FridgeScreen> {
           children: [
             Expanded(
               child: IconButton(
-                icon: Image.asset(''), // Вставь путь к изображению
+                icon: Image.asset('assets/Icons/pizza_grey.png'), // Вставь путь к изображению
                 onPressed: () => _onItemTapped(0),
                 color: _selectedIndex == 0 ? Color(0xFF2ECC71) : Colors.grey,
               ),
             ),
             Expanded(
               child: IconButton(
-                icon: Image.asset(''), // Вставь путь к изображению
+                icon: Image.asset('assets/Icons/fridge_green.png'), // Вставь путь к изображению
                 onPressed: () => _onItemTapped(1),
                 color: _selectedIndex == 1 ? Color(0xFF2ECC71) : Colors.grey,
               ),
             ),
             Expanded(
               child: IconButton(
-                icon: Image.asset(''), // Вставь путь к изображению
+                icon: Image.asset('assets/Icons/heart_grey.png'), // Вставь путь к изображению
                 onPressed: () => _onItemTapped(2),
                 color: _selectedIndex == 2 ? Color(0xFF2ECC71) : Colors.grey,
               ),
             ),
             Expanded(
               child: IconButton(
-                icon: Image.asset(''), // Вставь путь к изображению
+                icon: Image.asset('assets/Icons/person_grey.png'), // Вставь путь к изображению
                 onPressed: () => _onItemTapped(3),
                 color: _selectedIndex == 3 ? Color(0xFF2ECC71) : Colors.grey,
               ),
