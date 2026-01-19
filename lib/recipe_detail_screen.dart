@@ -62,6 +62,18 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             backgroundColor: Colors.white,
             appBar: PreferredSize(
               preferredSize: Size.fromHeight(kToolbarHeight),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: isCooking ? [] : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      offset: Offset(0, 3),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+
               child: AppBar(
                 backgroundColor: isCooking ? Color(0xFF2ECC71) : Colors.white,
                 scrolledUnderElevation: 0,
@@ -84,6 +96,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   ),
                 ],
               ),
+            ),
             ),
 
             body: Padding(
@@ -266,10 +279,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     Text(
                       'Шаги приготовления',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Color(0xFF165932),
                         fontSize: MediaQuery.of(context).size.width * 0.04,
                         fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
 
@@ -284,7 +297,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             width: MediaQuery.of(context).size.width * 0.925,
                             height: MediaQuery.of(context).size.height * 0.147,
                             decoration: BoxDecoration(
-                              color: isCooking ? Colors.grey[300] : Colors.grey[200],
+                              color: isCooking ? Color(0x0FFe0f7ea) : Colors.grey[200],
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Row(
@@ -297,7 +310,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                       width: 24,
                                       height: 27,
                                       decoration: BoxDecoration(
-                                        color: isCooking ? Color(0xFF2ECC71) : Colors.grey[200],
+                                        color: isCooking ? Color(0xFFe0f7ea) : Colors.grey[200],
                                       ),
                                       child: Center(
                                         child: Text(
@@ -308,7 +321,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                             fontSize: 40,
                                             height: 27 / 40,
                                             letterSpacing: 0,
-                                            color: isCooking ? Colors.white : Colors.grey[400],
+                                            color: isCooking ? Color(0xFF2ECC71) : Colors.grey[400],
                                           ),
                                         ),
                                       ),
@@ -322,10 +335,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                     child: Text(
                                       step.description,
                                       style: TextStyle(
-                                        color: isCooking ? Colors.white : Colors.grey[400],
+                                        color: isCooking ? Color(0xff2D490C) : Colors.grey[400],
                                         fontSize: MediaQuery.of(context).size.width * 0.03,
                                         fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.w900,
+                                        fontWeight: FontWeight.w400,
                                       ),
                                     ),
                                   ),
@@ -348,11 +361,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                             });
                                           }
                                               : null,
-                                          activeColor: isCooking ? Color(0xFF2ECC71) : Colors.grey[600],
+                                          activeColor: isCooking ? Color(0xFF165932) : Colors.grey[600],
                                           checkColor: Colors.white,
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                                           side: BorderSide(
-                                            color: isCooking ? Color(0xFF2ECC71) : Colors.grey[600]!,
+                                            color: isCooking ? Color(0xFF165932) : Colors.grey[600]!,
                                             width: 2,
                                           ),
                                           splashRadius: 15,
@@ -361,10 +374,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                       Text(
                                         formatTimeMMSS(step.timeInSeconds),
                                         style: TextStyle(
-                                          color: isCooking ? Colors.white : Colors.grey[600],
-                                          fontSize: MediaQuery.of(context).size.width * 0.025,
+                                          color: isCooking ? Color(0xff165932) : Colors.grey[600],
+                                          fontSize: MediaQuery.of(context).size.width * 0.035,
                                           fontFamily: 'Roboto',
-                                          fontWeight: FontWeight.w400,
+                                          fontWeight: FontWeight.w700,
                                         ),
                                       ),
                                     ],
@@ -391,7 +404,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               borderRadius: BorderRadius.circular(20),
                               side: BorderSide(
                                 color: isCooking ? Color(0xFF165932) : Colors.transparent,
-                                width: isCooking ? 2 : 0,
+                                width: isCooking ? 4 : 0,
                               ),
                             ),
                           ),
