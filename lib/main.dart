@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'recipe_detail_screen.dart';
 import 'models/recipe.dart';
 import 'recipe_manager.dart';
+import 'fridge_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,7 +22,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: RecipeDetailScreen(recipe: recipes[2],),
+      home: FridgeScreen;
+      //RecipeDetailScreen(recipe: recipes[2],),
     );
   }
 }
