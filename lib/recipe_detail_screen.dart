@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../utils/time_formatter.dart';
+import 'package:flutter/services.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;
@@ -56,25 +57,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFFFFFFF),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: kToolbarHeight,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    offset: Offset(0, 2),
-                    blurRadius: 2,
-                  ),
-                ],
-              ),
+        return Scaffold(
+            extendBodyBehindAppBar: true,    //Объединили AppBar StatusBar и  Body
+            backgroundColor: Colors.white,
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(kToolbarHeight),
               child: AppBar(
                 backgroundColor: isCooking ? Color(0xFF2ECC71) : Colors.white,
                 scrolledUnderElevation: 0,
@@ -83,8 +70,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   'Рецепт',
                   style: TextStyle(
                     color: Color(0xFF165932),
-                    fontSize: MediaQuery.of(context).size.width * 0.045,
-                    fontFamily: 'Roboto',
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -100,6 +85,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ],
               ),
             ),
+
+            body: Padding(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + kToolbarHeight,
+              ),
+
+            child: Column(
+              children: [
             if (isCooking)
               Container(
                 width: MediaQuery.of(context).size.width,
@@ -111,25 +104,29 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
+                      child: Center(
                       child: Text(
                         'Таймер',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: MediaQuery.of(context).size.width * 0.04,
+                          fontSize: MediaQuery.of(context).size.width * 0.05,
                           fontFamily: 'Roboto',
                           fontWeight: FontWeight.w500,
                         ),
+                       ),
                       ),
                     ),
                     Expanded(
+                      child: Center(
                       child: Text(
                         formatTimeMMSS(remainingTime),
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: MediaQuery.of(context).size.width * 0.05,
+                          fontSize: MediaQuery.of(context).size.width * 0.06,
                           fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w900,
                         ),
+                      ),
                       ),
                     ),
                   ],
@@ -167,13 +164,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           'assets/Icons/clock.png',
                           width: 20,
                           height: 20,
-                          color: isCooking ? Colors.white : null,
                         ),
                         SizedBox(width: 10),
                         Text(
                           formatTime(widget.recipe.prepTimeSeconds),
                           style: TextStyle(
-                            color: isCooking ? Colors.white : Color(0xFF2ECC71),
+                            color: Color(0xFF2ECC71),
                             fontSize: MediaQuery.of(context).size.width * 0.035,
                             fontFamily: 'Roboto',
                             fontWeight: FontWeight.w500,
@@ -220,7 +216,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: Color(0xFFA0A0A0),
-                          width: 1.5,
+                          width: 5,
                         ),
                       ),
                       child: Column(
@@ -231,21 +227,21 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Container(
-                                  width: 6,
-                                  height: 6,
-                                  margin: EdgeInsets.only(right: 12),
+                                  width: MediaQuery.of(context).size.width * 0.014,
+                                  height: MediaQuery.of(context).size.width * 0.02,
+                                  margin: EdgeInsets.only(right: 12),//Отсутп только справа от точек
                                   decoration: BoxDecoration(
-                                    color: Colors.black,
-                                    shape: BoxShape.circle,
+                                    color: Colors.black,             //Делаем черные круги как подпункты
+                                    shape: BoxShape.circle,          //Круг
                                   ),
                                 ),
                                 Text(
                                   ingredient.name,
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: MediaQuery.of(context).size.width * 0.03,
+                                    fontSize: MediaQuery.of(context).size.width * 0.035,
                                     fontFamily: 'Roboto',
-                                    fontWeight: FontWeight.w400,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 Spacer(),
@@ -418,6 +414,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           ],
         ),
       ),
-    );
+        );
   }
 }

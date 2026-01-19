@@ -19,10 +19,11 @@ String formatTimeMMSS(int seconds) {
   int totalMinutes = seconds  ~/ 60;
   int minutes = totalMinutes % 60;    //Количество минут - остаток от деления на часы
   int hours = totalMinutes ~/ 60;     //Целое количество часов без остатка минут
+  int secs = seconds % 60;             //Остаток секунд
 
   if (hours > 0) {
-    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:00';
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   } else {
-    return '${minutes.toString().padLeft(2, '0')}:00';
+    return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 }
