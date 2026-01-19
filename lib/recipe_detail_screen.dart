@@ -54,7 +54,7 @@ class RecipeDetailScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(
             horizontal: MediaQuery.of(context).size.width * 0.0374,
-            vertical: MediaQuery.of(context).size.height * 0.01,
+            vertical: MediaQuery.of(context).size.height * 0.02,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,7 +140,7 @@ class RecipeDetailScreen extends StatelessWidget {
                 child: Column(
                   children: recipe.ingredients.map((ingredient) {
                     return Padding(
-                      padding: EdgeInsets.only(bottom: 5),
+                      padding: EdgeInsets.only(bottom: 0),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -295,7 +295,7 @@ class RecipeDetailScreen extends StatelessWidget {
 
               Center(
               child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
+                width: MediaQuery.of(context).size.width * 0.6,
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
