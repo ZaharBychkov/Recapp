@@ -91,12 +91,12 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                                       maxLines: 2,                                            //Максимальное количество строк
                                       overflow: TextOverflow.ellipsis,                        //Если текст не помещается - добавить многоточие
                                       style: TextStyle(
-                                        fontSize: MediaQuery.of(context).size.width * 0.06,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1.0,
-                                        leadingDistribution: TextLeadingDistribution.even,     //Распределение свообдного места между строками
-                                      ),
-                                    ),
+                                    fontSize: MediaQuery.of(context).size.width * 0.06,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.0,
+                                    leadingDistribution: TextLeadingDistribution.even,     //Распределение свообдного места между строками
+                                  ),
+                                  ),
                                   ),
                                 ),
 
@@ -232,7 +232,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         width: MediaQuery.of(context).size.width * 0.056,
                       ),
                       Text(
-                        'Вход',
+                        'Профиль',
                         style: TextStyle(
                           color: Color(0xFFC2C2C2),
                           fontSize: MediaQuery.of(context).size.width * 0.0234,

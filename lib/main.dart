@@ -3,6 +3,7 @@ import 'recipe_detail_screen.dart';
 import 'models/recipe.dart';
 import 'recipe_manager.dart';
 import 'fridge_screen.dart';
+import 'recipe_list_screen_universal.dart';
 
 void main() {
   runApp(const MyApp());
