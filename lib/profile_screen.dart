@@ -40,12 +40,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       border: Border.all(color: Color(0xFF165932), width: 3.5),
                       color: Colors.white, // Фоновый цвет
                     ),
-                    child: ClipOval(
-                      child: Padding(
+                    child: ClipOval(                      //Обрезаем изображение строго по кругу
+                      child: Padding(                    //Отступ между границей круга и изображением
                         padding: EdgeInsets.all(20),    //Контроль размера изображения
                         child: Image.asset(
                           'assets/Icons/empty_avatar.png',
-                          fit: BoxFit.contain,                 //
+                          fit: BoxFit.contain,                 //Изображение масштабируется пропорционально, полносью помещаясь внутрь
                         )
                       )
                     ),
