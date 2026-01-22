@@ -33,18 +33,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     print("Нажали на аватар");
                   },
                   child: Container(
-                    width: MediaQuery.of(context).size.width * 0.25,
-                    height: MediaQuery.of(context).size.width * 0.25,
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    height: MediaQuery.of(context).size.width * 0.4,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Color(0xFF165932), width: 3.5),
                       color: Colors.white, // Фоновый цвет
                     ),
-                    child: Image.asset(
-                      'assets/Icons/empty_avatar.png',
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
+                    child: ClipOval(
+                      child: Padding(
+                        padding: EdgeInsets.all(20),    //Контроль размера изображения
+                        child: Image.asset(
+                          'assets/Icons/empty_avatar.png',
+                          fit: BoxFit.contain,                 //
+                        )
+                      )
                     ),
                   ),
                 ),
@@ -66,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Text(
                       'Логин',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Color(0xff165932),
                         fontSize: MediaQuery.of(context).size.width * 0.04,
                         fontFamily: 'Roboto',
                         fontWeight: FontWeight.w500,
