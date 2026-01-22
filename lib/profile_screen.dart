@@ -1,0 +1,214 @@
+import 'package:flutter/material.dart';
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String username = "avpetrov"; // Имя пользователя (можно заменить на реальное)
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFFF5F5F5), // Светло-серый фон
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.04,
+            vertical: MediaQuery.of(context).size.height * 0.02,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+              SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    // Можно добавить функцию для изменения аватара
+                    print("Нажали на аватар");
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    height: MediaQuery.of(context).size.width * 0.25,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Color(0xFF165932), width: 3.5),
+                      color: Colors.white, // Фоновый цвет
+                    ),
+                    child: Image.asset(
+                      'assets/Icons/empty_avatar.png',
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+              // Блок с логином
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Color(0xFFD9D9D9)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Логин',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      username, // Имя пользователя
+                      style: TextStyle(
+                        color: Color(0xFF2ECC71), // Зелёный цвет
+                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+              // Кнопка "Выход"
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Color(0xFFD9D9D9)),
+                ),
+                child: Center(
+                  child: Text(
+                    'Выход',
+                    style: TextStyle(
+                      color: Colors.red, // Красный цвет
+                      fontSize: MediaQuery.of(context).size.width * 0.04,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      bottomNavigationBar: Container(
+        height: MediaQuery.of(context).size.height * 0.08,
+        color: Colors.white,
+        child: Row(
+          children: [
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/Icons/pizza_grey.png',
+                      width: MediaQuery.of(context).size.width * 0.056,
+                    ),
+                    Text(
+                      'Рецепты',
+                      style: TextStyle(
+                        color: Color(0xFFC2C2C2),
+                        fontSize: MediaQuery.of(context).size.width * 0.0234,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/Icons/fridge_grey.png',
+                      width: MediaQuery.of(context).size.width * 0.056,
+                    ),
+                    Text(
+                      'Холодильник',
+                      style: TextStyle(
+                        color: Color(0xFFC2C2C2),
+                        fontSize: MediaQuery.of(context).size.width * 0.0234,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/Icons/heart_grey.png',
+                      width: MediaQuery.of(context).size.width * 0.056,
+                    ),
+                    Text(
+                      'Избранное',
+                      style: TextStyle(
+                        color: Color(0xFFC2C2C2),
+                        fontSize: MediaQuery.of(context).size.width * 0.0234,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/Icons/person_green.png', // Зелёная иконка профиля
+                      width: MediaQuery.of(context).size.width * 0.056,
+                    ),
+                    Text(
+                      'Профиль',
+                      style: TextStyle(
+                        color: Color(0xFF2ECC71), // Зелёный цвет
+                        fontSize: MediaQuery.of(context).size.width * 0.0234,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+
+    );
+  }
+}

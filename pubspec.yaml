@@ -71,7 +71,9 @@ flutter:
     - assets/Icons/lock_grey.png
     - assets/Images/food_background.png
     - assets/Icons/clock.png
-
+    - assets/Icons/heart_black.png
+    - assets/Icons/heart_red.png
+    - assets/Icons/empty_avatar.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

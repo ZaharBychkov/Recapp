@@ -4,6 +4,8 @@ import 'models/recipe.dart';
 import 'recipe_manager.dart';
 import 'fridge_screen.dart';
 import 'recipe_list_screen_universal.dart';
+import 'profile_screen.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: FridgeScreen(),
+      home: ProfileScreen(),
       //RecipeDetailScreen(recipe: recipes[2],),
     );
   }

@@ -6,8 +6,9 @@ import 'package:flutter/services.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;
+  final bool isLoggedIn;
 
-  const RecipeDetailScreen({super.key, required this.recipe});
+  const RecipeDetailScreen({super.key, required this.recipe, this.isLoggedIn = true});
 
   @override
   State<RecipeDetailScreen> createState() => _RecipeDetailScreenState();
@@ -15,6 +16,7 @@ class RecipeDetailScreen extends StatefulWidget {
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   bool isCooking = false;
+  bool isFavorite = false;
   int remainingTime = 0;
   Timer? timer;
   List<bool> stepCompleted = [];
@@ -52,6 +54,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     setState(() {
       isCooking = false;
       timer?.cancel();
+    });
+  }
+
+  void toggleFavorite() {
+    setState(() {
+      isFavorite = !isFavorite; //Переключение true / false
     });
   }
 
@@ -154,18 +162,53 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.recipe.title,
-                      style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.06,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
-                        fontFamily: 'Roboto',
-                        height: 1.2,
+
+                    if (widget.isLoggedIn)
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: Text(
+                              widget.recipe.title,
+                              style: TextStyle(
+                                fontSize: MediaQuery.of(context).size.width * 0.06,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                                fontFamily: 'Roboto',
+                                height: 1.2,
+                              ),
+                              maxLines: null,
+                              softWrap: true,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: GestureDetector(
+                              onTap: toggleFavorite,
+                              child: Image.asset(
+                                isFavorite
+                                    ? 'assets/Icons/heart_red.png'
+                                    : 'assets/Icons/heart_black.png',
+                                width: 24,
+                                height: 24,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Text(
+                        widget.recipe.title,
+                        style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.width * 0.06,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                          fontFamily: 'Roboto',
+                          height: 1.2,
+                        ),
+                        maxLines: null,
+                        softWrap: true,
                       ),
-                      maxLines: null,
-                      softWrap: true,
-                    ),
 
                     SizedBox(height: MediaQuery.of(context).size.height * 0.015),
 
@@ -273,6 +316,38 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         }).toList(),
                       ),
                     ),
+
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+                    if(widget.isLoggedIn)
+                      Center(
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color:Color(0xFF165932),
+                              width: 4,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          'Проверить наличие',
+                          style: TextStyle(
+                            color: Color(0xFF165932),
+                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                      ),
 
                     SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
@@ -420,6 +495,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         ),
                       ),
                     ),
+
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+
+
                   ],
                 ),
               ),
