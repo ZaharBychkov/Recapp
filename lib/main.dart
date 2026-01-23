@@ -26,8 +26,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: RegistrationScreen(),
-      //RecipeDetailScreen(recipe: recipes[2],),
+      home: //RecipeDetailScreen(),
+      RecipeDetailScreen(recipe: recipes[2],),
     );
   }
 }

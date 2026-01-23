@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../utils/time_formatter.dart';
 import 'package:flutter/services.dart';
+import '../models/comment.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;
@@ -61,6 +62,78 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     setState(() {
       isFavorite = !isFavorite; //Переключение true / false
     });
+  }
+
+  //Для комментария и проверки его визуала
+  List<Comment> comments = [
+    Comment(
+      author: "anna_obraztsove",
+      text: "Я не большой любитель рыбы, но решила приготовить по этому рецепту и просто влюбилась!",
+      imageUrl: "assets/Images/salmon_in_teriyaki_sauce.png",
+    ),
+  ];
+
+  Widget _buildComment(Comment comment) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Color(0xFFD9D9D9)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundImage: AssetImage('assets/Icons/empty_avatar.png'),
+                backgroundColor: Colors.white,
+              ),
+              SizedBox(width: 12),
+              Text(
+                comment.author,
+                style: TextStyle(
+                  color: Color(0xFF2ECC71), // Зелёный цвет
+                  fontSize: MediaQuery.of(context).size.width * 0.035,
+                  fontFamily: 'Roboto',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Spacer(),
+              Text(
+                comment.createdAt.toIso8601String().substring(0, 10), // Дата
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: MediaQuery.of(context).size.width * 0.03,
+                  fontFamily: 'Roboto',
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Text(
+            comment.text,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: MediaQuery.of(context).size.width * 0.035,
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          if (comment.imageUrl != null) ...[
+            SizedBox(height: 8),
+            Image.asset(
+              comment.imageUrl!,
+              fit: BoxFit.cover,
+              height: MediaQuery.of(context).size.height * 0.2,
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   @override
@@ -372,7 +445,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             width: MediaQuery.of(context).size.width * 0.925,
                             height: MediaQuery.of(context).size.height * 0.147,
                             decoration: BoxDecoration(
-                              color: isCooking ? Color(0x0FFe0f7ea) : Colors.grey[200],
+                              color: isCooking ? Color(0xFFe0f7ea) : Colors.grey[200],
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Row(
@@ -499,6 +572,51 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
 
+
+                    if (widget.isLoggedIn) ...[
+
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        height: 1,
+                        child: ColoredBox(color: Colors.black),
+                      ),
+
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                      Column(
+                        children: comments.map((comment) => _buildComment(comment)).toList(),
+                      ),
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  hintText: 'Оставить комментарий',
+                                  hintStyle: TextStyle(
+                                    color: Color(0xffc2c2c2),
+                                    fontSize: MediaQuery.of(context).size.width * 0.0374,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(color: Color(0xffa0a0a0)),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            IconButton(
+                              icon: Image.asset('assets/Icons/paste_image.png'),
+                              onPressed: () {
+                                print("Отправить комментарий");
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
 
                   ],
                 ),
