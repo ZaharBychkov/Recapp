@@ -184,11 +184,17 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
       builder: (context) {
+        final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: bottomInset + 12,
+            top: 12,
             left: 10,
             right: 10,
           ),
@@ -196,17 +202,18 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             height: MediaQuery.of(context).size.height * 0.14,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Color(0xff165932), width: 3),
             ),
             child: Stack(
               children: [
                 TextField(
                   autofocus: true,
-                  maxLines: null,
-                  expands: true,
                   keyboardType: TextInputType.multiline,
                   textAlignVertical: TextAlignVertical.top,
+
+                  minLines: 1,
+                  maxLines: 5,
+
                   decoration: InputDecoration(
                     hintText: 'Оставить комментарий',
                     border: InputBorder.none,
