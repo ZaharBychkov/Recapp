@@ -181,60 +181,65 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
   //Кнопка оставить комментарий
   void _openCommentInput() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
+    showModalBottomSheet(                                          //Окно которое выезжает снизу вверх
+      context: context,                                            //Передаем контекст текущего виджета
+      isScrollControlled: true,                                    // Позволяет управлять высотой окна экранной клавиатуры
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
+        borderRadius: BorderRadius.zero,                           //Убираем закругления - Material по умолчанию с радиусом
       ),
       builder: (context) {
-        final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+        final bottomInset = MediaQuery.of(context).viewInsets.bottom;     //Получаем высоту клавиатуры
 
-        return Padding(
+        return AnimatedPadding(
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
           padding: EdgeInsets.only(
-            bottom: bottomInset + 12,
-            top: 12,
-            left: 10,
-            right: 10,
+            bottom: bottomInset + (MediaQuery.of(context).size.height * 0.01), // 1% от высоты экрана
+            top: MediaQuery.of(context).size.height * 0.015, // 1.5% от высоты экрана
+            left: MediaQuery.of(context).size.width * 0.02,
+            right: MediaQuery.of(context).size.width * 0.02,
           ),
-          child: Container(
-            height: MediaQuery.of(context).size.height * 0.14,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Color(0xff165932), width: 3),
-            ),
-            child: Stack(
-              children: [
-                TextField(
-                  autofocus: true,
-                  keyboardType: TextInputType.multiline,
-                  textAlignVertical: TextAlignVertical.top,
-
-                  minLines: 1,
-                  maxLines: 5,
-
-                  decoration: InputDecoration(
-                    hintText: 'Оставить комментарий',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.only(
-                      left: MediaQuery.of(context).size.width * 0.04,
-                      right: MediaQuery.of(context).size.width * 0.12,
-                      top: MediaQuery.of(context).size.height * 0.02,
-                      bottom: MediaQuery.of(context).size.height * 0.02,
+          child: SafeArea(
+            top: false,
+            child: Container(
+              width: double.infinity,
+              height: MediaQuery.of(context).size.height * 0.14, // ← Добавлено: фиксированная высота
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Color(0xff165932), width: 3),
+              ),
+              child: Stack(                                                //Располагаем виджеты друг над другом
+                children: [
+                  TextField(
+                    autofocus: true,                                          //При открытии окна курсор сразу ставится в поле ввода
+                    keyboardType: TextInputType.multiline,
+                    minLines: 1,
+                    maxLines: 5, // Разрешаем ввод многострочного текста
+                    textAlignVertical: TextAlignVertical.top,                   // Текст начинается с верхней части поля
+                    decoration: InputDecoration(
+                      hintText: 'Оставить комментарий',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.only(
+                        left: MediaQuery.of(context).size.width * 0.04,
+                        right: MediaQuery.of(context).size.width * 0.12,
+                        top: MediaQuery.of(context).size.height * 0.02,
+                        bottom: MediaQuery.of(context).size.height * 0.02,
+                      ),
                     ),
                   ),
-                ),
 
-                Positioned(
-                  top: MediaQuery.of(context).size.height * 0.012,
-                  right: MediaQuery.of(context).size.width * 0.02,
-                  child: Image.asset(
-                    'assets/Icons/paste_image.png',
-                    width: MediaQuery.of(context).size.width * 0.06,
+                  Positioned(
+                    top: MediaQuery.of(context).size.height * 0.012,
+                    right: MediaQuery.of(context).size.width * 0.02,
+                    child: Image.asset(
+                      'assets/Icons/paste_image.png',
+                      width: MediaQuery.of(context).size.width * 0.06,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
