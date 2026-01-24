@@ -9,7 +9,11 @@ class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;
   final bool isLoggedIn;
 
-  const RecipeDetailScreen({super.key, required this.recipe, this.isLoggedIn = true});
+  const RecipeDetailScreen({
+    super.key,
+    required this.recipe,
+    this.isLoggedIn = true,
+  });
 
   @override
   State<RecipeDetailScreen> createState() => _RecipeDetailScreenState();
@@ -68,11 +72,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   List<Comment> comments = [
     Comment(
       author: "anna_obraztsove",
-      text: "Я не большой любитель рыбы, но решила приготовить по этому рецепту и просто влюбилась!",
+      text:
+          "Я не большой любитель рыбы, но решила приготовить по этому рецепту и просто влюбилась!",
       imageUrl: "assets/Images/burger_with_two_cutlets.png",
     ),
   ];
 
+  //Комментарии
   Widget _buildComment(Comment comment) {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
@@ -173,6 +179,63 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
+  //Кнопка оставить комментарий
+  void _openCommentInput() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 10,
+            right: 10,
+          ),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.14,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Color(0xff165932), width: 3),
+            ),
+            child: Stack(
+              children: [
+                TextField(
+                  autofocus: true,
+                  maxLines: null,
+                  expands: true,
+                  keyboardType: TextInputType.multiline,
+                  textAlignVertical: TextAlignVertical.top,
+                  decoration: InputDecoration(
+                    hintText: 'Оставить комментарий',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width * 0.04,
+                      right: MediaQuery.of(context).size.width * 0.12,
+                      top: MediaQuery.of(context).size.height * 0.02,
+                      bottom: MediaQuery.of(context).size.height * 0.02,
+                    ),
+                  ),
+                ),
+
+                Positioned(
+                  top: MediaQuery.of(context).size.height * 0.012,
+                  right: MediaQuery.of(context).size.width * 0.02,
+                  child: Image.asset(
+                    'assets/Icons/paste_image.png',
+                    width: MediaQuery.of(context).size.width * 0.06,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  //Основной контент
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -186,12 +249,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             boxShadow: isCooking
                 ? []
                 : [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                offset: Offset(0, 3),
-                blurRadius: 2,
-              ),
-            ],
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      offset: Offset(0, 3),
+                      blurRadius: 2,
+                    ),
+                  ],
           ),
           child: AppBar(
             backgroundColor: isCooking ? Color(0xFF2ECC71) : Colors.white,
@@ -228,9 +291,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               Container(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.1,
-                decoration: BoxDecoration(
-                  color: Color(0xFF2ECC71),
-                ),
+                decoration: BoxDecoration(color: Color(0xFF2ECC71)),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -287,7 +348,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                   child: Text(
                                     widget.recipe.title,
                                     style: TextStyle(
-                                      fontSize: MediaQuery.of(context).size.width * 0.06,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                          0.06,
                                       fontWeight: FontWeight.w700,
                                       color: Colors.black,
                                       fontFamily: 'Roboto',
@@ -316,7 +379,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             Text(
                               widget.recipe.title,
                               style: TextStyle(
-                                fontSize: MediaQuery.of(context).size.width * 0.06,
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.06,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.black,
                                 fontFamily: 'Roboto',
@@ -326,7 +390,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               softWrap: true,
                             ),
 
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.015,
+                          ),
 
                           // Время приготовления
                           Row(
@@ -343,7 +409,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                 formatTime(widget.recipe.prepTimeSeconds),
                                 style: TextStyle(
                                   color: Color(0xFF2ECC71),
-                                  fontSize: MediaQuery.of(context).size.width * 0.035,
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.035,
                                   fontFamily: 'Roboto',
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -351,7 +418,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             ],
                           ),
 
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.015,
+                          ),
 
                           // Изображение рецепта
                           Container(
@@ -369,20 +438,25 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             ),
                           ),
 
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.02,
+                          ),
 
                           // Ингредиенты
                           Text(
                             'Ингредиенты',
                             style: TextStyle(
                               color: Color(0xFF165932),
-                              fontSize: MediaQuery.of(context).size.width * 0.04,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.04,
                               fontFamily: 'Roboto',
                               fontWeight: FontWeight.w600,
                             ),
                           ),
 
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.01,
+                          ),
 
                           Container(
                             padding: EdgeInsets.all(16),
@@ -395,15 +469,22 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               ),
                             ),
                             child: Column(
-                              children: widget.recipe.ingredients.map((ingredient) {
+                              children: widget.recipe.ingredients.map((
+                                ingredient,
+                              ) {
                                 return Padding(
                                   padding: EdgeInsets.only(bottom: 0),
                                   child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Container(
-                                        width: MediaQuery.of(context).size.width * 0.014,
-                                        height: MediaQuery.of(context).size.width * 0.02,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.014,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                            0.02,
                                         margin: EdgeInsets.only(right: 12),
                                         decoration: BoxDecoration(
                                           color: Colors.black,
@@ -414,7 +495,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                         ingredient.name,
                                         style: TextStyle(
                                           color: Colors.black,
-                                          fontSize: MediaQuery.of(context).size.width * 0.035,
+                                          fontSize:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.035,
                                           fontFamily: 'Roboto',
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -424,7 +509,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                         ingredient.measurement,
                                         style: TextStyle(
                                           color: Colors.grey[600],
-                                          fontSize: MediaQuery.of(context).size.width * 0.033,
+                                          fontSize:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.033,
                                           fontFamily: 'Roboto',
                                           fontWeight: FontWeight.w400,
                                         ),
@@ -436,7 +525,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             ),
                           ),
 
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.02,
+                          ),
 
                           // Кнопка "Проверить наличие"
                           if (widget.isLoggedIn)
@@ -460,7 +551,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                     'Проверить наличие',
                                     style: TextStyle(
                                       color: Color(0xFF165932),
-                                      fontSize: MediaQuery.of(context).size.width * 0.04,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                          0.04,
                                       fontFamily: 'Roboto',
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -469,20 +562,25 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               ),
                             ),
 
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.02,
+                          ),
 
                           // Шаги приготовления
                           Text(
                             'Шаги приготовления',
                             style: TextStyle(
                               color: Color(0xFF165932),
-                              fontSize: MediaQuery.of(context).size.width * 0.04,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.04,
                               fontFamily: 'Roboto',
                               fontWeight: FontWeight.w600,
                             ),
                           ),
 
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.01,
+                          ),
 
                           Column(
                             children: widget.recipe.steps.map((step) {
@@ -490,14 +588,20 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               return Padding(
                                 padding: EdgeInsets.only(bottom: 12),
                                 child: Container(
-                                  width: MediaQuery.of(context).size.width * 0.925,
-                                  height: MediaQuery.of(context).size.height * 0.147,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.925,
+                                  height:
+                                      MediaQuery.of(context).size.height *
+                                      0.147,
                                   decoration: BoxDecoration(
-                                    color: isCooking ? Color(0xFFe0f7ea) : Colors.grey[200],
+                                    color: isCooking
+                                        ? Color(0xFFe0f7ea)
+                                        : Colors.grey[200],
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
                                         flex: 2,
@@ -506,7 +610,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                             width: 24,
                                             height: 27,
                                             decoration: BoxDecoration(
-                                              color: isCooking ? Color(0xFFe0f7ea) : Colors.grey[200],
+                                              color: isCooking
+                                                  ? Color(0xFFe0f7ea)
+                                                  : Colors.grey[200],
                                             ),
                                             child: Center(
                                               child: Text(
@@ -517,7 +623,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                                   fontSize: 40,
                                                   height: 27 / 40,
                                                   letterSpacing: 0,
-                                                  color: isCooking ? Color(0xFF2ECC71) : Colors.grey[400],
+                                                  color: isCooking
+                                                      ? Color(0xFF2ECC71)
+                                                      : Colors.grey[400],
                                                 ),
                                               ),
                                             ),
@@ -530,8 +638,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                           child: Text(
                                             step.description,
                                             style: TextStyle(
-                                              color: isCooking ? Color(0xff2D490C) : Colors.grey[400],
-                                              fontSize: MediaQuery.of(context).size.width * 0.03,
+                                              color: isCooking
+                                                  ? Color(0xff2D490C)
+                                                  : Colors.grey[400],
+                                              fontSize:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.03,
                                               fontFamily: 'Roboto',
                                               fontWeight: FontWeight.w400,
                                             ),
@@ -541,8 +655,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                       Expanded(
                                         flex: 2,
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Transform.scale(
                                               scale: 1.7,
@@ -550,26 +666,42 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                                 value: stepCompleted[index],
                                                 onChanged: isCooking
                                                     ? (value) {
-                                                  setState(() {
-                                                    stepCompleted[index] = value ?? false;
-                                                  });
-                                                }
+                                                        setState(() {
+                                                          stepCompleted[index] =
+                                                              value ?? false;
+                                                        });
+                                                      }
                                                     : null,
-                                                activeColor: isCooking ? Color(0xFF165932) : Colors.grey[600],
+                                                activeColor: isCooking
+                                                    ? Color(0xFF165932)
+                                                    : Colors.grey[600],
                                                 checkColor: Colors.white,
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
                                                 side: BorderSide(
-                                                  color: isCooking ? Color(0xFF165932) : Colors.grey[600]!,
+                                                  color: isCooking
+                                                      ? Color(0xFF165932)
+                                                      : Colors.grey[600]!,
                                                   width: 2,
                                                 ),
                                                 splashRadius: 15,
                                               ),
                                             ),
                                             Text(
-                                              formatTimeMMSS(step.timeInSeconds),
+                                              formatTimeMMSS(
+                                                step.timeInSeconds,
+                                              ),
                                               style: TextStyle(
-                                                color: isCooking ? Color(0xff165932) : Colors.grey[600],
-                                                fontSize: MediaQuery.of(context).size.width * 0.035,
+                                                color: isCooking
+                                                    ? Color(0xff165932)
+                                                    : Colors.grey[600],
+                                                fontSize:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.035,
                                                 fontFamily: 'Roboto',
                                                 fontWeight: FontWeight.w700,
                                               ),
@@ -584,30 +716,44 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             }).toList(),
                           ),
 
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.02,
+                          ),
 
                           // Кнопка "Начать готовить"
                           Center(
                             child: SizedBox(
                               width: MediaQuery.of(context).size.width * 0.6,
                               child: ElevatedButton(
-                                onPressed: isCooking ? finishCooking : startCooking,
+                                onPressed: isCooking
+                                    ? finishCooking
+                                    : startCooking,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: isCooking ? Colors.white : Color(0xFF165932),
+                                  backgroundColor: isCooking
+                                      ? Colors.white
+                                      : Color(0xFF165932),
                                   padding: EdgeInsets.symmetric(vertical: 14),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                     side: BorderSide(
-                                      color: isCooking ? Color(0xFF165932) : Colors.transparent,
+                                      color: isCooking
+                                          ? Color(0xFF165932)
+                                          : Colors.transparent,
                                       width: isCooking ? 4 : 0,
                                     ),
                                   ),
                                 ),
                                 child: Text(
-                                  isCooking ? 'Закончить готовить' : 'Начать готовить',
+                                  isCooking
+                                      ? 'Закончить готовить'
+                                      : 'Начать готовить',
                                   style: TextStyle(
-                                    color: isCooking ? Color(0xFF165932) : Colors.white,
-                                    fontSize: MediaQuery.of(context).size.width * 0.04,
+                                    color: isCooking
+                                        ? Color(0xFF165932)
+                                        : Colors.white,
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                        0.04,
                                     fontFamily: 'Roboto',
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -616,10 +762,19 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             ),
                           ),
 
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.02,
+                          ),
                         ],
                       ),
                     ),
+
+                    if (widget.isLoggedIn)
+                      Container(
+                        width: double.infinity,
+                        height: 1,
+                        color: Colors.black,
+                      ),
 
                     // ЛИНИЯ БЕЗ PADDING - на всю ширину экрана
                     if (widget.isLoggedIn)
@@ -627,115 +782,117 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         padding: EdgeInsets.all(10),
                         child: Column(
                           children: [
-                            SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-                            ...comments.map((comment) => _buildComment(comment)).toList(),
-                            SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.01,),
+                            ...comments
+                                .map((comment) => _buildComment(comment))
+                                .toList(),
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.01,),
 
-                            Column(
-                              children: [
-                                // ПРЕВЬЮ ИЗОБРАЖЕНИЯ (если выбрано)
-                                // if (selectedCommentImage != null)
-                                //   Container(
-                                //     margin: EdgeInsets.only(bottom: 8),
-                                //     padding: EdgeInsets.all(8),
-                                //     decoration: BoxDecoration(
-                                //       color: Colors.grey[100],
-                                //       borderRadius: BorderRadius.circular(10),
-                                //       border: Border.all(color: Color(0xffa0a0a0)),
-                                //     ),
-                                //     child: Stack(
-                                //       children: [
-                                //         ClipRRect(
-                                //           borderRadius: BorderRadius.circular(8),
-                                //           child: Image.asset(
-                                //             selectedCommentImage!,
-                                //             height: 120,
-                                //             width: double.infinity,
-                                //             fit: BoxFit.cover,
-                                //           ),
-                                //         ),
-                                //         // Кнопка удаления изображения
-                                //         Positioned(
-                                //           top: 4,
-                                //           right: 4,
-                                //           child: GestureDetector(
-                                //             onTap: () {
-                                //               setState(() {
-                                //                 selectedCommentImage = null;
-                                //               });
-                                //             },
-                                //             child: Container(
-                                //               padding: EdgeInsets.all(4),
-                                //               decoration: BoxDecoration(
-                                //                 color: Colors.red,
-                                //                 shape: BoxShape.circle,
-                                //               ),
-                                //               child: Icon(
-                                //                 Icons.close,
-                                //                 color: Colors.white,
-                                //                 size: 16,
-                                //               ),
-                                //             ),
-                                //           ),
-                                //         ),
-                                //       ],
-                                //     ),
-                                //   ),
 
-                                // ПОЛЕ ВВОДА КОММЕНТАРИЯ
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Color(0xffa0a0a0)),
-                                  ),
-                                  child: TextField(
-                                    maxLines: 3,
-                                    minLines: 1,
-                                    decoration: InputDecoration(
-                                      hintText: 'Оставить комментарий',
-                                      hintStyle: TextStyle(
-                                        color: Color(0xffc2c2c2),
-                                        fontSize: MediaQuery.of(context).size.width * 0.0374,
-                                        fontFamily: 'Roboto',
-                                      ),
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.only(
-                                        left: 16,
-                                        right: 50,
-                                        top: 12,
-                                        bottom: 12,
-                                      ),
-                                      // ИКОНКА ДОБАВЛЕНИЯ ИЗОБРАЖЕНИЯ
-                                      suffixIcon: Padding(
-                                        padding: EdgeInsets.only(top: 4, right: 4),
-                                        child: Align(
-                                          alignment: Alignment.topRight,
-                                          child: InkWell(
-                                            onTap: () {
-                                              // Здесь будет выбор изображения
-                                              // Пока для демо используем существующее изображение
-                                              setState(() {
-                                                selectedCommentImage = 'assets/Images/salmon_in_teriyaki_sauce.png';
-                                              });
-                                              print("Добавить изображение");
-                                            },
-                                            borderRadius: BorderRadius.circular(8),
-                                            child: Container(
-                                              padding: EdgeInsets.all(8),
-                                              child: Image.asset(
-                                                'assets/Icons/paste_image.png',
-                                                width: 24,
-                                                height: 24,
-                                              ),
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 15),
+                                  child: GestureDetector(
+                                  onTap: _openCommentInput,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: MediaQuery.of(context).size.height * 0.09,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Color(0xff165932), width: 3),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                            left: MediaQuery.of(context,).size.width * 0.04,
+                                            right: MediaQuery.of(context,).size.width * 0.12,
+                                            top: MediaQuery.of(context,).size.height * 0.02,
+                                            bottom: MediaQuery.of(context,).size.height * 0.02,
+                                          ),
+                                          child: Text(
+                                            'Оставить комментарий',
+                                            style: TextStyle(
+                                              color: Color(0xffc2c2c2),
+                                              fontSize: MediaQuery.of(context).size.width * 0.037,
                                             ),
                                           ),
                                         ),
-                                      ),
+                                        Positioned(
+                                          top: MediaQuery.of(context).size.height * 0.012,
+                                          right: MediaQuery.of(context).size.width * 0.02,
+                                          child: Image.asset(
+                                            'assets/Icons/paste_image.png',
+                                            width: MediaQuery.of(context).size.width * 0.06,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
+                                ),
+
+                                // Column(
+                                //   children: [
+                                //     Container(
+                                //       height: MediaQuery.of(context).size.height * 0.14, // 0.14–0.18
+                                //       decoration: BoxDecoration(
+                                //         borderRadius: BorderRadius.circular(12),
+                                //         border: Border.all(
+                                //           color: Color(0xff165932),
+                                //           width: 3,
+                                //         ),
+                                //       ),
+                                //       child: Stack(
+                                //         children: [
+                                //           // TEXTFIELD
+                                //           TextField(
+                                //             maxLines: null,
+                                //             expands: true,
+                                //             keyboardType: TextInputType.multiline,
+                                //             textAlignVertical: TextAlignVertical.top,
+                                //             decoration: InputDecoration(
+                                //               hintText: 'Оставить комментарий',
+                                //               hintStyle: TextStyle(
+                                //                 color: Color(0xffc2c2c2),
+                                //                 fontSize: MediaQuery.of(context,).size.width * 0.037,
+                                //                 fontFamily: 'Roboto',
+                                //               ),
+                                //               border: InputBorder.none,
+                                //               contentPadding: EdgeInsets.only(
+                                //                 left: MediaQuery.of(context,).size.width * 0.04,
+                                //                 right: MediaQuery.of(context,).size.width * 0.12,
+                                //                 top: MediaQuery.of(context,).size.height * 0.02,
+                                //                 bottom: MediaQuery.of(context,).size.height * 0.02,
+                                //               ),
+                                //             ),
+                                //           ),
+                                //
+                                //           // ИКОНКА ДОБАВЛЕНИЯ ИЗОБРАЖЕНИЯ
+                                //           Positioned(
+                                //             top: MediaQuery.of(context).size.height * 0.012,
+                                //             right: MediaQuery.of(context,).size.width * 0.02,
+                                //             child: InkWell(
+                                //               onTap: () {
+                                //                 setState(() {
+                                //                   selectedCommentImage =
+                                //                       'assets/Images/salmon_in_teriyaki_sauce.png';
+                                //                 });
+                                //               },
+                                //               borderRadius: BorderRadius.circular(8),
+                                //               child: Padding(
+                                //                 padding: EdgeInsets.all(MediaQuery.of(context,).size.width * 0.015,),
+                                //                 child: Image.asset(
+                                //                   'assets/Icons/paste_image.png',
+                                //                   width: MediaQuery.of(context).size.width * 0.06,
+                                //                 ),
+                                //               ),
+                                //             ),
+                                //           ),
+                                //         ],
+                                //       ),
+                                //     ),
+                                //   ],
+                                // ),
                           ],
                         ),
                       ),
