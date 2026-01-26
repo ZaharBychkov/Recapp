@@ -4,6 +4,9 @@ import '../models/recipe.dart';
 import '../utils/time_formatter.dart';
 import 'package:flutter/services.dart';
 import '../models/comment.dart';
+import '../services/ingredient_checker.dart';
+import '../models/ingredient_check_result.dart';
+import '../models/ingredient.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;
@@ -247,6 +250,45 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
+  IngredientCheckResult _checkResult = IngredientCheckResult.idle; //Переменная _checkResult типа IngredientCheckResult хранит статус проверки,
+  // по умолчанию idle не проверено
+
+  Color _borderColor() {                    //Функция для определения цвета через статус переменной _checkResult
+    switch (_checkResult) {
+      case IngredientCheckResult.success:    //В зависимости от результата проверки выставляем цвет
+        return Color(0xff2ecc71);
+      case IngredientCheckResult.failure:
+        return Colors.red;
+      case IngredientCheckResult.idle:
+      default: return Color(0xffa0a0a0);   //По умолчанию серый цвет
+    }
+  }
+
+  //Основное условия и проверка
+  void _checkIngredient() {
+    final fridgeIngredients = [
+      Ingredient(name: "Говядина", measurement: "400 г"),
+      Ingredient(name: "Лук", measurement: "1 шт."),
+      Ingredient(name: "Чеснок", measurement: "2 зубчика"),
+      Ingredient(name: "Сливочное масло", measurement: "50 г"),
+      Ingredient(name: "Сливки", measurement: "100 мл"),
+      Ingredient(name: "Хмели-сунели", measurement: "1 ч. ложка"),
+      Ingredient(name: "Соль", measurement: "по вкусу"),
+      Ingredient(name: "Перец", measurement: "по вкусу"),
+      Ingredient(name: "Масло для жарки", measurement: "2 ст. ложки"),
+    ];
+
+    //Вызываю сервис проверки
+    final hasAll = IngredientChecker.hasAllIngredients(
+      recipeIngredients: widget.recipe.ingredients,           //Входные данные для функции в ingredient_checkre.dart
+      fridgeIngredients: fridgeIngredients,
+    );
+
+    setState(() {
+      _checkResult = hasAll ? IngredientCheckResult.success : IngredientCheckResult.failure;
+    });
+
+  }
   //Основной контент
   @override
   Widget build(BuildContext context) {
@@ -476,7 +518,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: Color(0xFFA0A0A0),
+                                color: _borderColor(),
                                 width: 5,
                               ),
                             ),
@@ -547,7 +589,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               child: SizedBox(
                                 width: MediaQuery.of(context).size.width * 0.6,
                                 child: ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: _checkIngredient,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     padding: EdgeInsets.symmetric(vertical: 14),
