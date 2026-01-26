@@ -285,7 +285,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
 
     setState(() {
-      _checkResult = hasAll ? IngredientCheckResult.success : IngredientCheckResult.failure;
+      _checkResult = hasAll ? IngredientCheckResult.success : IngredientCheckResult.failure; //Обновляем состояние в зависимости от результата провреки
     });
 
   }
@@ -518,7 +518,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: _borderColor(),
+                                color: _borderColor(),  //Передаем цвет контейнера изоходя из статуса проверки ingredient_checker переменной _checkResult
                                 width: 5,
                               ),
                             ),

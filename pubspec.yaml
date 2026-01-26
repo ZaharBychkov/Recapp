@@ -76,6 +76,7 @@ flutter:
     - assets/Icons/heart_red.png
     - assets/Icons/empty_avatar.png
     - assets/Icons/paste_image.png
+    - assets/Icons/paste_image_plus.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
