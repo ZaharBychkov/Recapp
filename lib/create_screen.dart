@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dotted_border/dotted_border.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
   const CreateRecipeScreen({super.key});
@@ -8,7 +9,7 @@ class CreateRecipeScreen extends StatefulWidget {
 }
 
 class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
-  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();    //Вводим контроллер для текстового поля
   String? recipeImage;
   List<String> ingredients = [];
   List<String> steps = [];
@@ -22,7 +23,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   void _addRecipeImage() {
     // Заглушка для добавления изображения
     setState(() {
-      recipeImage = 'assets/Images/salmon_in_teriyaki_sauce.png';
+      recipeImage = 'assets/Images/burger_with_two_cutlets.png';
     });
     print("Добавить фото рецепта");
   }
@@ -52,65 +53,73 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Новый рецепт',
-          style: TextStyle(
-            color: Color(0xFF165932),
-            fontWeight: FontWeight.w600,
-            fontSize: MediaQuery.of(context).size.width * 0.05,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),  //Константа - стандартная высота
+        child: Container(                                 //Оборачиваем в контейнер чтобы сделать тень
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [                                      //Параметры тени
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),         //Цвет тени и прозрачность
+                offset: Offset(0, 3),                            //Смещеине тени по горзионтали 0, по вертикали 2
+                blurRadius: 2,
+              ),
+            ],
+          ),
+          child: AppBar(
+            backgroundColor: Colors.white, // Убираем isCooking
+            centerTitle: true,              //Центрирование заголовка
+            title: Text(
+              'Новый рецепт', // Меняем текст заголовка
+              style: TextStyle(
+                color: Color(0xFF165932),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => Navigator.pop(context),               //Возвращаем на предыдущий экран при нажатии
+            ),
           ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
+
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
+        padding: EdgeInsets.symmetric(                                 //Симметричные отступы
           horizontal: MediaQuery.of(context).size.width * 0.0374,
           vertical: MediaQuery.of(context).size.height * 0.02,
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,            //Выравниваем по левому краю
           children: [
-            // ПОЛЕ ВВОДА НАЗВАНИЯ
-            Text(
-              'Название рецепта',
-              style: TextStyle(
-                color: Color(0xFF165932),
-                fontSize: MediaQuery.of(context).size.width * 0.04,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w600,
+            SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+            Container(
+              decoration: BoxDecoration(
+              color: Colors.grey[200],
+            border: Border(
+              bottom: BorderSide(
+                color: Color(0xff165932),
+                width: 1,
+              )
+            ),
+            ),
+            child: TextField(
+              controller: _titleController,                              //Привязываем контролеер текста
+              decoration: InputDecoration(
+                hintText: 'Название рецепта',
+                hintStyle: TextStyle(
+                  color: Color(0xFF165932),
+                  fontFamily: 'Roboto',
+                  fontSize: 14,
+                ),
+                contentPadding: EdgeInsets.only(
+                    left: MediaQuery.of(context).size.width * 0.07,
+                    top: MediaQuery.of(context).size.height * 0.005,
+                    bottom: MediaQuery.of(context).size.height * 0.03,
+                ),   //Внутренние отступы
+                border: InputBorder.none,
               ),
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                hintText: 'Введите название',
-                hintStyle: TextStyle(
-                  color: Color(0xffc2c2c2),
-                  fontFamily: 'Roboto',
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Color(0xffa0a0a0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Color(0xffa0a0a0), width: 2),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Color(0xFF165932), width: 2),
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
             ),
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
@@ -128,66 +137,58 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
 
             if (recipeImage == null)
-              GestureDetector(
-                onTap: _addRecipeImage,
-                child: Container(
-                  width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.25,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Color(0xffa0a0a0),
-                      width: 2,
-                      style: BorderStyle.solid,
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Color(0xFF165932),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.add,
-                          color: Colors.white,
-                          size: 35,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        'Добавить фото рецепта',
-                        style: TextStyle(
-                          color: Color(0xFF165932),
-                          fontSize: MediaQuery.of(context).size.width * 0.04,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+    GestureDetector(
+      onTap: _addRecipeImage,
+      child: DottedBorder(
+        color: const Color(0xFF165932),               //Цвет рамки
+        strokeWidth: 2,                                 //Толшина линии
+        dashPattern: [20, 20],                           // 6 пикселей — линия, 4 пикселя — пробел
+        borderType: BorderType.RRect,                   //Скругленные углы
+        radius: const Radius.circular(10),             //Радиус скргления
+        child: Container(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height * 0.25,
+          color: Colors.grey[200],
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Image.asset(
+                'assets/Icons/paste_image_plus.png',
+                width: MediaQuery.of(context).size.width * 0.15,
+                height: MediaQuery.of(context).size.width * 0.15,
+              ),
+              Positioned(
+                bottom: MediaQuery.of(context).size.height * 0.05,
+                child: Text(
+                  'Добавить фото рецепта',
+                  style: TextStyle(
+                    color: Color(0xFF165932),
+                    fontSize: MediaQuery.of(context).size.width * 0.04,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              )
+              ),
+            ],
+          ),
+        ),
+      ),
+    )
             else
               Stack(
                 children: [
-                  ClipRRect(
+                  ClipRRect(                                                 //Делим дочерний элемент
                     borderRadius: BorderRadius.circular(10),
                     child: Image.asset(
-                      recipeImage!,
+                      recipeImage!,                                        //Указываем что не меожт быть null благодаря else
                       width: double.infinity,
                       height: MediaQuery.of(context).size.height * 0.25,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.cover,                                   //Заполняем изображеним контейнер образеая лишнее
                     ),
                   ),
                   Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(
+                    top: MediaQuery.of(context).size.height * 0.01,
+                    right: MediaQuery.of(context).size.height * 0.01,
+                    child: GestureDetector(                                   //Обработка нажатия на крестик
                       onTap: _removeRecipeImage,
                       child: Container(
                         padding: EdgeInsets.all(6),
