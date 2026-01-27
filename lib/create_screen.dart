@@ -37,10 +37,10 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   }
 
   Future<void> _addIngredient() async {
-    final Ingredient? ingredient = await showDialog<Ingredient>(
-      context: context,
-      barrierDismissible: true,
-      builder: (_) => const AddIngredientDialog(),
+    final Ingredient? ingredient = await showDialog<Ingredient>(    //Возвращаю inredient типа ingredient
+      context: context,                                            //Передаю контекст
+      barrierDismissible: true,                                   //При нажатии вне диалогового окна закрыть данное окно
+      builder: (_) => const AddIngredientDialog(),               //Вызываю диалоговое окно
     );
 
     if (ingredient != null) {

@@ -23,8 +23,7 @@ class _AddIngredientDialogState extends State<AddIngredientDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.zero,
-      child: Center(
+      insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.0001),
         child: Container(
           width: MediaQuery.of(context).size.width * 0.9,
           height: MediaQuery.of(context).size.height * 0.35,
@@ -94,7 +93,6 @@ class _AddIngredientDialogState extends State<AddIngredientDialog> {
             ],
           ),
         ),
-      ),
     );
   }
 
