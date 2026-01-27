@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'add_ingredient_dialog.dart';
+import '../models/ingredient.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
   const CreateRecipeScreen({super.key});
@@ -34,9 +36,18 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     });
   }
 
-  void _addIngredient() {
-    // Заглушка для добавления ингредиента
-    print("Добавить ингредиент");
+  Future<void> _addIngredient() async {
+    final Ingredient? ingredient = await showDialog<Ingredient>(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => const AddIngredientDialog(),
+    );
+
+    if (ingredient != null) {
+      setState(() {
+        ingredients.add('${ingredient.name} - ${ingredient.measurement}');
+      });
+    }
   }
 
   void _addStep() {
@@ -99,7 +110,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             border: Border(
               bottom: BorderSide(
                 color: Color(0xff165932),
-                width: 1,
+                width: 3,
               )
             ),
             ),
