@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'add_ingredient_dialog.dart';
 import '../models/ingredient.dart';
+import 'add_step_dialog.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
   const CreateRecipeScreen({super.key});
@@ -50,9 +51,16 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     }
   }
 
-  void _addStep() {
-    // Заглушка для добавления шага
-    print("Добавить шаг");
+  Future<void> _addStep() async {
+    final result = await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => const AddStepDialog(),
+      );
+
+    if (result != null) {
+      print(result);
+    }
   }
 
   void _saveRecipe() {
@@ -105,32 +113,49 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
             Container(
-              decoration: BoxDecoration(
-              color: Colors.grey[200],
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height * 0.01,
+                left: MediaQuery.of(context).size.width * 0.07,
+                right: MediaQuery.of(context).size.width * 0.07,
+                bottom: MediaQuery.of(context).size.height * 0.01,
+              ),
+              decoration: const BoxDecoration(
+              color: Color(0xffeeeeee),
             border: Border(
               bottom: BorderSide(
                 color: Color(0xff165932),
                 width: 3,
-              )
-            ),
-            ),
-            child: TextField(
-              controller: _titleController,                              //Привязываем контролеер текста
-              decoration: InputDecoration(
-                hintText: 'Название рецепта',
-                hintStyle: TextStyle(
-                  color: Color(0xFF165932),
-                  fontFamily: 'Roboto',
-                  fontSize: 14,
-                ),
-                contentPadding: EdgeInsets.only(
-                    left: MediaQuery.of(context).size.width * 0.07,
-                    top: MediaQuery.of(context).size.height * 0.005,
-                    bottom: MediaQuery.of(context).size.height * 0.03,
-                ),   //Внутренние отступы
-                border: InputBorder.none,
+                )
+               ),
               ),
-            ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Название рецепта',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xff165932),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+
+                  TextField(
+                      controller: _titleController,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                      )
+                  ),
+                ],
+              ),
             ),
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),

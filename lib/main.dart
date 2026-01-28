@@ -8,7 +8,6 @@ import 'profile_screen.dart';
 import 'registration_screen.dart';
 import 'create_screen.dart';
 
-
 void main() {
   runApp(const MyApp());
 }

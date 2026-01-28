@@ -46,14 +46,14 @@ class _AddIngredientDialogState extends State<AddIngredientDialog> {
 
               _buildInput(
                 controller: _nameController,
-                hint: 'Название ингредиента',
+                label: 'Название ингредиента',
               ),
 
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
               _buildInput(
                 controller: _amountController,
-                hint: 'Количество',
+                label: 'Количество',
               ),
 
               const Spacer(),
@@ -98,11 +98,17 @@ class _AddIngredientDialogState extends State<AddIngredientDialog> {
 
   Widget _buildInput({
     required TextEditingController controller,
-    required String hint,
+    required String label,
   }) {
     return Container(
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).size.height * 0.01,
+        left: MediaQuery.of(context).size.width * 0.07,
+        right: MediaQuery.of(context).size.width * 0.07,
+        bottom: MediaQuery.of(context).size.height * 0.01,
+      ),
       decoration: const BoxDecoration(
-        color: Color(0xFFF0F0F0),
+        color: Color(0xffeeeeee),
         border: Border(
           bottom: BorderSide(
             color: Color(0xFF165932),
@@ -110,17 +116,34 @@ class _AddIngredientDialogState extends State<AddIngredientDialog> {
           ),
         ),
       ),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hint,
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.only(
-            left: MediaQuery.of(context).size.width * 0.07,
-            top: MediaQuery.of(context).size.height * 0.005,
-            bottom: MediaQuery.of(context).size.height * 0.03,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xff165932),
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
+
+          SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+
+          TextField(
+            controller: controller,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
+          ),
+            decoration: const InputDecoration(
+              isDense: true,
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+            )
+          ),
+        ],
       ),
     );
   }
