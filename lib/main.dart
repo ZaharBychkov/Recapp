@@ -7,8 +7,13 @@ import 'recipe_list_screen_universal.dart';
 import 'profile_screen.dart';
 import 'registration_screen.dart';
 import 'create_screen.dart';
+import 'recipe_repository.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await RecipeRepository.init();
+
   runApp(const MyApp());
 }
 

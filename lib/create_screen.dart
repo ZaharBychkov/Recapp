@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'add_ingredient_dialog.dart';
-import '../models/ingredient.dart';
 import 'add_step_dialog.dart';
+import 'models/ingredient.dart';
+import 'models/step.dart';
+import 'models/recipe.dart';
+import 'recipe_manager.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
   const CreateRecipeScreen({super.key});
@@ -13,9 +16,10 @@ class CreateRecipeScreen extends StatefulWidget {
 
 class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final TextEditingController _titleController = TextEditingController();    //Вводим контроллер для текстового поля
+  final TextEditingController _descriptionController = TextEditingController();
   String? recipeImage;
-  List<String> ingredients = [];
-  List<String> steps = [];
+  List<Ingredient> ingredients = [];
+  List<RecipeStep> steps = [];
 
   @override
   void dispose() {
@@ -46,26 +50,83 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
     if (ingredient != null) {
       setState(() {
-        ingredients.add('${ingredient.name} - ${ingredient.measurement}');
+        ingredients.add(ingredient);
       });
     }
   }
 
   Future<void> _addStep() async {
-    final result = await showDialog(
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
       barrierDismissible: true,
       builder: (_) => const AddStepDialog(),
-      );
+    );
 
     if (result != null) {
-      print(result);
+      final stepNumber = steps.length + 1; 
+      final minutes = result['minutes'] as int;
+      final seconds = result['seconds'] as int;
+      final timeInSeconds = (minutes * 60) + seconds;
+
+      setState(() {
+        steps.add(RecipeStep(
+          stepNumber: stepNumber,
+          description: result['step'] as String, 
+          timeInSeconds: timeInSeconds,
+        ));
+      });
     }
   }
 
-  void _saveRecipe() {
-    // Заглушка для сохранения рецепта
-    print("Сохранить рецепт");
+    Future<void> _saveRecipe() async {
+    // Проверка обязательных полей
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Введите название рецепта')),
+      );
+      return;
+    }
+    
+    if (ingredients.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Добавьте хотя бы один ингредиент')),
+      );
+      return;
+    }
+    
+    if (steps.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Добавьте хотя бы один шаг')),
+      );
+      return;
+    }
+    
+    // Подсчёт общего времени приготовления
+    final totalTime = steps.fold<int>(
+      0, 
+      (sum, step) => sum + step.timeInSeconds,
+    );
+    
+    // Создание нового рецепта
+    final recipe = Recipe(
+      id: RecipeManager().getNextId(),
+      title: _titleController.text.trim(),
+      description: _descriptionController.text.trim().isNotEmpty 
+          ? _descriptionController.text.trim() 
+          : 'Без описания',
+      ingredients: ingredients,
+      prepTimeSeconds: totalTime,
+      imagePath: recipeImage ?? 'assets/Images/burger_with_two_cutlets.png',
+      steps: steps,
+    );
+    
+    // Сохранение в базу данных
+    await RecipeManager().addRecipe(recipe);
+    
+    // Возврат на предыдущий экран с результатом
+    if (mounted) {
+      Navigator.pop(context, true);  // true = рецепт был добавлен
+    }
   }
 
   @override
@@ -268,6 +329,27 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
+              )
+            else 
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: ingredients.length,
+                itemBuilder: (context, index) {
+                  final ing = ingredients[index]; 
+                  return ListTile(
+                    title: Text(ing.name),
+                    subtitle: Text(ing.measurement), 
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          ingredients.removeAt(index); 
+                        });
+                      },
+                    ),
+                  );
+                },
               ),
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.01),

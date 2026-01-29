@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../recipe_manager.dart';
-import '../models/recipe.dart';
-import '../utils/time_formatter.dart';
+import 'recipe_manager.dart';
+import 'models/recipe.dart';
+import 'utils/time_formatter.dart';
+import 'create_screen.dart';
 
 class RecipeListScreen extends StatefulWidget {
   final bool isLoggedIn;                                              //Параметр: авторизован или нет
@@ -24,6 +25,23 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   void initState() {
     super.initState();
     recipes = RecipeManager().getRecipes();                      //Получаем список рецептов из RecipeManager для recipe
+  }
+
+  // Метод для открытия экрана создания рецепта
+  Future<void> _openCreateRecipeScreen() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateRecipeScreen(),
+      ),
+    );
+    
+    // Если рецепт был добавлен — обновляем список
+    if (result == true) {
+      setState(() {
+        recipes = RecipeManager().getRecipes();
+      });
+    }
   }
 
   @override
@@ -139,7 +157,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         width: 60,
         height: 60,
         child: FloatingActionButton(
-          onPressed: widget.onAddRecipePressed,                             //Вызывает функцию переданную извне
+          onPressed: widget.onAddRecipePressed ?? _openCreateRecipeScreen,  //Вызывает функцию переданную извне или открывает экран создания
           backgroundColor: Color(0xFF2ECC71),
           child: Icon(Icons.add, color: Colors.white), //Кнопка с полюсом
           shape: CircleBorder(),                       //Полностью круглая

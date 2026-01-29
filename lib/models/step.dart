@@ -1,8 +1,25 @@
-class Step {
-  final int stepNumber;
-  final String description;
-  final int timeInSeconds;
-  bool isCompleted;
+import 'package:hive/hive.dart';
 
-  Step({required this.stepNumber, required this.description, required this.timeInSeconds, this.isCompleted = false});
+part 'step.g.dart';
+
+@HiveType(typeId: 1)
+class RecipeStep extends HiveObject {
+  @HiveField(0)
+  final int stepNumber; 
+
+  @HiveField(1)
+  final String description; 
+
+  @HiveField(2)
+  final int timeInSeconds; 
+
+  @HiveField(3)
+  bool isCompleted; 
+
+  RecipeStep({
+    required this.stepNumber,
+    required this.description, 
+    required this.timeInSeconds,
+    this.isCompleted = false,
+  });
 }
