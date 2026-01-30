@@ -10,9 +10,9 @@ import 'create_screen.dart';
 import 'recipe_repository.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();     //Устанавливаем связь с платформой Android 
 
-  await RecipeRepository.init();
+  await RecipeRepository.init();                //Ассинхронно инициализируем репозиторий с Hive
 
   runApp(const MyApp());
 }

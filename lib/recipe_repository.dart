@@ -17,6 +17,7 @@ class RecipeRepository {
     Hive.registerAdapter(RecipeAdapter());     //Основной
 
     _box = await Hive.openBox<Recipe>(_boxName); //Открываем коробку для хранения рецептов
+    //Посути Hive ищет папку с названием 'recipes' для этого и нужно имя для
 
     //Если база пустая - заполняем тестовыми данными 
     //Если ! слева значит логическое Не, если справа - не null
@@ -29,7 +30,6 @@ class RecipeRepository {
   static List<Recipe> getAllRecipes() {
     return _box?.values.toList() ?? []; //Возвращаем список всех рецептов или пустой список
   }
-
 
   //Добавить новый рецепт 
   static Future<void> addRecipe(Recipe recipe) async {
@@ -45,7 +45,15 @@ class RecipeRepository {
       .reduce((a, b) => a > b ? a : b);
     return maxId + 1; 
   }
-    
+  //По сути берем тут box.values т.е. Recipe(0), Recipe(1) и т.д. 
+  //И возвращаем r.id т.е. int geiId(Recipe r) {return r.id} 
+  //Но проще через лямбла написать (r) => r.id  
+  //Итог у нас есть все Id Recipe от Recipe(0) до Recipe(максимального)
+  //reduce - есди a > b то верни а, иначе врени b 
+  //Но проще написать a > b ? a : b (: - и есть вот это иначе true (а) : false (b)) 
+  //Сам reduce = свернуть весь список элементов в одно значение по определенно условию  
+  //В конце возвращаем это максимальное Id и прибовляем 1 получаем новое Id для нового рецепта   
+
   //Заполнение начальными рецептами (заглушка)
   static Future<void> _seedDefaultRecipes() async {
     final defaultRecipes = [

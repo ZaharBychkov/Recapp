@@ -234,42 +234,42 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
 
             if (recipeImage == null)
-    GestureDetector(
-      onTap: _addRecipeImage,
-      child: DottedBorder(
-        color: const Color(0xFF165932),               //Цвет рамки
-        strokeWidth: 2,                                 //Толшина линии
-        dashPattern: [20, 20],                           // 6 пикселей — линия, 4 пикселя — пробел
-        borderType: BorderType.RRect,                   //Скругленные углы
-        radius: const Radius.circular(10),             //Радиус скргления
-        child: Container(
-          width: double.infinity,
-          height: MediaQuery.of(context).size.height * 0.25,
-          color: Colors.grey[200],
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Image.asset(
-                'assets/Icons/paste_image_plus.png',
-                width: MediaQuery.of(context).size.width * 0.15,
-                height: MediaQuery.of(context).size.width * 0.15,
-              ),
-              Positioned(
-                bottom: MediaQuery.of(context).size.height * 0.05,
-                child: Text(
-                  'Добавить фото рецепта',
-                  style: TextStyle(
-                    color: Color(0xFF165932),
-                    fontSize: MediaQuery.of(context).size.width * 0.04,
-                    fontWeight: FontWeight.w600,
+            GestureDetector(
+              onTap: _addRecipeImage,
+              child: DottedBorder(
+                color: const Color(0xFF165932),               //Цвет рамки
+                strokeWidth: 2,                                 //Толшина линии
+                dashPattern: [20, 20],                           // 6 пикселей — линия, 4 пикселя — пробел
+                borderType: BorderType.RRect,                   //Скругленные углы
+                radius: const Radius.circular(10),             //Радиус скргления
+                child: Container(
+                  width: double.infinity,
+                  height: MediaQuery.of(context).size.height * 0.25,
+                  color: Colors.grey[200],
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/Icons/paste_image_plus.png',
+                        width: MediaQuery.of(context).size.width * 0.15,
+                        height: MediaQuery.of(context).size.width * 0.15,
+                      ),
+                      Positioned(
+                        bottom: MediaQuery.of(context).size.height * 0.05,
+                        child: Text(
+                          'Добавить фото рецепта',
+                          style: TextStyle(
+                            color: Color(0xFF165932),
+                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    )
+            )
             else
               Stack(
                 children: [
@@ -316,7 +316,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
             if (ingredients.isEmpty)
               Center(
@@ -330,29 +330,81 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   ),
                 ),
               )
-            else 
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: ingredients.length,
-                itemBuilder: (context, index) {
-                  final ing = ingredients[index]; 
-                  return ListTile(
-                    title: Text(ing.name),
-                    subtitle: Text(ing.measurement), 
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        setState(() {
-                          ingredients.removeAt(index); 
-                        });
-                      },
-                    ),
-                  );
-                },
+            else
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Colors.grey[600]!,
+                    width: 3,
+                  )
+                ),
+                child: Column(
+                  children: ingredients.map((ingredient) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 0,
+                        horizontal: 6,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 7), // ← отступ ТОЛЬКО слева
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    ingredient.name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  SizedBox(height: MediaQuery.of(context).size.height * 0.001),
+                                  Text(
+                                    ingredient.measurement,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey[600],
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit, color: Color(0xFF165932)),
+                                onPressed: () {
+                                  //
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Color(0xFF165932)),
+                                onPressed: () {
+                                  setState(() {
+                                    ingredients.remove(ingredient);
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
 
-            SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
             Center(
               child: SizedBox(
@@ -408,7 +460,95 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-              ),
+              )
+            else
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.grey[600]!,
+                      width: 3,
+                    ),
+                  ),
+                  child: Column(
+                    children: steps.map((step) {
+                      final minutes = step.timeInSeconds ~/ 60;
+                      final seconds = step.timeInSeconds % 60;
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 6,
+                          horizontal: 6,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // ШАГ X
+                            Text(
+                              'Шаг ${step.stepNumber}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                              ),
+                            ),
+
+                            const SizedBox(height: 2),
+
+                            // ОПИСАНИЕ ШАГА
+                            Text(
+                              step.description,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            // ВРЕМЯ + ИКОНКИ
+                            Row(
+                              children: [
+                                Text(
+                                  '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                ),
+
+                                const Spacer(),
+
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  color: const Color(0xFF165932),
+                                  onPressed: () {
+                                    // позже: редактирование шага
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  color: const Color(0xFF165932),
+                                  onPressed: () {
+                                    setState(() {
+                                      steps.remove(step);
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+
+
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
 
