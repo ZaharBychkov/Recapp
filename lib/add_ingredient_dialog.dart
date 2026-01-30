@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
 
 class AddIngredientDialog extends StatefulWidget {
-  const AddIngredientDialog({super.key});
+  final Ingredient? ingredient;
+
+  const AddIngredientDialog({super.key, this.ingredient});
 
   @override
   State<AddIngredientDialog> createState() => _AddIngredientDialogState();
@@ -17,6 +19,16 @@ class _AddIngredientDialogState extends State<AddIngredientDialog> {
     _nameController.dispose();
     _amountController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if(widget.ingredient != null) {
+      _nameController.text = widget.ingredient!.name;
+      _amountController.text = widget.ingredient!.measurement;
+    }
   }
 
   @override
@@ -83,8 +95,8 @@ class _AddIngredientDialogState extends State<AddIngredientDialog> {
                         borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
                       ),
                     ),
-                    child: const Text(
-                      'Добавить',
+                    child: Text(
+                      widget.ingredient == null ? 'Добавить' : 'Изменить',
                       style: TextStyle(color: Colors.white),
                     ),
                   ),

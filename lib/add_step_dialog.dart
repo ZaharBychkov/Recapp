@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import '../models/step.dart';
 
 class AddStepDialog extends StatefulWidget {
-  const AddStepDialog({super.key});
+  final RecipeStep? step;
+
+  const AddStepDialog({super.key, this.step});
 
   @override
   State<AddStepDialog> createState() => _AddStepDialogState();
@@ -18,6 +21,21 @@ class _AddStepDialogState extends State<AddStepDialog> {
     _minutesController.dispose();
     _secondsController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if(widget.step != null) {
+      _stepController.text = widget.step!.description;
+
+      final minutes = widget.step!.timeInSeconds ~/60;
+      final seconds = widget.step!.timeInSeconds % 60;
+
+      _minutesController.text = minutes.toString();
+      _secondsController.text = seconds.toString();
+    }
   }
 
   int _parseTime(String value) {
@@ -124,8 +142,8 @@ class _AddStepDialogState extends State<AddStepDialog> {
                       ),
                     ),
                   ),
-                  child: const Text(
-                    'Добавить',
+                  child: Text(
+                    widget.step == null ? 'Добавить' : 'Изменить',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),

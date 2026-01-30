@@ -21,6 +21,10 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   List<Ingredient> ingredients = [];
   List<RecipeStep> steps = [];
 
+
+  bool get _canSaveRecipe =>
+      ingredients.isNotEmpty && steps.isNotEmpty;
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -41,6 +45,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     });
   }
 
+
   Future<void> _addIngredient() async {
     final Ingredient? ingredient = await showDialog<Ingredient>(    //Возвращаю inredient типа ingredient
       context: context,                                            //Передаю контекст
@@ -51,6 +56,22 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     if (ingredient != null) {
       setState(() {
         ingredients.add(ingredient);
+      });
+    }
+  }
+
+  Future<void> _editIngredient(int index) async {
+    final edited = await showDialog<Ingredient>(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => AddIngredientDialog(
+        ingredient: ingredients[index],
+      ),
+    );
+
+    if (edited != null) {
+      setState(() {
+        ingredients[index] = edited;
       });
     }
   }
@@ -78,6 +99,29 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     }
   }
 
+  Future<void> _editStep(int index) async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => AddStepDialog(
+        step: steps[index],
+      ),
+    );
+
+    if (result != null) {
+      final minutes = result['minutes'] as int;
+      final seconds = result['seconds'] as int;
+
+      setState(() {
+        steps[index] = RecipeStep(
+          stepNumber: steps[index].stepNumber,
+          description: result['step'],
+          timeInSeconds: (minutes * 60) + seconds,
+        );
+      });
+    }
+  }
+
     Future<void> _saveRecipe() async {
     // Проверка обязательных полей
     if (_titleController.text.trim().isEmpty) {
@@ -100,7 +144,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       );
       return;
     }
-    
+
+
     // Подсчёт общего времени приготовления
     final totalTime = steps.fold<int>(
       0, 
@@ -383,9 +428,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             children: [
                               IconButton(
                                 icon: const Icon(Icons.edit, color: Color(0xFF165932)),
-                                onPressed: () {
-                                  //
-                                },
+                                onPressed: () => _editIngredient(ingredients.indexOf(ingredient)),
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete, color: Color(0xFF165932)),
@@ -526,9 +569,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                                 IconButton(
                                   icon: const Icon(Icons.edit),
                                   color: const Color(0xFF165932),
-                                  onPressed: () {
-                                    // позже: редактирование шага
-                                  },
+                                  onPressed: () => _editStep(steps.indexOf(step)),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.delete),
@@ -590,7 +631,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 child: ElevatedButton(
                   onPressed: _saveRecipe,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF165932),
+                    backgroundColor: _canSaveRecipe ? const Color(0xff165932) : Colors.grey,
                     padding: EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
