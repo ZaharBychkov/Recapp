@@ -15,20 +15,13 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
-
-  late final List<Widget> _screens;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _screens = const [
-      RecipeListScreen(),
-      FridgeScreen(),
-      FavoritesScreen(),
-      ProfileScreen(),
-    ];
-  }
+  
+  // Используем GlobalKey для сохранения состояния экранов в IndexedStack
+  // IndexedStack сохраняет состояние виджетов по ключам, даже если виджеты пересоздаются
+  final GlobalKey _recipeListKey = GlobalKey();
+  final GlobalKey _fridgeKey = GlobalKey();
+  final GlobalKey _favoritesKey = GlobalKey();
+  final GlobalKey _profileKey = GlobalKey();
 
   Future<void> _openCreateRecipe(BuildContext context) async {
     final result = await Navigator.push<bool>(
@@ -47,10 +40,22 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Создаем экраны с ключами для сохранения состояния в IndexedStack
+    // GlobalKey гарантирует, что IndexedStack сохранит состояние даже при пересоздании виджетов
+    final screens = [
+      RecipeListScreen(
+        key: _recipeListKey,
+        onAddRecipePressed: () => _openCreateRecipe(context),
+      ),
+      FridgeScreen(key: _fridgeKey),
+      FavoritesScreen(key: _favoritesKey),
+      ProfileScreen(key: _profileKey),
+    ];
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: _buildBottomBar(),
     );

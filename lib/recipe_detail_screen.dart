@@ -261,7 +261,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       case IngredientCheckResult.failure:
         return Colors.red;
       case IngredientCheckResult.idle:
-      default: return Color(0xffa0a0a0);   //По умолчанию серый цвет
+        return Color(0xffa0a0a0);   //По умолчанию серый цвет
     }
   }
 
@@ -419,11 +419,15 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                   flex: 1,
                                   child: GestureDetector(
                                     onTap: () async {
+                                      // Переключаем состояние избранного
                                       await RecipeManager().toggleFavorite(widget.recipe);
+                                      // Обновляем состояние виджета для отображения новой иконки
                                       setState(() {});
                                     },
                                     child: Image.asset(
-                                      widget.recipe.isFavorite ? 'asset/Icons/heart_red.png' : 'asset/Icons/heart_black.png',
+                                      widget.recipe.isFavorite 
+                                          ? 'assets/Icons/heart_red.png' 
+                                          : 'assets/Icons/heart_black.png',
                                       width: 24,
                                       height: 24,
                                     )
