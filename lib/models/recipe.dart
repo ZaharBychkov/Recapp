@@ -26,7 +26,10 @@ class Recipe extends HiveObject {
   final String imagePath;
   
   @HiveField(6)
-  final List<RecipeStep> steps; 
+  final List<RecipeStep> steps;
+
+  @HiveField(7)
+  bool isFavorite;
 
   Recipe({
     required this.id,
@@ -36,5 +39,6 @@ class Recipe extends HiveObject {
     required this.prepTimeSeconds,
     required this.imagePath,
     required this.steps,
+    this.isFavorite = false,
   });
 }

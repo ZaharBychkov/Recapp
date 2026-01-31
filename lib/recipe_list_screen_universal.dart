@@ -27,22 +27,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     recipes = RecipeManager().getRecipes();                      //Получаем список рецептов из RecipeManager для recipe
   }
 
-  // Метод для открытия экрана создания рецепта
-  Future<void> _openCreateRecipeScreen() async {
-    final result = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const CreateRecipeScreen(),
-      ),
-    );
-    
-    // Если рецепт был добавлен — обновляем список
-    if (result == true) {
-      setState(() {
-        recipes = RecipeManager().getRecipes();
-      });
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +142,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         width: 60,
         height: 60,
         child: FloatingActionButton(
-          onPressed: widget.onAddRecipePressed ?? _openCreateRecipeScreen,  //Вызывает функцию переданную извне или открывает экран создания
+          onPressed: widget.onAddRecipePressed,  //Вызывает функцию переданную извне или открывает экран создания
           backgroundColor: Color(0xFF2ECC71),
           child: Icon(Icons.add, color: Colors.white), //Кнопка с полюсом
           shape: CircleBorder(),                       //Полностью круглая
@@ -166,152 +151,6 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
           : null,                                                                //Если не авторизован - кнопка не отображается
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,  //Кнопка справа
 
-
-      bottomNavigationBar: Container(
-        height: MediaQuery.of(context).size.height * 0.08,
-        color: Colors.white,
-        child: Row(
-          children: [
-            if(widget.isLoggedIn) ...[
-              //Когда пользователь авторизован - показываем 4 иконки
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/Icons/pizza_green.png',
-                        width: MediaQuery.of(context).size.width * 0.056,
-                      ),
-                      Text(
-                        'Рецепты',
-                        style: TextStyle(
-                          color: Color(0xFF2ECC71),
-                          fontSize: MediaQuery.of(context).size.width * 0.0234,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/Icons/fridge_grey.png',
-                        width: MediaQuery.of(context).size.width * 0.056,
-                      ),
-                      Text(
-                        'Холодильник',
-                        style: TextStyle(
-                          color: Color(0xFFC2C2C2), //Исправлен цвет - был 0xFFC2C2C
-                          fontSize: MediaQuery.of(context).size.width * 0.0234,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/Icons/heart_grey.png', //Сердце
-                        width: MediaQuery.of(context).size.width * 0.056,
-                      ),
-                      Text(
-                        'Избранное',
-                        style: TextStyle(
-                          color: Color(0xFFC2C2C2), //Серый цвет
-                          fontSize: MediaQuery.of(context).size.width * 0.0234,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/Icons/person_grey.png',
-                        width: MediaQuery.of(context).size.width * 0.056,
-                      ),
-                      Text(
-                        'Профиль',
-                        style: TextStyle(
-                          color: Color(0xFFC2C2C2),
-                          fontSize: MediaQuery.of(context).size.width * 0.0234,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ] else ...[
-              //Когда пользователь не авторизован - показываем 2 иконки
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/Icons/pizza_green.png',
-                        width: MediaQuery.of(context).size.width * 0.056,
-                      ),
-                      Text(
-                        'Рецепты',
-                        style: TextStyle(
-                          color: Color(0xFF2ECC71),
-                          fontSize: MediaQuery.of(context).size.width * 0.0234,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/Icons/person_grey.png',
-                        width: MediaQuery.of(context).size.width * 0.056,
-                      ),
-                      Text(
-                        'Вход',
-                        style: TextStyle(
-                          color: Color(0xFFC2C2C2),
-                          fontSize: MediaQuery.of(context).size.width * 0.0234,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 }

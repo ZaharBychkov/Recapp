@@ -7,6 +7,7 @@ import '../models/comment.dart';
 import '../services/ingredient_checker.dart';
 import '../models/ingredient_check_result.dart';
 import '../models/ingredient.dart';
+import 'recipe_manager.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;
@@ -417,14 +418,15 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                 Expanded(
                                   flex: 1,
                                   child: GestureDetector(
-                                    onTap: toggleFavorite,
+                                    onTap: () async {
+                                      await RecipeManager().toggleFavorite(widget.recipe);
+                                      setState(() {});
+                                    },
                                     child: Image.asset(
-                                      isFavorite
-                                          ? 'assets/Icons/heart_red.png'
-                                          : 'assets/Icons/heart_black.png',
+                                      widget.recipe.isFavorite ? 'asset/Icons/heart_red.png' : 'asset/Icons/heart_black.png',
                                       width: 24,
                                       height: 24,
-                                    ),
+                                    )
                                   ),
                                 ),
                               ],

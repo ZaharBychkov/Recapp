@@ -1,21 +1,38 @@
-import 'models/recipe.dart';
 import 'recipe_repository.dart';
+import '../models/recipe.dart';
 
-//Все функции для хранения описал в repository этот файл теперь только вызывает эти функции и связывает 
-//базу с UI - отправлет в recipe_ropsitory и далее в Hive (базу данных)
+
 class RecipeManager {
-  
-  /// Получить все рецепты из базы данных
+  static final RecipeManager _instance = RecipeManager._internal(); //Создаем один экземпляр на одно приложение
+  factory RecipeManager() => _instance;                              //Возвращаем один экземпляр где бы мы не вызвался RecipeManager
+  RecipeManager._internal();                                         //Вызываем только внутри данного файла
+
+  //Получить все рецепты из базы
   List<Recipe> getRecipes() {
     return RecipeRepository.getAllRecipes();
   }
-  
-  /// Добавить новый рецепт
+
+  //Получить все рецепты с пометкой isFavorite
+  List<Recipe> getFavoriteRecipes() {
+    return RecipeRepository.getFavoriteRecipes();
+  }
+
+  //Проверить является ли рецепт isFavorite
+  bool isFavorite(Recipe recipe) {
+    return recipe.isFavorite;
+  }
+
+  //меняем состояние isFavorite
+  Future<void> toggleFavorite(Recipe recipe) async {
+    await RecipeRepository.toggleFavorite(recipe);
+  }
+
+  //Добавить рецепт
   Future<void> addRecipe(Recipe recipe) async {
     await RecipeRepository.addRecipe(recipe);
   }
-  
-  /// Получить следующий ID для нового рецепта
+
+  //Получить Id для нового рецепта
   int getNextId() {
     return RecipeRepository.getNextId();
   }

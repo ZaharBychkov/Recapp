@@ -26,6 +26,17 @@ class RecipeRepository {
     }
   }
 
+  //Берем все рецепты
+  static List<Recipe> getFavoriteRecipes() {
+    return _box?.values.where((r) => r.isFavorite).toList() ?? [];
+  }
+
+  //Конроллер для изменения состояния isFavorite
+  static Future<void> toggleFavorite(Recipe recipe) async {
+    recipe.isFavorite = !recipe.isFavorite;
+    await recipe.save();
+  }
+
   //Получить все рецепты
   static List<Recipe> getAllRecipes() {
     return _box?.values.toList() ?? []; //Возвращаем список всех рецептов или пустой список

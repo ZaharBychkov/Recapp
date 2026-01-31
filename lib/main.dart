@@ -8,6 +8,7 @@ import 'profile_screen.dart';
 import 'registration_screen.dart';
 import 'create_screen.dart';
 import 'recipe_repository.dart';
+import 'main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();     //Устанавливаем связь с платформой Android 
@@ -31,8 +32,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: CreateRecipeScreen(),
-      //RecipeDetailScreen(recipe: recipes[2],),
+      home: MainScreen(),
     );
   }
 }
