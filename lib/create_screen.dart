@@ -159,7 +159,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       description: _descriptionController.text.trim().isNotEmpty 
           ? _descriptionController.text.trim() 
           : 'Без описания',
-      ingredients: ingredients,
+      ingredients: ingredients,  // Добавляем ингредиенты!
       prepTimeSeconds: totalTime,
       imagePath: recipeImage ?? 'assets/Images/burger_with_two_cutlets.png',
       steps: steps,

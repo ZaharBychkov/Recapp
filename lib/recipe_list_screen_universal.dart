@@ -25,10 +25,33 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   @override
   void initState() {
     super.initState();
+    /*
+     * ВАЖНО: initState() вызывается ТОЛЬКО ОДИН РАЗ при создании виджета!
+     * Если виджет не уничтожается (как в нашем случае с IndexedStack + GlobalKey),
+     * то этот метод больше никогда не вызовется.
+     * 
+     * ПРОБЛЕМА: Мы загружали рецепты только здесь, поэтому новые рецепты
+     * не появлялись после создания - список оставался старым.
+     */
     recipes = RecipeManager().getRecipes();                      //Получаем список рецептов из RecipeManager для recipe
   }
 
-
+  /*
+   * НОВЫЙ МЕТОД: Принудительное обновление списка рецептов
+   * 
+   * ПОЧЕМУ ЭТО РАБОТАЕТ:
+   * 1. setState() заставляет Flutter перерисовать виджет
+   * 2. RecipeManager().getRecipes() заново читает данные из Hive
+   * 3. ListView.builder() видит обновленный список и показывает новые рецепты
+   * 
+   * БЕЗ ЭТОГО: Новые рецепты сохранялись в Hive, но список не обновлялся
+   * до перезапуска приложения (когда initState() вызовется снова)
+   */
+  void refreshRecipes() {
+    setState(() {
+      recipes = RecipeManager().getRecipes();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
