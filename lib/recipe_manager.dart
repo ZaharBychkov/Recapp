@@ -37,6 +37,11 @@ class RecipeManager {
     await RecipeRepository.updateRecipe(recipe);
   }
 
+  //Удалить рецепт
+  Future<void> deleteRecipe(int recipeId) async {
+    await RecipeRepository.deleteRecipe(recipeId);
+  }
+
   //Получить Id для нового рецепта
   int getNextId() {
     return RecipeRepository.getNextId();

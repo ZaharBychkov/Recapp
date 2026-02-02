@@ -24,6 +24,13 @@ class RecipeDetailScreen extends StatefulWidget {
   State<RecipeDetailScreen> createState() => _RecipeDetailScreenState();
 }
 
+/*
+ * RecipeDetailScreen может возвращать результаты:
+ * - true: рецепт был удален
+ * - "edited": рецепт был отредактирован
+ * - null/false: ничего не произошло
+ */
+
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   bool isCooking = false;
   bool isFavorite = false;
@@ -420,9 +427,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Заголовок рецепта с иконками действий
-                          if (widget.isLoggedIn)
-                            Row(
-                              children: [
+                          // Убрали условие if (widget.isLoggedIn) чтобы иконки всегда отображались
+                          Row(
+                            children: [
                                 /*
                                  * Текст заголовка - занимает 4/7 пространства
                                  * Уменьшили с flex: 5 до flex: 4 чтобы освободить место для иконок
@@ -493,9 +500,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                             /*
                                              * ЕСЛИ РЕЦЕПТ БЫЛ ОБНОВЛЕН (result == true):
                                              * Используем метод _reloadRecipe для обновления данных
+                                             * И возвращаем результат чтобы обновить список в RecipeListScreen
                                              */
                                             if (result == true) {
                                               _reloadRecipe();
+                                              
+                                              // Возвращаемся на список с результатом редактирования
+                                              Navigator.pop(context, "edited");  // "edited" = рецепт был изменен
                                             }
                                           },
                                         ),
@@ -505,9 +516,55 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                         flex: 1,
                                         child: IconButton(
                                           icon: const Icon(Icons.delete, color: Color(0xFF4d4d4d)),
-                                          onPressed: () {
-                                            // TODO: Добавить логику удаления рецепта
-                                            print("Удалить рецепт: ${widget.recipe.title}");
+                                          onPressed: () async {
+                                            /*
+                                             * ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ РЕЦЕПТА
+                                             * Показываем диалог подтверждения перед удалением
+                                             */
+                                            final confirmDelete = await showDialog<bool>(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: Text('Удалить рецепт?'),
+                                                content: Text('Вы уверены, что хотите удалить рецепт "${widget.recipe.title}"?'),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, false),
+                                                    child: Text('Отмена'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, true),
+                                                    child: Text('Удалить', style: TextStyle(color: Colors.red)),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+
+                                            /*
+                                             * ЕСЛИ ПОЛЬЗОВАТЕЛЬ ПОДТВЕРДИЛ УДАЛЕНИЕ:
+                                             * 1. Удаляем рецепт из базы данных
+                                             * 2. Показываем сообщение об успехе
+                                             * 3. Возвращаемся на предыдущий экран
+                                             */
+                                            if (confirmDelete == true) {
+                                              try {
+                                                await RecipeManager().deleteRecipe(widget.recipe.id);
+                                                
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(content: Text('Рецепт успешно удален!')),
+                                                  );
+                                                  
+                                                  // Возвращаемся на список рецептов с результатом удаления
+                                                  Navigator.pop(context, true);  // true = рецепт был удален
+                                                }
+                                              } catch (e) {
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(content: Text('Ошибка при удалении рецепта')),
+                                                  );
+                                                }
+                                              }
+                                            }
                                           },
                                         ),
                                       ),
@@ -515,21 +572,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                   ),
                                 ),
                               ],
-                            )
-                          else
-                            Text(
-                              widget.recipe.title,
-                              style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.06,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                                fontFamily: 'Roboto',
-                                height: 1.2,
-                              ),
-                              maxLines: null,
-                              softWrap: true,
-                            ),
+                          ),
 
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.015,

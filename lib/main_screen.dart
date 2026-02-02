@@ -89,6 +89,7 @@ class _MainScreenState extends State<MainScreen> {
     final screens = [
       RecipeListScreen(
         key: _recipeListKey,  // Ключ для доступа к этому виджету
+        isLoggedIn: true,    // Явно указываем что пользователь залогинен
         onAddRecipePressed: () => _openCreateRecipe(context),  // Callback для кнопки "+"
       ),
       FridgeScreen(key: _fridgeKey),

@@ -56,8 +56,22 @@ class RecipeRepository {
 
   //Удалить рецепт
   static Future<void> deleteRecipe(int recipeId) async {
-    await _box?.delete(recipeId); //Удаляем рецепт по ID
-    print("Рецепт удален из Hive с ID: $recipeId");
+    try {
+      print("Попытка удалить рецепт с ID: $recipeId");
+      print("Количество рецептов до удаления: ${_box?.length}");
+      
+      await _box?.delete(recipeId);
+      
+      print("Количество рецептов после удаления: ${_box?.length}");
+      print("Рецепт успешно удален из Hive с ID: $recipeId");
+      
+      // Принудительно сохраняем изменения
+      await _box?.flush();
+      
+    } catch (e) {
+      print("Ошибка при удалении рецепта: $e");
+      rethrow; // Перебрасываем ошибку дальше
+    }
   }
 
   //Получить следующий свободный ID 

@@ -73,8 +73,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                   itemBuilder: (context, index) {       //Создаем список, на вход берем контекст экрана и индексы рецептов
                     final recipe = recipes[index];     // recipe - рецепт по списку из мэнеджера
                     return InkWell(                                          //Оборачиваем в InkWell для обработки нажатий с визуальным откликом
-                      onTap: () {                                            //При нажатии открываем детальный экран рецепта
-                        Navigator.push(
+                      onTap: () async {                                            //При нажатии открываем детальный экран рецепта
+                        final result = await Navigator.push<dynamic>(
                           context,
                           MaterialPageRoute(
                             builder: (_) => RecipeDetailScreen(
@@ -83,6 +83,19 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                             ),
                           ),
                         );
+
+                        /*
+                         * ЕСЛИ РЕЦЕПТ БЫЛ УДАЛЕН (result == true):
+                         * Обновляем список чтобы убрать удаленный рецепт
+                         * 
+                         * ЕСЛИ РЕЦЕПТ БЫЛ ИЗМЕНЕН (result == "edited"):
+                         * Обновляем список чтобы показать измененные данные
+                         */
+                        if (result == true || result == "edited") {
+                          setState(() {
+                            recipes = RecipeManager().getRecipes();
+                          });
+                        }
                       },
                       borderRadius: BorderRadius.circular(10),               //Скругление для ripple эффекта
                       child: Container(                                         // Возвращаем контейнеры для каждого элемента по индексу index
