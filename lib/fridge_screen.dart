@@ -56,6 +56,75 @@ class _FridgeScreenState extends State<FridgeScreen> {
     });
   }
 
+  /*
+   * Диалог для добавления нового ингредиента в холодильник
+   */
+  void _showAddIngredientDialog() {
+    final nameController = TextEditingController();
+    final measurementController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Добавить ингредиент'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Название ингредиента',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: measurementController,
+              decoration: InputDecoration(
+                labelText: 'Количество',
+                hintText: 'например: 200 г, 2 шт., по вкусу',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Отмена'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = nameController.text.trim();
+              final measurement = measurementController.text.trim();
+
+              if (name.isNotEmpty && measurement.isNotEmpty) {
+                setState(() {
+                  fridgeIngredients.add(
+                    Ingredient(name: name, measurement: measurement),
+                  );
+                });
+                Navigator.pop(context);
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Ингредиент "$name" добавлен в холодильник')),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Заполните все поля')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF2ECC71),
+            ),
+            child: Text('Добавить', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,6 +161,33 @@ class _FridgeScreenState extends State<FridgeScreen> {
                       SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                       ...fridgeIngredients.map((ingredient) => _buildItem(ingredient.name, ingredient.measurement)).toList(),
                     ],
+                  ),
+                ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _showAddIngredientDialog();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF2ECC71),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: Text(
+                        'Добавить ингредиент',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: MediaQuery.of(context).size.width * 0.04,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.02),
