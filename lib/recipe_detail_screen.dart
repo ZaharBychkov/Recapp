@@ -394,43 +394,79 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Заголовок рецепта
+                          // Заголовок рецепта с иконками действий
                           if (widget.isLoggedIn)
                             Row(
                               children: [
+                                /*
+                                 * Текст заголовка - занимает 4/7 пространства
+                                 * Уменьшили с flex: 5 до flex: 4 чтобы освободить место для иконок
+                                 */
                                 Expanded(
-                                  flex: 5,
+                                  flex: 6,  // Уменьшили чтобы освободить место для иконок
                                   child: Text(
                                     widget.recipe.title,
                                     style: TextStyle(
                                       fontSize:
                                           MediaQuery.of(context).size.width *
-                                          0.06,
+                                          0.07,
                                       fontWeight: FontWeight.w700,
                                       color: Colors.black,
                                       fontFamily: 'Roboto',
-                                      height: 1.2,
+                                      height: 1.15,
                                     ),
                                     maxLines: null,
                                     softWrap: true,
                                   ),
                                 ),
+
                                 Expanded(
-                                  flex: 1,
-                                  child: GestureDetector(
-                                    onTap: () async {
-                                      // Переключаем состояние избранного
-                                      await RecipeManager().toggleFavorite(widget.recipe);
-                                      // Обновляем состояние виджета для отображения новой иконки
-                                      setState(() {});
-                                    },
-                                    child: Image.asset(
-                                      widget.recipe.isFavorite 
-                                          ? 'assets/Icons/heart_red.png' 
-                                          : 'assets/Icons/heart_black.png',
-                                      width: 24,
-                                      height: 24,
-                                    )
+                                  flex: 3,  // 3 иконки по flex: 1 каждая
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,  // Иконки справа
+                                    children: [
+                                      // Иконка избранного (сердечко)
+                                      Expanded(
+                                        flex: 1,
+                                        child: GestureDetector(
+                                          onTap: () async {
+                                            // Переключаем состояние избранного
+                                            await RecipeManager().toggleFavorite(widget.recipe);
+                                            // Обновляем состояние виджета для отображения новой иконки
+                                            setState(() {});
+                                          },
+                                          child: Image.asset(
+                                            widget.recipe.isFavorite 
+                                                ? 'assets/Icons/heart_red.png' 
+                                                : 'assets/Icons/heart_black.png',
+                                            width: 24,
+                                            height: 24,
+                                          )
+                                        ),
+                                      ),
+                                      // Иконка редактирования (карандаш)
+                                      Expanded(
+                                        flex: 1,
+                                        child: IconButton(
+                                          icon: const Icon(Icons.edit, color: Color(0xff4d4d4d)),
+                                          onPressed: () {
+                                            // TODO: Добавить логику редактирования рецепта
+                                            print("Редактировать рецепт: ${widget.recipe.title}");
+                                          },
+                                        ),
+                                      ),
+                                      // Иконка удаления (урна)
+                                      Expanded(
+                                        flex: 1,
+                                        child: IconButton(
+                                          icon: const Icon(Icons.delete, color: Color(0xFF4d4d4d)),
+                                          onPressed: () {
+                                            // TODO: Добавить логику удаления рецепта
+                                            print("Удалить рецепт: ${widget.recipe.title}");
+                                          },
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
