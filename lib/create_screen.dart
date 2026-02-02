@@ -8,7 +8,14 @@ import 'models/recipe.dart';
 import 'recipe_manager.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
-  const CreateRecipeScreen({super.key});
+  /*
+   * Параметры экрана:
+   * - recipe: если передан, то это режим редактирования
+   * - если recipe == null, то это режим создания нового рецепта
+   */
+  final Recipe? recipe;
+  
+  const CreateRecipeScreen({super.key, this.recipe});
 
   @override
   State<CreateRecipeScreen> createState() => _CreateRecipeScreenState();
@@ -26,8 +33,26 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       ingredients.isNotEmpty && steps.isNotEmpty;
 
   @override
+  void initState() {
+    super.initState();
+    /*
+     * ЕСЛИ ПЕРЕДАН РЕЦЕПТ - это режим редактирования
+     * Заполняем все поля данными из существующего рецепта
+     */
+    if (widget.recipe != null) {
+      final recipe = widget.recipe!;
+      _titleController.text = recipe.title;
+      _descriptionController.text = recipe.description;
+      recipeImage = recipe.imagePath;
+      ingredients = List.from(recipe.ingredients);
+      steps = List.from(recipe.steps);
+    }
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -122,7 +147,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     }
   }
 
-    Future<void> _saveRecipe() async {
+  Future<void> _saveRecipe() async {
     // Проверка обязательных полей
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -145,32 +170,46 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       return;
     }
 
-
     // Подсчёт общего времени приготовления
     final totalTime = steps.fold<int>(
       0, 
       (sum, step) => sum + step.timeInSeconds,
     );
     
-    // Создание нового рецепта
+    /*
+     * СОЗДАНИЕ ИЛИ ОБНОВЛЕНИЕ РЕЦЕПТА
+     * Если widget.recipe != null - режим редактирования (используем существующий ID)
+     * Если widget.recipe == null - режим создания (генерируем новый ID)
+     */
     final recipe = Recipe(
-      id: RecipeManager().getNextId(),
+      id: widget.recipe?.id ?? RecipeManager().getNextId(),  // Используем существующий ID или создаем новый
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim().isNotEmpty 
           ? _descriptionController.text.trim() 
           : 'Без описания',
-      ingredients: ingredients,  // Добавляем ингредиенты!
+      ingredients: ingredients,
       prepTimeSeconds: totalTime,
       imagePath: recipeImage ?? 'assets/Images/burger_with_two_cutlets.png',
       steps: steps,
     );
     
-    // Сохранение в базу данных
-    await RecipeManager().addRecipe(recipe);
+    if (widget.recipe != null) {
+      // РЕЖИМ РЕДАКТИРОВАНИЯ - обновляем существующий рецепт
+      await RecipeManager().updateRecipe(recipe);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Рецепт успешно обновлен!')),
+      );
+    } else {
+      // РЕЖИМ СОЗДАНИЯ - добавляем новый рецепт
+      await RecipeManager().addRecipe(recipe);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Рецепт успешно создан!')),
+      );
+    }
     
     // Возврат на предыдущий экран с результатом
     if (mounted) {
-      Navigator.pop(context, true);  // true = рецепт был добавлен
+      Navigator.pop(context, true);  // true = рецепт был сохранен (создан или обновлен)
     }
   }
 
@@ -195,7 +234,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             backgroundColor: Colors.white, // Убираем isCooking
             centerTitle: true,              //Центрирование заголовка
             title: Text(
-              'Новый рецепт', // Меняем текст заголовка
+              widget.recipe != null ? 'Редактирование рецепта' : 'Новый рецепт', // Динамический заголовок
               style: TextStyle(
                 color: Color(0xFF165932),
                 fontWeight: FontWeight.w600,

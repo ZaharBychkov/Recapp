@@ -8,25 +8,25 @@ part 'recipe.g.dart';
 class Recipe extends HiveObject {
   
   @HiveField(0)
-  final int id;
+  int id;
   
   @HiveField(1)
-  final String title;
+  String title;
   
   @HiveField(2)
-  final String description;
+  String description;
   
   @HiveField(3)
-  final List<Ingredient> ingredients;
+  List<Ingredient> ingredients;
   
   @HiveField(4)
-  final int prepTimeSeconds;
+  int prepTimeSeconds;
   
   @HiveField(5)
-  final String imagePath;
+  String imagePath;
   
   @HiveField(6)
-  final List<RecipeStep> steps;
+  List<RecipeStep> steps;
 
   @HiveField(7)
   bool isFavorite;

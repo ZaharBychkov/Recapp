@@ -8,6 +8,7 @@ import '../services/ingredient_checker.dart';
 import '../models/ingredient_check_result.dart';
 import '../models/ingredient.dart';
 import 'recipe_manager.dart';
+import 'create_screen.dart';  // Добавляем импорт CreateRecipeScreen
 
 class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;
@@ -35,6 +36,30 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   void initState() {
     super.initState();
     stepCompleted = List.generate(widget.recipe.steps.length, (index) => false);
+  }
+
+  /*
+   * Метод для перезагрузки данных рецепта из Hive
+   * Теперь можно обновлять поля widget.recipe напрямую
+   */
+  void _reloadRecipe() {
+    final updatedRecipe = RecipeManager()
+        .getRecipes()
+        .firstWhere((r) => r.id == widget.recipe.id);
+    
+    setState(() {
+      // Обновляем все поля рецепта актуальными данными
+      widget.recipe.title = updatedRecipe.title;
+      widget.recipe.description = updatedRecipe.description;
+      widget.recipe.ingredients = updatedRecipe.ingredients;
+      widget.recipe.steps = updatedRecipe.steps;
+      widget.recipe.prepTimeSeconds = updatedRecipe.prepTimeSeconds;
+      widget.recipe.imagePath = updatedRecipe.imagePath;
+      widget.recipe.isFavorite = updatedRecipe.isFavorite;
+      
+      // Обновляем список шагов для cooking mode
+      stepCompleted = List.generate(updatedRecipe.steps.length, (index) => false);
+    });
   }
 
   @override
@@ -449,9 +474,29 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                         flex: 1,
                                         child: IconButton(
                                           icon: const Icon(Icons.edit, color: Color(0xff4d4d4d)),
-                                          onPressed: () {
-                                            // TODO: Добавить логику редактирования рецепта
-                                            print("Редактировать рецепт: ${widget.recipe.title}");
+                                          onPressed: () async {
+                                            /*
+                                             * ОТКРЫВАЕМ ЭКРАН РЕДАКТИРОВАНИЯ
+                                             * Передаем текущий рецепт (widget.recipe) в CreateRecipeScreen
+                                             * CreateRecipeScreen поймет, что это режим редактирования
+                                             * и заполнит все поля данными из рецепта
+                                             * 
+                                             * Ждем результат редактирования и обновляем UI если нужно
+                                             */
+                                            final result = await Navigator.push<bool>(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => CreateRecipeScreen(recipe: widget.recipe),
+                                              ),
+                                            );
+                                            
+                                            /*
+                                             * ЕСЛИ РЕЦЕПТ БЫЛ ОБНОВЛЕН (result == true):
+                                             * Используем метод _reloadRecipe для обновления данных
+                                             */
+                                            if (result == true) {
+                                              _reloadRecipe();
+                                            }
                                           },
                                         ),
                                       ),

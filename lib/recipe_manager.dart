@@ -32,6 +32,11 @@ class RecipeManager {
     await RecipeRepository.addRecipe(recipe);
   }
 
+  //Обновить существующий рецепт
+  Future<void> updateRecipe(Recipe recipe) async {
+    await RecipeRepository.updateRecipe(recipe);
+  }
+
   //Получить Id для нового рецепта
   int getNextId() {
     return RecipeRepository.getNextId();

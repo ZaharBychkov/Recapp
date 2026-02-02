@@ -44,7 +44,20 @@ class RecipeRepository {
 
   //Добавить новый рецепт 
   static Future<void> addRecipe(Recipe recipe) async {
-    await _box?.add(recipe); //Добавляем рецепт в коробку, которая возможно пустая 
+    await _box?.put(recipe.id, recipe); //Добавляем рецепт в коробку, которая возможно пустая
+    print("Рецепт сохранен в Hive с ID: ${recipe.id}");
+  }
+
+  //Обновить существующий рецепт
+  static Future<void> updateRecipe(Recipe recipe) async {
+    await _box?.put(recipe.id, recipe); //Обновляем рецепт по его ID
+    print("Рецепт обновлен в Hive с ID: ${recipe.id}");
+  }
+
+  //Удалить рецепт
+  static Future<void> deleteRecipe(int recipeId) async {
+    await _box?.delete(recipeId); //Удаляем рецепт по ID
+    print("Рецепт удален из Hive с ID: $recipeId");
   }
 
   //Получить следующий свободный ID 

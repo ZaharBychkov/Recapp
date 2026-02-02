@@ -50,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
     final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (_) => const CreateRecipeScreen(),
+        builder: (_) => const CreateRecipeScreen(),  // Без параметра = режим создания
       ),
     );
 
