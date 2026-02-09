@@ -8,14 +8,11 @@ class RecipeRepository {
   static Box<Recipe>? _box;                 //Коробка с рецептами
 
   static Future<void> init() async {         //Инициализируем ассинхронно Hive
-      
-    await Hive.initFlutter();             //Ждем пока загрзится пржде чем начать работу
 
-    //Регистрируем адаптеры (в нужно порядке: сначала вложенные ), они уже сгенерированы 
-    Hive.registerAdapter(IngredientAdapter()); //Вложенный 
-    Hive.registerAdapter(RecipeStepAdapter()); //Вложенные
-    Hive.registerAdapter(RecipeAdapter());     //Основной
-
+    // //Регистрируем адаптеры (в нужно порядке: сначала вложенные ), они уже сгенерированы
+    // Hive.registerAdapter(IngredientAdapter()); //Вложенный
+    // Hive.registerAdapter(RecipeStepAdapter()); //Вложенные
+    // Hive.registerAdapter(RecipeAdapter());     //Основной
     _box = await Hive.openBox<Recipe>(_boxName); //Открываем коробку для хранения рецептов
     //Посути Hive ищет папку с названием 'recipes' для этого и нужно имя для
 

@@ -10,6 +10,93 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String username = "avpetrov"; // Имя пользователя (можно заменить на реальное)
 
+  void _showAvatarAction(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+
+              _actionItem(
+                text: 'Сфотографировать',
+                onTap: () {},
+              ),
+              const Divider(height: 1),
+              _actionItem(
+                text: 'Выбрать из альбома',
+                onTap: () {},
+              ),
+              const Divider(height: 1),
+              _actionItem(
+                text: 'Удалить',
+                textColor: Colors.red,
+                onTap: () {},
+              ),
+
+              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Отмена',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+  Widget _actionItem({
+    required String text,
+    required VoidCallback onTap,
+    Color textColor = Colors.black,
+}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 14),
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            )
+          )
+        )
+      )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,8 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Center(
                 child: GestureDetector(
                   onTap: () {
-                    // Можно добавить функцию для изменения аватара
-                    print("Нажали на аватар");
+                    _showAvatarAction(context);
                   },
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.4,

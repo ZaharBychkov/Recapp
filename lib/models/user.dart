@@ -1,7 +1,21 @@
-class User {
-  final String login;           //Логин
-  final String password;        //Пароль
-  final DateTime createdAt;     //Когда создан
+import 'package:hive/hive.dart';
 
-  User(this.login, this.password) : createdAt = DateTime.now();
+part 'user.g.dart';
+
+@HiveType(typeId: 3)
+class User extends HiveObject {
+  @HiveField(0)
+  String id;
+
+  @HiveField(1)
+  String name;
+
+  @HiveField(2)
+  String? avatarPath;
+
+  User({
+    required this.id,
+    required this.name,
+    this.avatarPath,
+  });
 }

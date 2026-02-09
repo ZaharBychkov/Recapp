@@ -9,11 +9,19 @@ import 'registration_screen.dart';
 import 'create_screen.dart';
 import 'recipe_repository.dart';
 import 'main_screen.dart';
+import 'package:hive/hive.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();     //Устанавливаем связь с платформой Android 
+  WidgetsFlutterBinding.ensureInitialized();
 
-  await RecipeRepository.init();                //Ассинхронно инициализируем репозиторий с Hive
+  await Hive.initFlutter();
+
+  Hive.registerAdapter(UserAdapter());
+  Hive.registerAdapter(IngredientAdapter());
+  Hive.registerAdapter(RecipeStepAdapter());
+  Hive.registerAdapter(RecipeAdapter());
+
+  await RecipeRepository.init();
 
   runApp(const MyApp());
 }
