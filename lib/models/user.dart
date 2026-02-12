@@ -11,11 +11,19 @@ class User extends HiveObject {
   String name;
 
   @HiveField(2)
+  String password;
+
+  @HiveField(3)
+  String login;
+
+  @HiveField(4)
   String? avatarPath;
 
   User({
     required this.id,
     required this.name,
+    required this.password,
+    required this.login,
     this.avatarPath,
   });
 }

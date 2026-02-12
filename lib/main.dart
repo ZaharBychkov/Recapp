@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
-import 'recipe_detail_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+import 'models/user.dart';
 import 'models/recipe.dart';
-import 'recipe_manager.dart';
-import 'fridge_screen.dart';
-import 'recipe_list_screen_universal.dart';
-import 'profile_screen.dart';
-import 'registration_screen.dart';
-import 'create_screen.dart';
-import 'recipe_repository.dart';
+import 'models/ingredient.dart';
+import 'models/step.dart';
+
+import 'services/recipe_repository.dart';
+import 'services/user_repository.dart';
 import 'main_screen.dart';
-import 'package:hive/hive.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Hive.initFlutter();
 
+  // Регистрируем ВСЕ адаптеры
   Hive.registerAdapter(UserAdapter());
   Hive.registerAdapter(IngredientAdapter());
   Hive.registerAdapter(RecipeStepAdapter());
   Hive.registerAdapter(RecipeAdapter());
 
+  // Инициализация репозиториев
+  await UserRepository.init();
   await RecipeRepository.init();
 
   runApp(const MyApp());
@@ -31,16 +33,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Берём первый рецепт из менеджера
-    final recipes = RecipeManager().getRecipes();
-
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Otus Food App',
       theme: ThemeData(
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: MainScreen(),
+      home: const MainScreen(),
     );
   }
 }

@@ -24,13 +24,14 @@ class RecipeAdapter extends TypeAdapter<Recipe> {
       prepTimeSeconds: fields[4] as int,
       imagePath: fields[5] as String,
       steps: (fields[6] as List).cast<RecipeStep>(),
+      isFavorite: fields[7] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, Recipe obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -44,7 +45,9 @@ class RecipeAdapter extends TypeAdapter<Recipe> {
       ..writeByte(5)
       ..write(obj.imagePath)
       ..writeByte(6)
-      ..write(obj.steps);
+      ..write(obj.steps)
+      ..writeByte(7)
+      ..write(obj.isFavorite);
   }
 
   @override

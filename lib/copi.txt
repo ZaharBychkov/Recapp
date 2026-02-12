@@ -1,65 +1,30 @@
-/*
-//прописаь иморт hive
-//прописать импорт user
-//создать класс user repository
-//внутри два статические константы _boxName  = userBox и _userKey currentUser
-//Создать функцию getUser
-//внутри открыть коробку потом получать юзера через коробу и вернуть
-//его если он не 0 вернуть
-если пользователя кладем нового пользователя в hive библиотеку
- и возвращаем его
-Cоздаем ассинхрнную загрузку updateAvatar в которой обновляем аватар
-открываем коробку
-получаем пользователя через фукнцию описанную выше
-гвворить что путь user-а - это тут путь который передали в фукциню
-сохраняем ассинхронно
-добавляем фунуцю удаления ассинхронно
-получаем пользоавтеля
-указываем что путь = null
-сохраняем
-*/
+  //Сама ассинхронная загрузка
+  // Получаем байты изображения из assets (один раз!)
+  // Получаем байты изображения из assets (один раз!)
+   // Декодируем первый кадр (раз у нас готовое изображение, то единственный кадр)
+  / Проверяем, что виджет всё ещё существует, пользователь до сих пор на странице
+  // Сохраняем изображение и вызываем перерисовку
+    // Сохраняем сообщение об ошибке и обновляем UI
 
 
-import 'package:hive/hive.dart';
-import '../models/user.dart';
+  Future<void> _loadBackgroundImage() async {
 
-class UserRepository {
-  static final String _boxName = 'userBox';
-  static final String _userKey = 'currentUser';
+    try {
+      final byteData = await rootBundle.load('assets/Images/food_background.png');
+      // Получаем байты изображения из assets (один раз!)
 
-  User getUser() {
-    final box = Hive.box<User>(_boxName);
-    final user = box.get(_userKey);
+      final codec = await ui.instantiateImageCodec(byteData.buffer.asUint8List());
+      // Получаем байты изображения из assets (один раз!)
 
-    if (user != null) {
-      return user;
+      final frame = await codec.getNextFrame();       // Декодируем первый кадр (раз у нас готовое изображение, то единственный кадр)
+
+      if (mounted) {                                  // Проверяем, что виджет всё ещё существует, пользователь до сих пор на странице
+        setState(() => _backgroundImage = frame.image); // Сохраняем изображение и вызываем перерисовку
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _errorMessage = 'Не удалось загрузить фоновую картинку');
+        // Сохраняем сообщение об ошибке и обновляем UI
+      }
     }
-
-    final newUser = User(
-      id: 'local_user',
-      name: 'Пользователь',
-      avatarPath: null,
-    );
-
-    box.put(_userKey, newUser);
-    return newUser;
   }
-
-  Future<void> updateAvatar(String avatarPath) async {
-    final user = getUser();
-    user.avatarPath = avatarPath;
-    await user.save();
-  }
-
-  Future<void> updateName(String name) async {
-    final user = getUser();
-    user.name = name;
-    await user.save();
-  }
-
-  Future<void> removeAvatar() async {
-    final user = getUser();
-    user.avatarPath = null;
-    await user.save();
-  }
-}

@@ -20,16 +20,13 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
     _loadBackgroundImage();                           // Запускаем асинхронную загрузку изображения сразу
   }
 
-  Future<void> _loadBackgroundImage() async {   //Сама ассинхронная загрузка
+  Future<void> _loadBackgroundImage() async {
     try {
       final byteData = await rootBundle.load('assets/Images/food_background.png');
       // Получаем байты изображения из assets (один раз!)
-
       final codec = await ui.instantiateImageCodec(byteData.buffer.asUint8List());
       // Создаём декодер для работы с этими байтами
-
       final frame = await codec.getNextFrame();       // Декодируем первый кадр (раз у нас готовое изображение, то единственный кадр)
-
       if (mounted) {                                  // Проверяем, что виджет всё ещё существует, пользователь до сих пор на странице
         setState(() => _backgroundImage = frame.image); // Сохраняем изображение и вызываем перерисовку
       }
@@ -65,13 +62,7 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
     );
   }
 
-  Widget _buildContent(Size size) {                    //Вывод ошибки
-    if (_errorMessage != null) {                      // Если произошла ошибка при загрузке
-      return Text(
-        _errorMessage!,
-        style: const TextStyle(color: Colors.red, fontSize: 18),
-      );
-    }
+  Widget _buildContent(Size size) {
 
     if (_backgroundImage == null) {                   // Ещё не загрузилось изображение
       return const SizedBox(                          // Компактный индикатор, а не на весь экран

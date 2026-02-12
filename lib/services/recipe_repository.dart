@@ -1,7 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'models/recipe.dart';
-import 'models/ingredient.dart';
-import 'models/step.dart';
+import '../models/recipe.dart';
+import '../models/ingredient.dart';
+import '../models/step.dart';
 
 class RecipeRepository {
   static const String _boxName = 'recipes';  //Имя коробки для хранения 

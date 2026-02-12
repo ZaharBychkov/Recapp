@@ -23,10 +23,8 @@ class TextImagePainter extends CustomPainter {
     final scaledWidth = image.width.toDouble() * scale;
     final scaleHeight = image.height.toDouble() * scale;
 
-    // 1. Создаём слой
     canvas.saveLayer(rect, Paint());
 
-    // 2. Рисуем ТЕКСТ как маску (НЕ прозрачный!)
     final textPainter = TextPainter(
       text: TextSpan(
         text: text,
@@ -34,7 +32,7 @@ class TextImagePainter extends CustomPainter {
           fontSize: fontSize,
           fontFamily: fontFamily,
           fontWeight: fontWeight,
-          color: Colors.white, // ВАЖНО: белый
+          color: Colors.white,
         ),
       ),
       textAlign: TextAlign.center,
@@ -50,10 +48,9 @@ class TextImagePainter extends CustomPainter {
 
     textPainter.paint(canvas, offset);
 
-    // 3. Рисуем изображение ВНУТРИ текста
-    final imagePaint = Paint()
-      ..blendMode = BlendMode.srcIn
-      ..filterQuality = FilterQuality.high;
+    final imagePaint = Paint();
+    imagePaint.blendMode = BlendMode.srcIn;
+    imagePaint.filterQuality = FilterQuality.high;
 
     canvas.drawImageRect(
       image,
@@ -62,7 +59,7 @@ class TextImagePainter extends CustomPainter {
       imagePaint,
     );
 
-    // 4. Восстанавливаем слой
+
     canvas.restore();
   }
 

@@ -5,38 +5,51 @@ class UserRepository {
   static final String _boxName = 'userBox';
   static final String _userKey = 'currentUser';
 
-  User getUser() {
-    final box = Hive.box<User>(_boxName);
-    final user = box.get(_userKey);
+  static Box<User>? _box;
 
-    if (user != null) {
-      return user;
+  static Future<void> init() async {
+    _box = await Hive.openBox<User>(_boxName);
+  }
+
+  static Box<User> get _safeBox {
+    if (_box == null) {
+      throw Exception('UserRepository not initialized');
     }
-
-    final newUser = User(
-      id: 'local_user',
-      name: 'Пользователь',
-      avatarPath: null,
-    );
-
-    box.put(_userKey, newUser);
-    return newUser;
+    return _box!;
   }
 
-  Future<void> updateAvatar(String avatarPath) async {
-    final user = getUser();
-    user.avatarPath = avatarPath;
-    await user.save();
+  static User? getCurrentUser() {
+    return _safeBox.get(_userKey);
   }
 
-  Future<void> updateName(String name) async {
-    final user = getUser();
+  static Future<void> saveUser(User user) async {
+    await _safeBox.put(_userKey, user);
+  }
+
+  static Future<void> logout() async {
+    await _safeBox.delete(_userKey);
+  }
+
+  static Future<void> updateName(String name) async {
+    final user = getCurrentUser();
+    if (user == null) return;
+
     user.name = name;
     await user.save();
   }
 
-  Future<void> removeAvatar() async {
-    final user = getUser();
+  static Future<void> updateAvatar(String avatarPath) async {
+    final user = getCurrentUser();
+    if (user == null) return;
+
+    user.avatarPath = avatarPath;
+    await user.save();
+  }
+
+  static Future<void> removeAvatar() async {
+    final user = getCurrentUser();
+    if (user == null) return;
+
     user.avatarPath = null;
     await user.save();
   }
