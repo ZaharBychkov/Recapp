@@ -406,7 +406,7 @@ class RecipeRepository {
     ];
 
     for (final recipe in defaultRecipes) {
-      await _box?.add(recipe);
+      await _box?.put(recipe.id, recipe);
     }
   }
 }

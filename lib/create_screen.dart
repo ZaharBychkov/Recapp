@@ -148,70 +148,54 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   }
 
   Future<void> _saveRecipe() async {
-    // Проверка обязательных полей
-    if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Введите название рецепта')),
+    final totalTime = steps.fold<int>(
+      0,
+          (sum, step) => sum + step.timeInSeconds,
+    );
+
+    if (widget.recipe != null) {
+      // РЕДАКТИРОВАНИЕ
+
+      final existingRecipe = widget.recipe!;
+
+      existingRecipe.title = _titleController.text.trim();
+      existingRecipe.description =
+      _descriptionController.text.trim().isNotEmpty
+          ? _descriptionController.text.trim()
+          : 'Без описания';
+
+      existingRecipe.ingredients = ingredients;
+      existingRecipe.steps = steps;
+      existingRecipe.prepTimeSeconds = totalTime;
+      existingRecipe.imagePath =
+          recipeImage ?? 'assets/Images/burger_with_two_cutlets.png';
+
+      await existingRecipe.save();   // 🔥 ВАЖНО
+
+    } else {
+      // СОЗДАНИЕ
+
+      final newRecipe = Recipe(
+        id: RecipeManager().getNextId(),
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim().isNotEmpty
+            ? _descriptionController.text.trim()
+            : 'Без описания',
+        ingredients: ingredients,
+        prepTimeSeconds: totalTime,
+        imagePath:
+        recipeImage ?? 'assets/Images/burger_with_two_cutlets.png',
+        steps: steps,
       );
-      return;
-    }
-    
-    if (ingredients.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Добавьте хотя бы один ингредиент')),
-      );
-      return;
-    }
-    
-    if (steps.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Добавьте хотя бы один шаг')),
-      );
-      return;
+
+      await RecipeManager().addRecipe(newRecipe);
     }
 
-    // Подсчёт общего времени приготовления
-    final totalTime = steps.fold<int>(
-      0, 
-      (sum, step) => sum + step.timeInSeconds,
-    );
-    
-    /*
-     * СОЗДАНИЕ ИЛИ ОБНОВЛЕНИЕ РЕЦЕПТА
-     * Если widget.recipe != null - режим редактирования (используем существующий ID)
-     * Если widget.recipe == null - режим создания (генерируем новый ID)
-     */
-    final recipe = Recipe(
-      id: widget.recipe?.id ?? RecipeManager().getNextId(),  // Используем существующий ID или создаем новый
-      title: _titleController.text.trim(),
-      description: _descriptionController.text.trim().isNotEmpty 
-          ? _descriptionController.text.trim() 
-          : 'Без описания',
-      ingredients: ingredients,
-      prepTimeSeconds: totalTime,
-      imagePath: recipeImage ?? 'assets/Images/burger_with_two_cutlets.png',
-      steps: steps,
-    );
-    
-    if (widget.recipe != null) {
-      // РЕЖИМ РЕДАКТИРОВАНИЯ - обновляем существующий рецепт
-      await RecipeManager().updateRecipe(recipe);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Рецепт успешно обновлен!')),
-      );
-    } else {
-      // РЕЖИМ СОЗДАНИЯ - добавляем новый рецепт
-      await RecipeManager().addRecipe(recipe);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Рецепт успешно создан!')),
-      );
-    }
-    
-    // Возврат на предыдущий экран с результатом
     if (mounted) {
-      Navigator.pop(context, true);  // true = рецепт был сохранен (создан или обновлен)
+      Navigator.pop(context, true);
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
