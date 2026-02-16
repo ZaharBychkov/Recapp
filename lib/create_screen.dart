@@ -661,7 +661,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                     ),
                   ),
                   child: Text(
-                    'Сохранить рецепт',
+                    '\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u0440\u0435\u0446\u0435\u043f\u0442',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: MediaQuery.of(context).size.width * 0.04,
