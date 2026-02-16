@@ -8,12 +8,14 @@ class FridgeDialogResult {
   final double amount;
   final IngredientUnit unit;
   final String? existingItemId;
+  final bool forceCreateNew;
 
   const FridgeDialogResult({
     required this.name,
     required this.amount,
     required this.unit,
     this.existingItemId,
+    this.forceCreateNew = false,
   });
 }
 
@@ -218,6 +220,7 @@ class _FridgeItemDialogState extends State<FridgeItemDialog> {
         existingItemId: (_selectedExisting != null && !_createAsNew)
             ? _selectedExisting!.id
             : null,
+        forceCreateNew: _createAsNew,
       ),
     );
   }

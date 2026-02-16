@@ -52,9 +52,18 @@ class _FridgeScreenState extends State<FridgeScreen> {
     final name = NameSanitizer.normalize(result.name);
     final amountBase = _converter.toBase(amount: result.amount, unit: result.unit);
 
-    if (result.existingItemId != null) {
+    final normalizedName = name.toLowerCase();
+    final autoMergeIndex = _items.indexWhere(
+      (item) =>
+          item.name.toLowerCase() == normalizedName &&
+          item.unit.category == result.unit.category,
+    );
+    final shouldMerge = !result.forceCreateNew &&
+        (result.existingItemId != null || autoMergeIndex != -1);
+
+    if (shouldMerge) {
       await FridgeRepository.addToExisting(
-        itemId: result.existingItemId!,
+        itemId: result.existingItemId ?? _items[autoMergeIndex].id,
         deltaBase: amountBase,
       );
     } else {
