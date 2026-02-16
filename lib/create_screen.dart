@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'add_ingredient_dialog.dart';
 import 'add_step_dialog.dart';
@@ -9,9 +9,9 @@ import 'recipe_manager.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
   /*
-   * Параметры экрана:
-   * - recipe: если передан, то это режим редактирования
-   * - если recipe == null, то это режим создания нового рецепта
+   * РџР°СЂР°РјРµС‚СЂС‹ СЌРєСЂР°РЅР°:
+   * - recipe: РµСЃР»Рё РїРµСЂРµРґР°РЅ, С‚Рѕ СЌС‚Рѕ СЂРµР¶РёРј СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ
+   * - РµСЃР»Рё recipe == null, С‚Рѕ СЌС‚Рѕ СЂРµР¶РёРј СЃРѕР·РґР°РЅРёСЏ РЅРѕРІРѕРіРѕ СЂРµС†РµРїС‚Р°
    */
   final Recipe? recipe;
   
@@ -22,7 +22,7 @@ class CreateRecipeScreen extends StatefulWidget {
 }
 
 class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
-  final TextEditingController _titleController = TextEditingController();    //Вводим контроллер для текстового поля
+  final TextEditingController _titleController = TextEditingController();    //Р’РІРѕРґРёРј РєРѕРЅС‚СЂРѕР»Р»РµСЂ РґР»СЏ С‚РµРєСЃС‚РѕРІРѕРіРѕ РїРѕР»СЏ
   final TextEditingController _descriptionController = TextEditingController();
   String? recipeImage;
   List<Ingredient> ingredients = [];
@@ -36,8 +36,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   void initState() {
     super.initState();
     /*
-     * ЕСЛИ ПЕРЕДАН РЕЦЕПТ - это режим редактирования
-     * Заполняем все поля данными из существующего рецепта
+     * Р•РЎР›Р РџР•Р Р•Р”РђРќ Р Р•Р¦Р•РџРў - СЌС‚Рѕ СЂРµР¶РёРј СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ
+     * Р—Р°РїРѕР»РЅСЏРµРј РІСЃРµ РїРѕР»СЏ РґР°РЅРЅС‹РјРё РёР· СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ СЂРµС†РµРїС‚Р°
      */
     if (widget.recipe != null) {
       final recipe = widget.recipe!;
@@ -57,11 +57,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   }
 
   void _addRecipeImage() {
-    // Заглушка для добавления изображения
+    // Р—Р°РіР»СѓС€РєР° РґР»СЏ РґРѕР±Р°РІР»РµРЅРёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
     setState(() {
       recipeImage = 'assets/Images/burger_with_two_cutlets.png';
     });
-    print("Добавить фото рецепта");
+    debugPrint("Р”РѕР±Р°РІРёС‚СЊ С„РѕС‚Рѕ СЂРµС†РµРїС‚Р°");
   }
 
   void _removeRecipeImage() {
@@ -72,10 +72,10 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
 
   Future<void> _addIngredient() async {
-    final Ingredient? ingredient = await showDialog<Ingredient>(    //Возвращаю inredient типа ingredient
-      context: context,                                            //Передаю контекст
-      barrierDismissible: true,                                   //При нажатии вне диалогового окна закрыть данное окно
-      builder: (_) => const AddIngredientDialog(),               //Вызываю диалоговое окно
+    final Ingredient? ingredient = await showDialog<Ingredient>(    //Р’РѕР·РІСЂР°С‰Р°СЋ inredient С‚РёРїР° ingredient
+      context: context,                                            //РџРµСЂРµРґР°СЋ РєРѕРЅС‚РµРєСЃС‚
+      barrierDismissible: true,                                   //РџСЂРё РЅР°Р¶Р°С‚РёРё РІРЅРµ РґРёР°Р»РѕРіРѕРІРѕРіРѕ РѕРєРЅР° Р·Р°РєСЂС‹С‚СЊ РґР°РЅРЅРѕРµ РѕРєРЅРѕ
+      builder: (_) => const AddIngredientDialog(),               //Р’С‹Р·С‹РІР°СЋ РґРёР°Р»РѕРіРѕРІРѕРµ РѕРєРЅРѕ
     );
 
     if (ingredient != null) {
@@ -154,7 +154,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     );
 
     if (widget.recipe != null) {
-      // РЕДАКТИРОВАНИЕ
+      // Р Р•Р”РђРљРўРР РћР’РђРќРР•
 
       final existingRecipe = widget.recipe!;
 
@@ -162,7 +162,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       existingRecipe.description =
       _descriptionController.text.trim().isNotEmpty
           ? _descriptionController.text.trim()
-          : 'Без описания';
+          : 'Р‘РµР· РѕРїРёСЃР°РЅРёСЏ';
 
       existingRecipe.ingredients = ingredients;
       existingRecipe.steps = steps;
@@ -170,17 +170,17 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       existingRecipe.imagePath =
           recipeImage ?? 'assets/Images/burger_with_two_cutlets.png';
 
-      await existingRecipe.save();   // 🔥 ВАЖНО
+      await existingRecipe.save();   // рџ”Ґ Р’РђР–РќРћ
 
     } else {
-      // СОЗДАНИЕ
+      // РЎРћР—Р”РђРќРР•
 
       final newRecipe = Recipe(
         id: RecipeManager().getNextId(),
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim().isNotEmpty
             ? _descriptionController.text.trim()
-            : 'Без описания',
+            : 'Р‘РµР· РѕРїРёСЃР°РЅРёСЏ',
         ingredients: ingredients,
         prepTimeSeconds: totalTime,
         imagePath:
@@ -202,23 +202,23 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),  //Константа - стандартная высота
-        child: Container(                                 //Оборачиваем в контейнер чтобы сделать тень
+        preferredSize: Size.fromHeight(kToolbarHeight),  //РљРѕРЅСЃС‚Р°РЅС‚Р° - СЃС‚Р°РЅРґР°СЂС‚РЅР°СЏ РІС‹СЃРѕС‚Р°
+        child: Container(                                 //РћР±РѕСЂР°С‡РёРІР°РµРј РІ РєРѕРЅС‚РµР№РЅРµСЂ С‡С‚РѕР±С‹ СЃРґРµР»Р°С‚СЊ С‚РµРЅСЊ
           decoration: BoxDecoration(
             color: Colors.white,
-            boxShadow: [                                      //Параметры тени
+            boxShadow: [                                      //РџР°СЂР°РјРµС‚СЂС‹ С‚РµРЅРё
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),         //Цвет тени и прозрачность
-                offset: Offset(0, 3),                            //Смещеине тени по горзионтали 0, по вертикали 2
+                color: Colors.black.withValues(alpha: 0.2),         //Р¦РІРµС‚ С‚РµРЅРё Рё РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ
+                offset: Offset(0, 3),                            //РЎРјРµС‰РµРёРЅРµ С‚РµРЅРё РїРѕ РіРѕСЂР·РёРѕРЅС‚Р°Р»Рё 0, РїРѕ РІРµСЂС‚РёРєР°Р»Рё 2
                 blurRadius: 2,
               ),
             ],
           ),
           child: AppBar(
-            backgroundColor: Colors.white, // Убираем isCooking
-            centerTitle: true,              //Центрирование заголовка
+            backgroundColor: Colors.white, // РЈР±РёСЂР°РµРј isCooking
+            centerTitle: true,              //Р¦РµРЅС‚СЂРёСЂРѕРІР°РЅРёРµ Р·Р°РіРѕР»РѕРІРєР°
             title: Text(
-              widget.recipe != null ? 'Редактирование рецепта' : 'Новый рецепт', // Динамический заголовок
+              widget.recipe != null ? 'Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ СЂРµС†РµРїС‚Р°' : 'РќРѕРІС‹Р№ СЂРµС†РµРїС‚', // Р”РёРЅР°РјРёС‡РµСЃРєРёР№ Р·Р°РіРѕР»РѕРІРѕРє
               style: TextStyle(
                 color: Color(0xFF165932),
                 fontWeight: FontWeight.w600,
@@ -226,19 +226,19 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             ),
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),               //Возвращаем на предыдущий экран при нажатии
+              onPressed: () => Navigator.pop(context),               //Р’РѕР·РІСЂР°С‰Р°РµРј РЅР° РїСЂРµРґС‹РґСѓС‰РёР№ СЌРєСЂР°РЅ РїСЂРё РЅР°Р¶Р°С‚РёРё
             ),
           ),
         ),
       ),
 
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(                                 //Симметричные отступы
+        padding: EdgeInsets.symmetric(                                 //РЎРёРјРјРµС‚СЂРёС‡РЅС‹Рµ РѕС‚СЃС‚СѓРїС‹
           horizontal: MediaQuery.of(context).size.width * 0.0374,
           vertical: MediaQuery.of(context).size.height * 0.02,
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,            //Выравниваем по левому краю
+          crossAxisAlignment: CrossAxisAlignment.start,            //Р’С‹СЂР°РІРЅРёРІР°РµРј РїРѕ Р»РµРІРѕРјСѓ РєСЂР°СЋ
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
             Container(
@@ -261,7 +261,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Название рецепта',
+                    'РќР°Р·РІР°РЅРёРµ СЂРµС†РµРїС‚Р°',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xff165932),
@@ -289,9 +289,9 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
-            // БЛОК ДОБАВЛЕНИЯ ФОТО
+            // Р‘Р›РћРљ Р”РћР‘РђР’Р›Р•РќРРЇ Р¤РћРўРћ
             Text(
-              'Фото рецепта',
+              'Р¤РѕС‚Рѕ СЂРµС†РµРїС‚Р°',
               style: TextStyle(
                 color: Color(0xFF165932),
                 fontSize: MediaQuery.of(context).size.width * 0.04,
@@ -305,11 +305,11 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             GestureDetector(
               onTap: _addRecipeImage,
               child: DottedBorder(
-                color: const Color(0xFF165932),               //Цвет рамки
-                strokeWidth: 2,                                 //Толшина линии
-                dashPattern: [20, 20],                           // 6 пикселей — линия, 4 пикселя — пробел
-                borderType: BorderType.RRect,                   //Скругленные углы
-                radius: const Radius.circular(10),             //Радиус скргления
+                color: const Color(0xFF165932),               //Р¦РІРµС‚ СЂР°РјРєРё
+                strokeWidth: 2,                                 //РўРѕР»С€РёРЅР° Р»РёРЅРёРё
+                dashPattern: [20, 20],                           // 6 РїРёРєСЃРµР»РµР№ вЂ” Р»РёРЅРёСЏ, 4 РїРёРєСЃРµР»СЏ вЂ” РїСЂРѕР±РµР»
+                borderType: BorderType.RRect,                   //РЎРєСЂСѓРіР»РµРЅРЅС‹Рµ СѓРіР»С‹
+                radius: const Radius.circular(10),             //Р Р°РґРёСѓСЃ СЃРєСЂРіР»РµРЅРёСЏ
                 child: Container(
                   width: double.infinity,
                   height: MediaQuery.of(context).size.height * 0.25,
@@ -325,7 +325,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       Positioned(
                         bottom: MediaQuery.of(context).size.height * 0.05,
                         child: Text(
-                          'Добавить фото рецепта',
+                          'Р”РѕР±Р°РІРёС‚СЊ С„РѕС‚Рѕ СЂРµС†РµРїС‚Р°',
                           style: TextStyle(
                             color: Color(0xFF165932),
                             fontSize: MediaQuery.of(context).size.width * 0.04,
@@ -341,19 +341,19 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             else
               Stack(
                 children: [
-                  ClipRRect(                                                 //Делим дочерний элемент
+                  ClipRRect(                                                 //Р”РµР»РёРј РґРѕС‡РµСЂРЅРёР№ СЌР»РµРјРµРЅС‚
                     borderRadius: BorderRadius.circular(10),
                     child: Image.asset(
-                      recipeImage!,                                        //Указываем что не меожт быть null благодаря else
+                      recipeImage!,                                        //РЈРєР°Р·С‹РІР°РµРј С‡С‚Рѕ РЅРµ РјРµРѕР¶С‚ Р±С‹С‚СЊ null Р±Р»Р°РіРѕРґР°СЂСЏ else
                       width: double.infinity,
                       height: MediaQuery.of(context).size.height * 0.25,
-                      fit: BoxFit.cover,                                   //Заполняем изображеним контейнер образеая лишнее
+                      fit: BoxFit.cover,                                   //Р—Р°РїРѕР»РЅСЏРµРј РёР·РѕР±СЂР°Р¶РµРЅРёРј РєРѕРЅС‚РµР№РЅРµСЂ РѕР±СЂР°Р·РµР°СЏ Р»РёС€РЅРµРµ
                     ),
                   ),
                   Positioned(
                     top: MediaQuery.of(context).size.height * 0.01,
                     right: MediaQuery.of(context).size.height * 0.01,
-                    child: GestureDetector(                                   //Обработка нажатия на крестик
+                    child: GestureDetector(                                   //РћР±СЂР°Р±РѕС‚РєР° РЅР°Р¶Р°С‚РёСЏ РЅР° РєСЂРµСЃС‚РёРє
                       onTap: _removeRecipeImage,
                       child: Container(
                         padding: EdgeInsets.all(6),
@@ -374,9 +374,9 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
-            // ИНГРЕДИЕНТЫ
+            // РРќР“Р Р•Р”РР•РќРўР«
             Text(
-              'Ингредиенты',
+              'РРЅРіСЂРµРґРёРµРЅС‚С‹',
               style: TextStyle(
                 color: Color(0xFF165932),
                 fontSize: MediaQuery.of(context).size.width * 0.04,
@@ -389,7 +389,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             if (ingredients.isEmpty)
               Center(
                 child: Text(
-                  'нет ингредиентов',
+                  'РЅРµС‚ РёРЅРіСЂРµРґРёРµРЅС‚РѕРІ',
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: MediaQuery.of(context).size.width * 0.035,
@@ -421,7 +421,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         children: [
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.only(left: 7), // ← отступ ТОЛЬКО слева
+                              padding: const EdgeInsets.only(left: 7), // в†ђ РѕС‚СЃС‚СѓРї РўРћР›Р¬РљРћ СЃР»РµРІР°
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -489,7 +489,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                     ),
                   ),
                   child: Text(
-                    'Добавить ингредиент',
+                    'Р”РѕР±Р°РІРёС‚СЊ РёРЅРіСЂРµРґРёРµРЅС‚',
                     style: TextStyle(
                       color: Color(0xFF165932),
                       fontSize: MediaQuery.of(context).size.width * 0.04,
@@ -503,9 +503,9 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
-            // ШАГИ ПРИГОТОВЛЕНИЯ
+            // РЁРђР“Р РџР РР“РћРўРћР’Р›Р•РќРРЇ
             Text(
-              'Шаги приготовления',
+              'РЁР°РіРё РїСЂРёРіРѕС‚РѕРІР»РµРЅРёСЏ',
               style: TextStyle(
                 color: Color(0xFF165932),
                 fontSize: MediaQuery.of(context).size.width * 0.04,
@@ -518,7 +518,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             if (steps.isEmpty)
               Center(
                 child: Text(
-                  'нет шагов приготовления',
+                  'РЅРµС‚ С€Р°РіРѕРІ РїСЂРёРіРѕС‚РѕРІР»РµРЅРёСЏ',
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: MediaQuery.of(context).size.width * 0.035,
@@ -551,9 +551,9 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // ШАГ X
+                            // РЁРђР“ X
                             Text(
-                              'Шаг ${step.stepNumber}',
+                              'РЁР°Рі ${step.stepNumber}',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -563,7 +563,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
                             const SizedBox(height: 2),
 
-                            // ОПИСАНИЕ ШАГА
+                            // РћРџРРЎРђРќРР• РЁРђР“Рђ
                             Text(
                               step.description,
                               style: TextStyle(
@@ -575,7 +575,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
                             const SizedBox(height: 6),
 
-                            // ВРЕМЯ + ИКОНКИ
+                            // Р’Р Р•РњРЇ + РРљРћРќРљР
                             Row(
                               children: [
                                 Text(
@@ -633,7 +633,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                     ),
                   ),
                   child: Text(
-                    'Добавить шаг',
+                    'Р”РѕР±Р°РІРёС‚СЊ С€Р°Рі',
                     style: TextStyle(
                       color: Color(0xFF165932),
                       fontSize: MediaQuery.of(context).size.width * 0.04,
@@ -647,7 +647,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.03),
 
-            // КНОПКА СОХРАНИТЬ
+            // РљРќРћРџРљРђ РЎРћРҐР РђРќРРўР¬
             Center(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.7,
@@ -661,7 +661,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                     ),
                   ),
                   child: Text(
-                    'Сохранить рецепт',
+                    'РЎРѕС…СЂР°РЅРёС‚СЊ СЂРµС†РµРїС‚',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: MediaQuery.of(context).size.width * 0.04,
@@ -680,3 +680,4 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     );
   }
 }
+

@@ -1,30 +1,1330 @@
-  //Сама ассинхронная загрузка
-  // Получаем байты изображения из assets (один раз!)
-  // Получаем байты изображения из assets (один раз!)
-   // Декодируем первый кадр (раз у нас готовое изображение, то единственный кадр)
-  / Проверяем, что виджет всё ещё существует, пользователь до сих пор на странице
-  // Сохраняем изображение и вызываем перерисовку
-    // Сохраняем сообщение об ошибке и обновляем UI
+Итак вот что я хочу сделать сегодня, 
 
+import 'package:flutter/material.dart';
+import 'models/recipe.dart';
+import 'recipe_manager.dart';
+import 'models/ingredient.dart';
+import '../utils/time_formatter.dart';
 
-  Future<void> _loadBackgroundImage() async {
+class FridgeScreen extends StatefulWidget {
+  const FridgeScreen({super.key});
 
-    try {
-      final byteData = await rootBundle.load('assets/Images/food_background.png');
-      // Получаем байты изображения из assets (один раз!)
+  @override
+  State<FridgeScreen> createState() => _FridgeScreenState();
+}
 
-      final codec = await ui.instantiateImageCodec(byteData.buffer.asUint8List());
-      // Получаем байты изображения из assets (один раз!)
+class _FridgeScreenState extends State<FridgeScreen> {
+  int _selectedIndex = 0;
+  List<Recipe> recommendedRecipes = [];
 
-      final frame = await codec.getNextFrame();       // Декодируем первый кадр (раз у нас готовое изображение, то единственный кадр)
+  // Список ингредиентов в холодильнике
+  List<Ingredient> fridgeIngredients = [
+    // Для "Лосось в соусе терияки"
+    Ingredient(name: "Соевый соус", measurement: "8 ст. ложек"),
+    Ingredient(name: "Вода", measurement: "6 ст. ложек"),
+    Ingredient(name: "Мед", measurement: "3 ст. ложки"),
+    Ingredient(name: "Коричневый сахар", measurement: "2 ст. ложки"),
+    Ingredient(name: "Чеснок", measurement: "3 зубчика"),
+    Ingredient(name: "Тертый свежий имбирь", measurement: "1 ст. ложка"),
+    Ingredient(name: "Лимонный сок", measurement: "1.5 ст. ложки"),
+    Ingredient(name: "Кукурузный крахмал", measurement: "1 ст. ложка"),
+    Ingredient(name: "Растительное масло", measurement: "1 ч. ложка"),
+    Ingredient(name: "Филе лосося", measurement: "680 г"),
+    Ingredient(name: "Кунжут", measurement: "по вкусу"),
+    // Для "Пицца Маргарита домашняя"
+    Ingredient(name: "Тесто для пиццы", measurement: "200 г"),
+    Ingredient(name: "Моцарелла", measurement: "150 г"),
+    Ingredient(name: "Помидоры", measurement: "100 г"),
+    Ingredient(name: "Базилик", measurement: "5-6 листьев"),
+    Ingredient(name: "Оливковое масло", measurement: "1 ст. ложка"),
+    Ingredient(name: "Соль", measurement: "щепотка"),
+    Ingredient(name: "Томатный соус", measurement: "3 ст. ложки"),
 
-      if (mounted) {                                  // Проверяем, что виджет всё ещё существует, пользователь до сих пор на странице
-        setState(() => _backgroundImage = frame.image); // Сохраняем изображение и вызываем перерисовку
+    // Для "Паста с морепродуктами"
+    Ingredient(name: "Спагетти", measurement: "200 г"),
+    Ingredient(name: "Креветки", measurement: "150 г"),
+    Ingredient(name: "Мидии", measurement: "100 г"),
+    Ingredient(name: "Сливки", measurement: "150 мл"),
+    Ingredient(name: "Чеснок", measurement: "2 зубчика"),
+    Ingredient(name: "Петрушка", measurement: "1 ст. ложка"),
+    Ingredient(name: "Оливковое масло", measurement: "2 ст. ложки"),
+    Ingredient(name: "Соль", measurement: "по вкусу"),
+    Ingredient(name: "Перец", measurement: "по вкусу"),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  /*
+   * Диалог для добавления нового ингредиента в холодильник
+   */
+  void _showAddIngredientDialog() {
+    final nameController = TextEditingController();
+    final measurementController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Добавить ингредиент'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Название ингредиента',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: measurementController,
+              decoration: InputDecoration(
+                labelText: 'Количество',
+                hintText: 'например: 200 г, 2 шт., по вкусу',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Отмена'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = nameController.text.trim();
+              final measurement = measurementController.text.trim();
+
+              if (name.isNotEmpty && measurement.isNotEmpty) {
+                setState(() {
+                  fridgeIngredients.add(
+                    Ingredient(name: name, measurement: measurement),
+                  );
+                });
+                Navigator.pop(context);
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Ингредиент "$name" добавлен в холодильник')),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Заполните все поля')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF2ECC71),
+            ),
+            child: Text('Добавить', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[300],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width * 0.04,
+              vertical: MediaQuery.of(context).size.height * 0.02,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'В холодильнике',
+                        style: TextStyle(
+                          color: Color(0xFF165932),
+                          fontSize: MediaQuery.of(context).size.width * 0.045,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                      ...fridgeIngredients.map((ingredient) => _buildItem(ingredient.name, ingredient.measurement)).toList(),
+                    ],
+                  ),
+                ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _showAddIngredientDialog();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF2ECC71),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: Text(
+                        'Добавить ингредиент',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: MediaQuery.of(context).size.width * 0.04,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _compareWithRecipes();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF2ECC71),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: Text(
+                        'Рекомендовать рецепты',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: MediaQuery.of(context).size.width * 0.04,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                if (recommendedRecipes.isNotEmpty)
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+                if (recommendedRecipes.isNotEmpty)
+                  Container(
+                    decoration: BoxDecoration(
+                      //color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: recommendedRecipes.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        Recipe recipe = entry.value;
+                        return Container(
+                          margin: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).size.height * 0.017,   //Отступ 0.017 от высоты экрана
+                          ),
+                          width: MediaQuery.of(context).size.width * 0.925,        //Размеры контейнера
+                          height: MediaQuery.of(context).size.height * 0.147,
+                          decoration: BoxDecoration(                               //Закгругление контейнеров
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.white,                                    //Белый фон контейнера
+                          ),
+                          child: Row(                                               //Создаем ряд в контейнере с двумя элементами Expanded для изображения
+                            children: [                                             //и Expanded - Column для текста с иконкой и временм
+                              Expanded(
+                                flex: 20,
+                                child: ClipRRect(                                   //Обрезаем изобраежние также как и сам контейнер чтобы небыло отсрых уголов
+                                  borderRadius: BorderRadius.only(                  //only - значит нужно конкретно указать углы для скругления, в отличии от circular
+                                    topLeft: Radius.circular(10),                   //Верхний левый
+                                    bottomLeft: Radius.circular(10),                //Левый нижний
+                                  ),
+                                  child: Image.asset(                                 //Загружаем изображение
+                                    recipe.imagePath,                                 //Берем изображение по пути
+                                    fit: BoxFit.cover,                                //Заполняем весь контейнер обрезаем то что не влазит
+                                    height: double.infinity,                          //Занимаем всю высоту  контейнера
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(width: MediaQuery.of(context).size.width * 0.03), //Отступ между изображением и текстом
+
+                              // Текстовая часть
+                              //Железобетонно ставим все элементы
+                              Expanded(
+                                flex: 33,
+                                child: Stack(
+                                  children: [
+                                    Positioned(                                                 //Точно позиционируем дочерние элементы в стеке
+                                      top: MediaQuery.of(context).size.height * 0.025,          //Отступ сверху
+                                      left: 0,
+                                      right: 0,
+                                      child: Padding(                                            //Добавление внутренних отступов
+                                        padding: const EdgeInsets.only(right: 4),               //Отступ только справа 12 пикселей
+                                        child: Text(
+                                          recipe.title,
+                                          maxLines: 2,                                            //Максимальное количество строк
+                                          overflow: TextOverflow.ellipsis,                        //Если текст не помещается - добавить многоточие
+                                          style: TextStyle(
+                                            fontSize: MediaQuery.of(context).size.width * 0.06,
+                                            fontWeight: FontWeight.w600,
+                                            height: 1.0,
+                                            leadingDistribution: TextLeadingDistribution.even,     //Распределение свообдного места между строками
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    Positioned(                                                     //Второй элемент
+                                      bottom: MediaQuery.of(context).size.height * 0.025,           //Отступ снизу
+                                      left: 0,
+                                      child: Row(
+                                        children: [
+                                          Image.asset('assets/Icons/clock.png', width: MediaQuery.of(context).size.width * 0.05),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            formatTime(recipe.prepTimeSeconds),
+                                            style: TextStyle(
+                                              color: Color(0xFF2ECC71),
+                                              fontSize: MediaQuery.of(context).size.width * 0.04,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItem(String name, String quantity) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width * 0.014,
+            height: MediaQuery.of(context).size.width * 0.02,
+            margin: EdgeInsets.only(right: 12),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              shape: BoxShape.circle,
+            ),
+          ),
+          Text(
+            name,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: MediaQuery.of(context).size.width * 0.035,
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Spacer(),
+          Text(
+            quantity,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: MediaQuery.of(context).size.width * 0.033,
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _compareWithRecipes() {
+    final recipeManager = RecipeManager();
+    final allRecipes = recipeManager.getRecipes();
+
+    List<Recipe> matchingRecipes = [];
+
+    for (final recipe in allRecipes) {
+      bool allIngredientsAvailable = true;
+
+      for(final ingredient in recipe.ingredients) {
+        if (!fridgeIngredients.any((fridgeIng) =>
+        fridgeIng.name.trim().toLowerCase() == ingredient.name.trim().toLowerCase()
+        )) {
+          allIngredientsAvailable = false;
+          break;
+        }
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _errorMessage = 'Не удалось загрузить фоновую картинку');
-        // Сохраняем сообщение об ошибке и обновляем UI
+
+      if (allIngredientsAvailable) {
+        print("Рецепт '${recipe.title}' можно приготовить - все ингредиенты есть!");
+        matchingRecipes.add(recipe);
+      } else {
+        print("Рецепт '${recipe.title}' нельзя приготовить - не хватает ингредиентов");
       }
     }
+
+    setState(() {
+      recommendedRecipes = matchingRecipes;
+    });
   }
+}
+
+вот у меня есть экран холодильника и кнопка добавления нового рецепта,  а также диалоговое окно 
+
+import 'package:flutter/material.dart';
+import '../models/ingredient.dart';
+
+class AddIngredientDialog extends StatefulWidget {
+  final Ingredient? ingredient;
+
+  const AddIngredientDialog({super.key, this.ingredient});
+
+  @override
+  State<AddIngredientDialog> createState() => _AddIngredientDialogState();
+}
+
+class _AddIngredientDialogState extends State<AddIngredientDialog> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if(widget.ingredient != null) {
+      _nameController.text = widget.ingredient!.name;
+      _amountController.text = widget.ingredient!.measurement;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.0001),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.35,
+          padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+          decoration: BoxDecoration(
+            color: Colors.white,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Ингредиент',
+                style: TextStyle(
+                  fontSize: MediaQuery.of(context).size.width * 0.05,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+              _buildInput(
+                controller: _nameController,
+                label: 'Название ингредиента',
+              ),
+
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+              _buildInput(
+                controller: _amountController,
+                label: 'Количество',
+              ),
+
+              const Spacer(),
+
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_nameController.text.isEmpty ||
+                          _amountController.text.isEmpty) {
+                        return;
+                      }
+
+                      Navigator.pop(
+                        context,
+                        Ingredient(
+                          name: _nameController.text,
+                          measurement: _amountController.text,
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2ECC71),
+                      padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.02),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                      ),
+                    ),
+                    child: Text(
+                      widget.ingredient == null ? 'Добавить' : 'Изменить',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+    );
+  }
+
+  Widget _buildInput({
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return Container(
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).size.height * 0.01,
+        left: MediaQuery.of(context).size.width * 0.07,
+        right: MediaQuery.of(context).size.width * 0.07,
+        bottom: MediaQuery.of(context).size.height * 0.01,
+      ),
+      decoration: const BoxDecoration(
+        color: Color(0xffeeeeee),
+        border: Border(
+          bottom: BorderSide(
+            color: Color(0xFF165932),
+            width: 3,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xff165932),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+
+          SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+
+          TextField(
+            controller: controller,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
+          ),
+            decoration: const InputDecoration(
+              isDense: true,
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+            )
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Мне не нравится как добавляются ингредиента, дело в том что при добавлении нового ингредиента в холодильник, создается новый ингрдеиент, хотя например в холодильнике был огурец, а пользователь добавли зеленый огурец и поулчается два огурца разных, хотя пользотваель имелл виду одно и то-же 
+
+Проблема еще в том что ингрдеиенты сами по себе не хранят единицу измерения как таковую, они хранят строку например 3 штуки, а единицу под названием 3 и чего штуки в связи с этим вот что я предлагаю 
+
+Мне нужно диалоговое окно вот такое 
+Колонка 
+ряд в первом ряду строка поиска 
+второй ряд - кнопка (добавить новый ингредиент 
+ниже прокручиваемый спискок 
+под ним ряд
+внутри ряда два равнознаных поля первое - количество ( текст внутри поля почти прозраынй) и второе поле - выпадающий список внутри которого основные единицы измренеия (литры, граммы, милилитры, милиграммы, граммы, килограммы, возможно я не все еще названи и штуки (тоже важно)) 
+
+Логика такая, пользователь запускает диалоговое окно и в прокручиваемом списке появляются все ингредиенты холодильника и их количество ( также как и сейчас) пользователь может поискать ингредиент который он хочет добавить в холодльнике если он таковой  находит то он может на него нажать в таком случае название сразу вставляется в строку поиска и пользователь вводит количество (менять единицу измерения в таком случае нельзя) и это количество суммируется с тем количество которое уже есть, если же пользователь принципиально хоче разделит два огурца, он нажимеет на кнопку добавить новый ингредиент и тогда списко пропадает остаестя только название количество и единица, он заполняет все поля, и в fridge_screen появляется новый ингрдеиент 
+
+Нужно также поменять вероятно классы ингредиентов, т.е. сейчас нет привязки к единицам измерения, думаю из следует добавить 
+
+Итак покажи возможные проблемы, какие места проблемные в такой логики, чтобы улучшил или добавил бы профессионал (не лишнего, а именно исправил текущее) 
+Дай список файлов которые тебе нужны чтобы более точно почь мне это реалиозовать 
+import 'package:hive/hive.dart';
+
+part 'ingredient.g.dart';          //Файл сгенерируется автоматически 
+
+//(Создаем номера ячеек как на складе: 0 = ингредиенты, 1 = рецепты)
+@HiveType(typeId: 0)        //ID для типа Ingredient, другой для Step         
+class Ingredient extends HiveObject {
+  @HiveField(0)
+  final String name;                   //Когда Hive будет генерить адаптер, он будет использовать эти строки для генерации адаптера
+                                       //Адаптер нужен чтобы перевести кодовые данные в базу смартфона
+  @HiveField(1)
+  final String measurement;                    
+
+  Ingredient({
+    required this.name,
+    required this.measurement,
+  });
+
+  @override
+  String toString() => '$name: $measurement'; //Вывод в консоль
+}
+
+import 'package:hive/hive.dart';
+import 'ingredient.dart';
+import 'step.dart';
+
+part 'recipe.g.dart';
+
+@HiveType(typeId: 2)
+class Recipe extends HiveObject {
+  
+  @HiveField(0)
+  int id;
+  
+  @HiveField(1)
+  String title;
+  
+  @HiveField(2)
+  String description;
+  
+  @HiveField(3)
+  List<Ingredient> ingredients;
+  
+  @HiveField(4)
+  int prepTimeSeconds;
+  
+  @HiveField(5)
+  String imagePath;
+  
+  @HiveField(6)
+  List<RecipeStep> steps;
+
+  @HiveField(7)
+  bool isFavorite;
+
+  Recipe({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.ingredients,
+    required this.prepTimeSeconds,
+    required this.imagePath,
+    required this.steps,
+    this.isFavorite = false,
+  });
+}
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'recipe.dart';
+
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
+class RecipeAdapter extends TypeAdapter<Recipe> {
+  @override
+  final int typeId = 2;
+
+  @override
+  Recipe read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return Recipe(
+      id: fields[0] as int,
+      title: fields[1] as String,
+      description: fields[2] as String,
+      ingredients: (fields[3] as List).cast<Ingredient>(),
+      prepTimeSeconds: fields[4] as int,
+      imagePath: fields[5] as String,
+      steps: (fields[6] as List).cast<RecipeStep>(),
+      isFavorite: fields[7] as bool,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, Recipe obj) {
+    writer
+      ..writeByte(8)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.title)
+      ..writeByte(2)
+      ..write(obj.description)
+      ..writeByte(3)
+      ..write(obj.ingredients)
+      ..writeByte(4)
+      ..write(obj.prepTimeSeconds)
+      ..writeByte(5)
+      ..write(obj.imagePath)
+      ..writeByte(6)
+      ..write(obj.steps)
+      ..writeByte(7)
+      ..write(obj.isFavorite);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RecipeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'ingredient.dart';
+
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
+class IngredientAdapter extends TypeAdapter<Ingredient> {
+  @override
+  final int typeId = 0;
+
+  @override
+  Ingredient read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return Ingredient(
+      name: fields[0] as String,
+      measurement: fields[1] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, Ingredient obj) {
+    writer
+      ..writeByte(2)
+      ..writeByte(0)
+      ..write(obj.name)
+      ..writeByte(1)
+      ..write(obj.measurement);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is IngredientAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+import 'services/recipe_repository.dart';
+import '../models/recipe.dart';
+
+
+class RecipeManager {
+  static final RecipeManager _instance = RecipeManager._internal(); //Создаем один экземпляр на одно приложение
+  factory RecipeManager() => _instance;                              //Возвращаем один экземпляр где бы мы не вызвался RecipeManager
+  RecipeManager._internal();                                         //Вызываем только внутри данного файла
+
+  //Получить все рецепты из базы
+  List<Recipe> getRecipes() {
+    return RecipeRepository.getAllRecipes();
+  }
+
+  //Получить все рецепты с пометкой isFavorite
+  List<Recipe> getFavoriteRecipes() {
+    return RecipeRepository.getFavoriteRecipes();
+  }
+
+  //Проверить является ли рецепт isFavorite
+  bool isFavorite(Recipe recipe) {
+    return recipe.isFavorite;
+  }
+
+  //меняем состояние isFavorite
+  Future<void> toggleFavorite(Recipe recipe) async {
+    await RecipeRepository.toggleFavorite(recipe);
+  }
+
+  //Добавить рецепт
+  Future<void> addRecipe(Recipe recipe) async {
+    await RecipeRepository.addRecipe(recipe);
+  }
+
+  //Обновить существующий рецепт
+  Future<void> updateRecipe(Recipe recipe) async {
+    await RecipeRepository.updateRecipe(recipe);
+  }
+
+  //Удалить рецепт
+  Future<void> deleteRecipe(int recipeId) async {
+    await RecipeRepository.deleteRecipe(recipeId);
+  }
+
+  //Получить Id для нового рецепта
+  int getNextId() {
+    return RecipeRepository.getNextId();
+  }
+}
+
+import 'package:flutter/material.dart';
+import 'models/recipe.dart';
+import 'recipe_manager.dart';
+import 'models/ingredient.dart';
+import '../utils/time_formatter.dart';
+
+class FridgeScreen extends StatefulWidget {
+  const FridgeScreen({super.key});
+
+  @override
+  State<FridgeScreen> createState() => _FridgeScreenState();
+}
+
+class _FridgeScreenState extends State<FridgeScreen> {
+  int _selectedIndex = 0;
+  List<Recipe> recommendedRecipes = [];
+
+  // Список ингредиентов в холодильнике
+  List<Ingredient> fridgeIngredients = [
+    // Для "Лосось в соусе терияки"
+    Ingredient(name: "Соевый соус", measurement: "8 ст. ложек"),
+    Ingredient(name: "Вода", measurement: "6 ст. ложек"),
+    Ingredient(name: "Мед", measurement: "3 ст. ложки"),
+    Ingredient(name: "Коричневый сахар", measurement: "2 ст. ложки"),
+    Ingredient(name: "Чеснок", measurement: "3 зубчика"),
+    Ingredient(name: "Тертый свежий имбирь", measurement: "1 ст. ложка"),
+    Ingredient(name: "Лимонный сок", measurement: "1.5 ст. ложки"),
+    Ingredient(name: "Кукурузный крахмал", measurement: "1 ст. ложка"),
+    Ingredient(name: "Растительное масло", measurement: "1 ч. ложка"),
+    Ingredient(name: "Филе лосося", measurement: "680 г"),
+    Ingredient(name: "Кунжут", measurement: "по вкусу"),
+    // Для "Пицца Маргарита домашняя"
+    Ingredient(name: "Тесто для пиццы", measurement: "200 г"),
+    Ingredient(name: "Моцарелла", measurement: "150 г"),
+    Ingredient(name: "Помидоры", measurement: "100 г"),
+    Ingredient(name: "Базилик", measurement: "5-6 листьев"),
+    Ingredient(name: "Оливковое масло", measurement: "1 ст. ложка"),
+    Ingredient(name: "Соль", measurement: "щепотка"),
+    Ingredient(name: "Томатный соус", measurement: "3 ст. ложки"),
+
+    // Для "Паста с морепродуктами"
+    Ingredient(name: "Спагетти", measurement: "200 г"),
+    Ingredient(name: "Креветки", measurement: "150 г"),
+    Ingredient(name: "Мидии", measurement: "100 г"),
+    Ingredient(name: "Сливки", measurement: "150 мл"),
+    Ingredient(name: "Чеснок", measurement: "2 зубчика"),
+    Ingredient(name: "Петрушка", measurement: "1 ст. ложка"),
+    Ingredient(name: "Оливковое масло", measurement: "2 ст. ложки"),
+    Ingredient(name: "Соль", measurement: "по вкусу"),
+    Ingredient(name: "Перец", measurement: "по вкусу"),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  /*
+   * Диалог для добавления нового ингредиента в холодильник
+   */
+  void _showAddIngredientDialog() {
+    final nameController = TextEditingController();
+    final measurementController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Добавить ингредиент'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Название ингредиента',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: measurementController,
+              decoration: InputDecoration(
+                labelText: 'Количество',
+                hintText: 'например: 200 г, 2 шт., по вкусу',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Отмена'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = nameController.text.trim();
+              final measurement = measurementController.text.trim();
+
+              if (name.isNotEmpty && measurement.isNotEmpty) {
+                setState(() {
+                  fridgeIngredients.add(
+                    Ingredient(name: name, measurement: measurement),
+                  );
+                });
+                Navigator.pop(context);
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Ингредиент "$name" добавлен в холодильник')),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Заполните все поля')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF2ECC71),
+            ),
+            child: Text('Добавить', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[300],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width * 0.04,
+              vertical: MediaQuery.of(context).size.height * 0.02,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'В холодильнике',
+                        style: TextStyle(
+                          color: Color(0xFF165932),
+                          fontSize: MediaQuery.of(context).size.width * 0.045,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                      ...fridgeIngredients.map((ingredient) => _buildItem(ingredient.name, ingredient.measurement)).toList(),
+                    ],
+                  ),
+                ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _showAddIngredientDialog();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF2ECC71),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: Text(
+                        'Добавить ингредиент',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: MediaQuery.of(context).size.width * 0.04,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _compareWithRecipes();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF2ECC71),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: Text(
+                        'Рекомендовать рецепты',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: MediaQuery.of(context).size.width * 0.04,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                if (recommendedRecipes.isNotEmpty)
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+                if (recommendedRecipes.isNotEmpty)
+                  Container(
+                    decoration: BoxDecoration(
+                      //color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: recommendedRecipes.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        Recipe recipe = entry.value;
+                        return Container(
+                          margin: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).size.height * 0.017,   //Отступ 0.017 от высоты экрана
+                          ),
+                          width: MediaQuery.of(context).size.width * 0.925,        //Размеры контейнера
+                          height: MediaQuery.of(context).size.height * 0.147,
+                          decoration: BoxDecoration(                               //Закгругление контейнеров
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.white,                                    //Белый фон контейнера
+                          ),
+                          child: Row(                                               //Создаем ряд в контейнере с двумя элементами Expanded для изображения
+                            children: [                                             //и Expanded - Column для текста с иконкой и временм
+                              Expanded(
+                                flex: 20,
+                                child: ClipRRect(                                   //Обрезаем изобраежние также как и сам контейнер чтобы небыло отсрых уголов
+                                  borderRadius: BorderRadius.only(                  //only - значит нужно конкретно указать углы для скругления, в отличии от circular
+                                    topLeft: Radius.circular(10),                   //Верхний левый
+                                    bottomLeft: Radius.circular(10),                //Левый нижний
+                                  ),
+                                  child: Image.asset(                                 //Загружаем изображение
+                                    recipe.imagePath,                                 //Берем изображение по пути
+                                    fit: BoxFit.cover,                                //Заполняем весь контейнер обрезаем то что не влазит
+                                    height: double.infinity,                          //Занимаем всю высоту  контейнера
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(width: MediaQuery.of(context).size.width * 0.03), //Отступ между изображением и текстом
+
+                              // Текстовая часть
+                              //Железобетонно ставим все элементы
+                              Expanded(
+                                flex: 33,
+                                child: Stack(
+                                  children: [
+                                    Positioned(                                                 //Точно позиционируем дочерние элементы в стеке
+                                      top: MediaQuery.of(context).size.height * 0.025,          //Отступ сверху
+                                      left: 0,
+                                      right: 0,
+                                      child: Padding(                                            //Добавление внутренних отступов
+                                        padding: const EdgeInsets.only(right: 4),               //Отступ только справа 12 пикселей
+                                        child: Text(
+                                          recipe.title,
+                                          maxLines: 2,                                            //Максимальное количество строк
+                                          overflow: TextOverflow.ellipsis,                        //Если текст не помещается - добавить многоточие
+                                          style: TextStyle(
+                                            fontSize: MediaQuery.of(context).size.width * 0.06,
+                                            fontWeight: FontWeight.w600,
+                                            height: 1.0,
+                                            leadingDistribution: TextLeadingDistribution.even,     //Распределение свообдного места между строками
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    Positioned(                                                     //Второй элемент
+                                      bottom: MediaQuery.of(context).size.height * 0.025,           //Отступ снизу
+                                      left: 0,
+                                      child: Row(
+                                        children: [
+                                          Image.asset('assets/Icons/clock.png', width: MediaQuery.of(context).size.width * 0.05),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            formatTime(recipe.prepTimeSeconds),
+                                            style: TextStyle(
+                                              color: Color(0xFF2ECC71),
+                                              fontSize: MediaQuery.of(context).size.width * 0.04,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItem(String name, String quantity) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width * 0.014,
+            height: MediaQuery.of(context).size.width * 0.02,
+            margin: EdgeInsets.only(right: 12),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              shape: BoxShape.circle,
+            ),
+          ),
+          Text(
+            name,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: MediaQuery.of(context).size.width * 0.035,
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Spacer(),
+          Text(
+            quantity,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: MediaQuery.of(context).size.width * 0.033,
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _compareWithRecipes() {
+    final recipeManager = RecipeManager();
+    final allRecipes = recipeManager.getRecipes();
+
+    List<Recipe> matchingRecipes = [];
+
+    for (final recipe in allRecipes) {
+      bool allIngredientsAvailable = true;
+
+      for(final ingredient in recipe.ingredients) {
+        if (!fridgeIngredients.any((fridgeIng) =>
+        fridgeIng.name.trim().toLowerCase() == ingredient.name.trim().toLowerCase()
+        )) {
+          allIngredientsAvailable = false;
+          break;
+        }
+      }
+
+      if (allIngredientsAvailable) {
+        print("Рецепт '${recipe.title}' можно приготовить - все ингредиенты есть!");
+        matchingRecipes.add(recipe);
+      } else {
+        print("Рецепт '${recipe.title}' нельзя приготовить - не хватает ингредиентов");
+      }
+    }
+
+    setState(() {
+      recommendedRecipes = matchingRecipes;
+    });
+  }
+}
+
+Нет репозитори для холодильника есть только recipe_repos.. и user_repos есть еще indredient_checker
+
+какие еще файлы тебе нужны задай мне уточняющие вопросы чтобы лучше понять что мне нужно  
+
+
+1. Да хочу чтобы холодильник сохранялся после перезапуска подключаем FridgeRepository 
+
+2. Нужно суммировать одинаковые ингрдеиенты но по логику которую я описывал в диаолговом окне добавлени ингредиента если пользователь нажал на уже существующий ингредиент, тогда выключаем единицы измерения и даем пользователю возможность добавить необходимое количество не не меньше 0 если пользователь создает новый ингредиент то очевидно не суммируем 
+
+3. Да давай проверять количество 
+
+4. Поиск по ингрдеинетам - кончено планирую прямо в диалоговом окне добавления, просто во fridge_screen поиска не будет 
+автодополнение - не совсем понимаю что это 
+справочник ингрдиентов - не совсем понимаю что это, польозватель ищет ингредиенты из тех что уже есть в холодильнике, не думаю что нужно делать отдельный справочник просто вытаскивать из холодильника а не из справочника 
+
+5. Пока это лишнее, если пользователь захоче изменить единицу, пусть заново вводит количество 
+
+6. Опять же не совсем понимюа зачем нужен справочник, пользователю выпадаею только элементы котоыре есть в холодильинке, если нужно ввести новое то выводит по памяти, не буду предлагать ему варианты
+
+Задай еще уточняющие вопрсоы для большего понимания
+Да ты описал логику как я хочу 
+
+Только ты не описал что при добавлении нового он также добавляется в Hive 
+
+1. Если пользователь хочет добавить 500 мл, пусть добавил 0.5 литра, в случае если вдруг он добавит больше чем нужно например 500 выводим 501 литр просто суммируем, пользователь должен сам учитывать единицу измерения и пусть выбирает под себя, мы реализуем редактирвание  внутри которого он сможет изменить единицу измерения , тажке структуризация должна работать если мы хотим узнать хватит ли ингредиента для рецепта, в этом случае прогрмма также должна иметь возможнось переводить в нужные единицы 
+
+2. В случае если пользователь использовал, оставляем во фриджи скринн 0 но деалем его зачеркнутым, т.е. во fridge_screen. как только пользователь использоваел все то ингредиент опускается вниз списка меняем его фон на крассный и зачеркиваем оставляем возможность редактирвоать или удалить 
+
+3. Слушай, я предлагаю изменить методику редактирвоания рецетпа, предположим пользоваель хоче изменить рецепт он нажимает на количество появляются keyboard и пользователь сам вводи нужное, если хочет изменить единицу измерения, появляется крассивый прокурчиваемый список который немного выходит вверх и вниз в котором видно один ниже и один выше единица измерения, и пользователь просто прокручивает до той которая ему нужно, и сделать это бесконченым кругом, чтобы пользователь мог прокручивать эти условиные 6 единиц измерния (граммы литры милиграммы) бескончено выбрав только одну из этих единицы 
+
+4. Сортировка не нужна я хочу добавить возможность чтобы пользователь мог перемещать положение ингредиента в списке на то место которое ему нужно 
+
+5. Я хочу убрать флаг по вкусу в рецептах и имеено тех местах которые нужно будет рассчитывать чтобы не усложнять логику 
+
+6. Да это все реализуем
+
+7. Пока ограничимся 100% совпадением 
+
+8. Да, уже описал это выше, после приготовления убираем из холодильника то что было использовано 
+
+9. Добавим кнопку история в холодильник думаю это будет выезжающий справа виджет в котором будет указано дата блюдо и все затраченные на него инрединеты и также возможнсть восстановить все ингредиенты если вдруг пользователь запустил но не начал делать рецепт 
+
+задай еще уточняющие вопрсоы для большего понимания
+вес - да, все что ты перечислил по весу, 
+
+Объем - да 
+штуки - Только чтуки никаких зубчиков пользователь сам понимает что он хочет зубчик или листочек, это слишком сильно усложняет логику и фильтрацию, поэтому оставим только штуку 
+
+2. Да давай переписывать ingredient и все что потребуется 
+
+3. История будет хранить дату, название, картинку рецепта, список ингредиентов также как и на fridge_screen только в уменьшеном формате, и возможность восстановления и диалоговое окно подтверждения 
+
+4. Если не хватает, даем пользователю возможность готовить но указываем что ингредиенты из холодильника не будут списаны автоматически, (делаем дополнительное диалоговое окно) 
+
+5. Да все перемещения на экране должны сохранятся при перезапуске 
+
+6. Если пользователь хочет добавить может нажать на количество и добавить, в этом случае зачеркнутая линия исчезает и фон становится нормальным 
+
+7. Единицы измерения фиксированные вот эти 
+Вес
+
+г
+
+кг
+
+мг
+
+Объём
+
+мл
+
+л
+
+Штуки
+
+шт
+
+8. восстановить это значит что если пользователь удалил этот ингредиент он восстанавилвается с нужным количеством, если такой уже есть суммируем, позиция не важна для самого ингредиента это чисто визуальное дополнение для пользователя 
+
+9. разделить модели
+
+сделать UnitConverter сервис
+
+сделать FridgeRepository
+
+сделать HistoryRepository
+
+сделать Domain слой
+
+это pet-project но делаем масштабируемый продукт, т.е. делаем архитуктурно верно, т.е. это и еще и обучение для меня я должен понимать как приложения должно выглядить в идеале 
+
+Задай еще уточняющие вопросы для большего понимания
+1. Не совсем понимаю еще как это работает так что выбери то что более предпочтительно для моего проекта 
+
+2. Если пользователь редактирует ингредиент он также может менять название 
+
+3. Да все верно конвертурем и сравниваем 
+
+4. Разрешаем готовить, указываем что в связи с тем что ингредиентов недостатнчно они не будут списаны из холодильника и не списываем и не сохраняем в историю 
+
+5. отдельный Hive box
+
+6. восстанавливаем 
+
+7. Автоматически переносим вниз и меняем визуал 
+
+8. Эту вещь мы проработали в диалоговом окне если пользователь нажимает на уже существующее молоко то добавляем в него, если принципиально хочет новый ингредиент то пусть создает молока, но списывать с рецепта будем именно то что совпадает в холодильником, т.е. если в рецепте Молоко то списываем Молоко, а молоко не трогаем 
+
+9. Давай по чистой архитектуре 
+
+10. Да готов 
+
+Задай еще уточняющие вопросы 
+1.  меняем только в холодильнике, 
+
+2. если пользоавтель удалил что-то из холодильника. это значит что в холодильнике этого нет, рецепт же на холодильник не влияет, так что при удалении из холодильника рецепт оставляем таким-же 
+
+3. Если пользователь нажал кнопку завершить приготовления, значит он приготовление закончил, так что да успешное приготовления списываем, не успешное не списываем 
+
+4. Да
+5. Да
+
+6. B) разрешаем, пусть перетаскивает сломанные ингрдеинеты если ему этого хочется, наша задача не засорять холодильник использованными ингредиентами, остальное дело пользователя 
+
+
+7. Да 
+
+8. Да пусть остается в истории 
+
+9. A) 
+
+10.A) максимально правильно /

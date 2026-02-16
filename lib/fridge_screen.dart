@@ -1,7 +1,13 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+
+import 'models/fridge/fridge_item.dart';
 import 'models/recipe.dart';
+import 'repositories/fridge_repository.dart';
 import 'recipe_manager.dart';
-import 'models/ingredient.dart';
+import 'widgets/fridge_item_dialog.dart';
+import 'domain/name_sanitizer.dart';
+import 'domain/unit_converter.dart';
+import 'services/recipe_availability_service.dart';
 import '../utils/time_formatter.dart';
 
 class FridgeScreen extends StatefulWidget {
@@ -12,121 +18,139 @@ class FridgeScreen extends StatefulWidget {
 }
 
 class _FridgeScreenState extends State<FridgeScreen> {
-  int _selectedIndex = 0;
-  List<Recipe> recommendedRecipes = [];
+  final UnitConverter _converter = const UnitConverter();
+  final RecipeAvailabilityService _availabilityService = const RecipeAvailabilityService();
 
-  // Список ингредиентов в холодильнике
-  List<Ingredient> fridgeIngredients = [
-    // Для "Лосось в соусе терияки"
-    Ingredient(name: "Соевый соус", measurement: "8 ст. ложек"),
-    Ingredient(name: "Вода", measurement: "6 ст. ложек"),
-    Ingredient(name: "Мед", measurement: "3 ст. ложки"),
-    Ingredient(name: "Коричневый сахар", measurement: "2 ст. ложки"),
-    Ingredient(name: "Чеснок", measurement: "3 зубчика"),
-    Ingredient(name: "Тертый свежий имбирь", measurement: "1 ст. ложка"),
-    Ingredient(name: "Лимонный сок", measurement: "1.5 ст. ложки"),
-    Ingredient(name: "Кукурузный крахмал", measurement: "1 ст. ложка"),
-    Ingredient(name: "Растительное масло", measurement: "1 ч. ложка"),
-    Ingredient(name: "Филе лосося", measurement: "680 г"),
-    Ingredient(name: "Кунжут", measurement: "по вкусу"),
-    // Для "Пицца Маргарита домашняя"
-    Ingredient(name: "Тесто для пиццы", measurement: "200 г"),
-    Ingredient(name: "Моцарелла", measurement: "150 г"),
-    Ingredient(name: "Помидоры", measurement: "100 г"),
-    Ingredient(name: "Базилик", measurement: "5-6 листьев"),
-    Ingredient(name: "Оливковое масло", measurement: "1 ст. ложка"),
-    Ingredient(name: "Соль", measurement: "щепотка"),
-    Ingredient(name: "Томатный соус", measurement: "3 ст. ложки"),
+  List<FridgeItem> _items = <FridgeItem>[];
+  List<Recipe> recommendedRecipes = <Recipe>[];
+  bool _loading = true;
 
-    // Для "Паста с морепродуктами"
-    Ingredient(name: "Спагетти", measurement: "200 г"),
-    Ingredient(name: "Креветки", measurement: "150 г"),
-    Ingredient(name: "Мидии", measurement: "100 г"),
-    Ingredient(name: "Сливки", measurement: "150 мл"),
-    Ingredient(name: "Чеснок", measurement: "2 зубчика"),
-    Ingredient(name: "Петрушка", measurement: "1 ст. ложка"),
-    Ingredient(name: "Оливковое масло", measurement: "2 ст. ложки"),
-    Ingredient(name: "Соль", measurement: "по вкусу"),
-    Ingredient(name: "Перец", measurement: "по вкусу"),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
 
-  void _onItemTapped(int index) {
+  Future<void> _reload() async {
+    final loaded = FridgeRepository.getItems();
+    if (!mounted) return;
+
     setState(() {
-      _selectedIndex = index;
+      _items = loaded;
+      _loading = false;
     });
   }
 
-  /*
-   * Диалог для добавления нового ингредиента в холодильник
-   */
-  void _showAddIngredientDialog() {
-    final nameController = TextEditingController();
-    final measurementController = TextEditingController();
-
-    showDialog(
+  Future<void> _addIngredient() async {
+    final result = await showDialog<FridgeDialogResult>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Добавить ингредиент'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: 'Название ингредиента',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: measurementController,
-              decoration: InputDecoration(
-                labelText: 'Количество',
-                hintText: 'например: 200 г, 2 шт., по вкусу',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Отмена'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final name = nameController.text.trim();
-              final measurement = measurementController.text.trim();
+      builder: (_) => FridgeItemDialog(existingItems: _items),
+    );
 
-              if (name.isNotEmpty && measurement.isNotEmpty) {
-                setState(() {
-                  fridgeIngredients.add(
-                    Ingredient(name: name, measurement: measurement),
-                  );
-                });
-                Navigator.pop(context);
-                
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Ингредиент "$name" добавлен в холодильник')),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Заполните все поля')),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF2ECC71),
-            ),
-            child: Text('Добавить', style: TextStyle(color: Colors.white)),
-          ),
-        ],
+    if (result == null) return;
+
+    final name = NameSanitizer.normalize(result.name);
+    final amountBase = _converter.toBase(amount: result.amount, unit: result.unit);
+
+    if (result.existingItemId != null) {
+      await FridgeRepository.addToExisting(
+        itemId: result.existingItemId!,
+        deltaBase: amountBase,
+      );
+    } else {
+      await FridgeRepository.addNew(
+        name: name,
+        amountBase: amountBase,
+        unit: result.unit,
+      );
+    }
+
+    await _reload();
+  }
+
+  Future<void> _editIngredient(FridgeItem item) async {
+    final result = await showDialog<FridgeDialogResult>(
+      context: context,
+      builder: (_) => FridgeItemDialog(
+        existingItems: _items,
+        editingItem: item,
       ),
     );
+
+    if (result == null) return;
+
+    final name = NameSanitizer.normalize(result.name);
+    final hasExactDuplicate = _items.any((e) => e.id != item.id && e.name == name);
+    if (hasExactDuplicate) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Такой ингредиент уже существует. Отредактируйте существующий.'),
+          ),
+        );
+      }
+      return;
+    }
+
+    final amountBase = _converter.toBase(amount: result.amount, unit: result.unit);
+
+    await FridgeRepository.updateItem(
+      item.copyWith(
+        name: name,
+        unit: result.unit,
+        amountBase: amountBase,
+      ),
+    );
+
+    await _reload();
+  }
+
+  Future<void> _deleteIngredient(FridgeItem item) async {
+    await FridgeRepository.deleteItem(item.id);
+    await _reload();
+  }
+
+  Future<void> _onReorder(int oldIndex, int newIndex) async {
+    final list = List<FridgeItem>.from(_items);
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    final moved = list.removeAt(oldIndex);
+    list.insert(newIndex, moved);
+
+    await FridgeRepository.reorderItems(list.map((e) => e.id).toList());
+    await _reload();
+  }
+
+  void _compareWithRecipes() {
+    final allRecipes = RecipeManager().getRecipes();
+    final matching = <Recipe>[];
+
+    for (final recipe in allRecipes) {
+      final result = _availabilityService.checkAndBuildConsumption(
+        recipeIngredients: recipe.ingredients,
+        fridgeItems: _items,
+      );
+
+      if (result.hasAllIngredients) {
+        matching.add(recipe);
+      }
+    }
+
+    setState(() {
+      recommendedRecipes = matching;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: SafeArea(
@@ -141,7 +165,7 @@ class _FridgeScreenState extends State<FridgeScreen> {
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
@@ -152,14 +176,73 @@ class _FridgeScreenState extends State<FridgeScreen> {
                       Text(
                         'В холодильнике',
                         style: TextStyle(
-                          color: Color(0xFF165932),
+                          color: const Color(0xFF165932),
                           fontSize: MediaQuery.of(context).size.width * 0.045,
-                          fontFamily: 'Roboto',
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                      ...fridgeIngredients.map((ingredient) => _buildItem(ingredient.name, ingredient.measurement)).toList(),
+                      const SizedBox(height: 12),
+                      if (_items.isEmpty)
+                        const Text('Список пуст')
+                      else
+                        ReorderableListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _items.length,
+                          onReorder: _onReorder,
+                          buildDefaultDragHandles: false,
+                          itemBuilder: (context, index) {
+                            final item = _items[index];
+                            return Container(
+                              key: ValueKey(item.id),
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: item.isDepleted ? const Color(0xFFFFE6E6) : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  ReorderableDragStartListener(
+                                    index: index,
+                                    child: const Icon(Icons.drag_indicator, color: Colors.grey),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      item.name,
+                                      style: TextStyle(
+                                        fontSize: MediaQuery.of(context).size.width * 0.035,
+                                        fontWeight: FontWeight.w600,
+                                        decoration: item.isDepleted
+                                            ? TextDecoration.lineThrough
+                                            : TextDecoration.none,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    _converter.format(baseAmount: item.amountBase, unit: item.unit),
+                                    style: TextStyle(
+                                      color: Colors.grey[700],
+                                      fontSize: MediaQuery.of(context).size.width * 0.033,
+                                      decoration: item.isDepleted
+                                          ? TextDecoration.lineThrough
+                                          : TextDecoration.none,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => _editIngredient(item),
+                                    icon: const Icon(Icons.edit, size: 18),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => _deleteIngredient(item),
+                                    icon: const Icon(Icons.delete_outline, size: 18),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                     ],
                   ),
                 ),
@@ -168,12 +251,10 @@ class _FridgeScreenState extends State<FridgeScreen> {
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.6,
                     child: ElevatedButton(
-                      onPressed: () {
-                        _showAddIngredientDialog();
-                      },
+                      onPressed: _addIngredient,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF2ECC71),
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: const Color(0xFF2ECC71),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -183,7 +264,6 @@ class _FridgeScreenState extends State<FridgeScreen> {
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: MediaQuery.of(context).size.width * 0.04,
-                          fontFamily: 'Roboto',
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -195,12 +275,10 @@ class _FridgeScreenState extends State<FridgeScreen> {
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.6,
                     child: ElevatedButton(
-                      onPressed: () {
-                        _compareWithRecipes();
-                      },
+                      onPressed: _compareWithRecipes,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF2ECC71),
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: const Color(0xFF2ECC71),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -210,108 +288,83 @@ class _FridgeScreenState extends State<FridgeScreen> {
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: MediaQuery.of(context).size.width * 0.04,
-                          fontFamily: 'Roboto',
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
                 ),
-
                 if (recommendedRecipes.isNotEmpty)
                   SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-
                 if (recommendedRecipes.isNotEmpty)
-                  Container(
-                    decoration: BoxDecoration(
-                      //color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      children: recommendedRecipes.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        Recipe recipe = entry.value;
-                        return Container(
-                          margin: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).size.height * 0.017,   //Отступ 0.017 от высоты экрана
-                          ),
-                          width: MediaQuery.of(context).size.width * 0.925,        //Размеры контейнера
-                          height: MediaQuery.of(context).size.height * 0.147,
-                          decoration: BoxDecoration(                               //Закгругление контейнеров
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.white,                                    //Белый фон контейнера
-                          ),
-                          child: Row(                                               //Создаем ряд в контейнере с двумя элементами Expanded для изображения
-                            children: [                                             //и Expanded - Column для текста с иконкой и временм
-                              Expanded(
-                                flex: 20,
-                                child: ClipRRect(                                   //Обрезаем изобраежние также как и сам контейнер чтобы небыло отсрых уголов
-                                  borderRadius: BorderRadius.only(                  //only - значит нужно конкретно указать углы для скругления, в отличии от circular
-                                    topLeft: Radius.circular(10),                   //Верхний левый
-                                    bottomLeft: Radius.circular(10),                //Левый нижний
-                                  ),
-                                  child: Image.asset(                                 //Загружаем изображение
-                                    recipe.imagePath,                                 //Берем изображение по пути
-                                    fit: BoxFit.cover,                                //Заполняем весь контейнер обрезаем то что не влазит
-                                    height: double.infinity,                          //Занимаем всю высоту  контейнера
-                                  ),
+                  Column(
+                    children: recommendedRecipes.map((recipe) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        width: MediaQuery.of(context).size.width * 0.925,
+                        height: MediaQuery.of(context).size.height * 0.147,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 20,
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(10),
+                                  bottomLeft: Radius.circular(10),
+                                ),
+                                child: Image.asset(
+                                  recipe.imagePath,
+                                  fit: BoxFit.cover,
+                                  height: double.infinity,
                                 ),
                               ),
-
-                              SizedBox(width: MediaQuery.of(context).size.width * 0.03), //Отступ между изображением и текстом
-
-                              // Текстовая часть
-                              //Железобетонно ставим все элементы
-                              Expanded(
-                                flex: 33,
-                                child: Stack(
+                            ),
+                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+                            Expanded(
+                              flex: 33,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 4),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Positioned(                                                 //Точно позиционируем дочерние элементы в стеке
-                                      top: MediaQuery.of(context).size.height * 0.025,          //Отступ сверху
-                                      left: 0,
-                                      right: 0,
-                                      child: Padding(                                            //Добавление внутренних отступов
-                                        padding: const EdgeInsets.only(right: 4),               //Отступ только справа 12 пикселей
-                                        child: Text(
-                                          recipe.title,
-                                          maxLines: 2,                                            //Максимальное количество строк
-                                          overflow: TextOverflow.ellipsis,                        //Если текст не помещается - добавить многоточие
-                                          style: TextStyle(
-                                            fontSize: MediaQuery.of(context).size.width * 0.06,
-                                            fontWeight: FontWeight.w600,
-                                            height: 1.0,
-                                            leadingDistribution: TextLeadingDistribution.even,     //Распределение свообдного места между строками
-                                          ),
-                                        ),
+                                    Text(
+                                      recipe.title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: MediaQuery.of(context).size.width * 0.06,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1.0,
                                       ),
                                     ),
-
-                                    Positioned(                                                     //Второй элемент
-                                      bottom: MediaQuery.of(context).size.height * 0.025,           //Отступ снизу
-                                      left: 0,
-                                      child: Row(
-                                        children: [
-                                          Image.asset('assets/Icons/clock.png', width: MediaQuery.of(context).size.width * 0.05),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            formatTime(recipe.prepTimeSeconds),
-                                            style: TextStyle(
-                                              color: Color(0xFF2ECC71),
-                                              fontSize: MediaQuery.of(context).size.width * 0.04,
-                                              fontWeight: FontWeight.w500,
-                                            ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Image.asset('assets/Icons/clock.png', width: MediaQuery.of(context).size.width * 0.05),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          formatTime(recipe.prepTimeSeconds),
+                                          style: TextStyle(
+                                            color: const Color(0xFF2ECC71),
+                                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                                            fontWeight: FontWeight.w500,
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   ),
               ],
             ),
@@ -319,75 +372,5 @@ class _FridgeScreenState extends State<FridgeScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildItem(String name, String quantity) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width * 0.014,
-            height: MediaQuery.of(context).size.width * 0.02,
-            margin: EdgeInsets.only(right: 12),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              shape: BoxShape.circle,
-            ),
-          ),
-          Text(
-            name,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: MediaQuery.of(context).size.width * 0.035,
-              fontFamily: 'Roboto',
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Spacer(),
-          Text(
-            quantity,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: MediaQuery.of(context).size.width * 0.033,
-              fontFamily: 'Roboto',
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _compareWithRecipes() {
-    final recipeManager = RecipeManager();
-    final allRecipes = recipeManager.getRecipes();
-
-    List<Recipe> matchingRecipes = [];
-
-    for (final recipe in allRecipes) {
-      bool allIngredientsAvailable = true;
-
-      for(final ingredient in recipe.ingredients) {
-        if (!fridgeIngredients.any((fridgeIng) =>
-        fridgeIng.name.trim().toLowerCase() == ingredient.name.trim().toLowerCase()
-        )) {
-          allIngredientsAvailable = false;
-          break;
-        }
-      }
-
-      if (allIngredientsAvailable) {
-        print("Рецепт '${recipe.title}' можно приготовить - все ингредиенты есть!");
-        matchingRecipes.add(recipe);
-      } else {
-        print("Рецепт '${recipe.title}' нельзя приготовить - не хватает ингредиентов");
-      }
-    }
-
-    setState(() {
-      recommendedRecipes = matchingRecipes;
-    });
   }
 }

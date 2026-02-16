@@ -16,7 +16,7 @@ class RecipeListScreen extends StatefulWidget {
   });
 
   @override
-  _RecipeListScreenState createState() => _RecipeListScreenState();
+  State<RecipeListScreen> createState() => _RecipeListScreenState();
 }
 
 class _RecipeListScreenState extends State<RecipeListScreen> {
@@ -189,7 +189,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       //Кнопка внизу экрана, появляется если пользователь автризирован
       //Используем Scaffold.flatingActionButton и flatingActionButtonLocation потому что кнопка только одна
       //Если бы кнопок было бы несколько пришлось бы использовать Positioned
-      floatingActionButton: widget.isLoggedIn ? Container(
+      floatingActionButton: widget.isLoggedIn ? SizedBox(
         width: 60,
         height: 60,
         child: FloatingActionButton(
@@ -203,8 +203,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             );
           },
           backgroundColor: Color(0xFF2ECC71),
-          child: Icon(Icons.add, color: Colors.white), //Кнопка с плюсом
-          shape: CircleBorder(),                       //Полностью круглая
+          shape: CircleBorder(),
+          child: Icon(Icons.add, color: Colors.white),
         ),
       )
           : null,                                                                //Если не авторизован - кнопка не отображается
@@ -213,3 +213,4 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     );
   }
 }
+

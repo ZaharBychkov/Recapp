@@ -1,5 +1,5 @@
 import 'services/recipe_repository.dart';
-import '../models/recipe.dart';
+import 'models/recipe.dart';
 
 
 class RecipeManager {

@@ -1,77 +1,87 @@
+import 'dart:convert';
+
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter/foundation.dart';
 import '../models/recipe.dart';
 import '../models/ingredient.dart';
 import '../models/step.dart';
+import '../domain/recipe_measurement_parser.dart';
+import '../domain/unit_converter.dart';
 
 class RecipeRepository {
-  static const String _boxName = 'recipes';  //Имя коробки для хранения 
-  static Box<Recipe>? _box;                 //Коробка с рецептами
+  static const String _boxName = 'recipes';  //РРјСЏ РєРѕСЂРѕР±РєРё РґР»СЏ С…СЂР°РЅРµРЅРёСЏ 
+  static Box<Recipe>? _box;
+  static const _parser = RecipeMeasurementParser();
+  static const _converter = UnitConverter();                 //РљРѕСЂРѕР±РєР° СЃ СЂРµС†РµРїС‚Р°РјРё
 
-  static Future<void> init() async {         //Инициализируем ассинхронно Hive
+  static Future<void> init() async {         //РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј Р°СЃСЃРёРЅС…СЂРѕРЅРЅРѕ Hive
 
-    // //Регистрируем адаптеры (в нужно порядке: сначала вложенные ), они уже сгенерированы
-    // Hive.registerAdapter(IngredientAdapter()); //Вложенный
-    // Hive.registerAdapter(RecipeStepAdapter()); //Вложенные
-    // Hive.registerAdapter(RecipeAdapter());     //Основной
-    _box = await Hive.openBox<Recipe>(_boxName); //Открываем коробку для хранения рецептов
-    //Посути Hive ищет папку с названием 'recipes' для этого и нужно имя для
+    // //Р РµРіРёСЃС‚СЂРёСЂСѓРµРј Р°РґР°РїС‚РµСЂС‹ (РІ РЅСѓР¶РЅРѕ РїРѕСЂСЏРґРєРµ: СЃРЅР°С‡Р°Р»Р° РІР»РѕР¶РµРЅРЅС‹Рµ ), РѕРЅРё СѓР¶Рµ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅС‹
+    // Hive.registerAdapter(IngredientAdapter()); //Р’Р»РѕР¶РµРЅРЅС‹Р№
+    // Hive.registerAdapter(RecipeStepAdapter()); //Р’Р»РѕР¶РµРЅРЅС‹Рµ
+    // Hive.registerAdapter(RecipeAdapter());     //РћСЃРЅРѕРІРЅРѕР№
+    _box = await Hive.openBox<Recipe>(_boxName); //РћС‚РєСЂС‹РІР°РµРј РєРѕСЂРѕР±РєСѓ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ СЂРµС†РµРїС‚РѕРІ
+    //РџРѕСЃСѓС‚Рё Hive РёС‰РµС‚ РїР°РїРєСѓ СЃ РЅР°Р·РІР°РЅРёРµРј 'recipes' РґР»СЏ СЌС‚РѕРіРѕ Рё РЅСѓР¶РЅРѕ РёРјСЏ РґР»СЏ
 
-    //Если база пустая - заполняем тестовыми данными 
-    //Если ! слева значит логическое Не, если справа - не null
+    //Р•СЃР»Рё Р±Р°Р·Р° РїСѓСЃС‚Р°СЏ - Р·Р°РїРѕР»РЅСЏРµРј С‚РµСЃС‚РѕРІС‹РјРё РґР°РЅРЅС‹РјРё 
+    //Р•СЃР»Рё ! СЃР»РµРІР° Р·РЅР°С‡РёС‚ Р»РѕРіРёС‡РµСЃРєРѕРµ РќРµ, РµСЃР»Рё СЃРїСЂР°РІР° - РЅРµ null
     if(_box!.isEmpty) {
       await _seedDefaultRecipes();
     }
+
+    await _migrateMojibakeText();
+    await _migrateRecipeMeasurements();
   }
 
-  //Берем все рецепты
+  //Р‘РµСЂРµРј РІСЃРµ СЂРµС†РµРїС‚С‹
   static List<Recipe> getFavoriteRecipes() {
     return _box?.values.where((r) => r.isFavorite).toList() ?? [];
   }
 
-  //Конроллер для изменения состояния isFavorite
+  //РљРѕРЅСЂРѕР»Р»РµСЂ РґР»СЏ РёР·РјРµРЅРµРЅРёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ isFavorite
   static Future<void> toggleFavorite(Recipe recipe) async {
     recipe.isFavorite = !recipe.isFavorite;
     await recipe.save();
   }
 
-  //Получить все рецепты
+  //РџРѕР»СѓС‡РёС‚СЊ РІСЃРµ СЂРµС†РµРїС‚С‹
   static List<Recipe> getAllRecipes() {
-    return _box?.values.toList() ?? []; //Возвращаем список всех рецептов или пустой список
+    return _box?.values.toList() ?? []; //Р’РѕР·РІСЂР°С‰Р°РµРј СЃРїРёСЃРѕРє РІСЃРµС… СЂРµС†РµРїС‚РѕРІ РёР»Рё РїСѓСЃС‚РѕР№ СЃРїРёСЃРѕРє
   }
 
-  //Добавить новый рецепт 
+  //Р”РѕР±Р°РІРёС‚СЊ РЅРѕРІС‹Р№ СЂРµС†РµРїС‚ 
   static Future<void> addRecipe(Recipe recipe) async {
-    await _box?.put(recipe.id, recipe); //Добавляем рецепт в коробку, которая возможно пустая
-    print("Рецепт сохранен в Hive с ID: ${recipe.id}");
+    await _box?.put(recipe.id, recipe); //Р”РѕР±Р°РІР»СЏРµРј СЂРµС†РµРїС‚ РІ РєРѕСЂРѕР±РєСѓ, РєРѕС‚РѕСЂР°СЏ РІРѕР·РјРѕР¶РЅРѕ РїСѓСЃС‚Р°СЏ
+    debugPrint("Рецепт сохранен в Hive с ID: ${recipe.id}");
   }
 
-  //Обновить существующий рецепт
+  //РћР±РЅРѕРІРёС‚СЊ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ СЂРµС†РµРїС‚
   static Future<void> updateRecipe(Recipe recipe) async {
-    await _box?.put(recipe.id, recipe); //Обновляем рецепт по его ID
-    print("Рецепт обновлен в Hive с ID: ${recipe.id}");
+    await _box?.put(recipe.id, recipe); //РћР±РЅРѕРІР»СЏРµРј СЂРµС†РµРїС‚ РїРѕ РµРіРѕ ID
+    debugPrint("Рецепт обновлен в Hive с ID: ${recipe.id}");
   }
 
-  //Удалить рецепт
+  //РЈРґР°Р»РёС‚СЊ СЂРµС†РµРїС‚
   static Future<void> deleteRecipe(int recipeId) async {
     try {
-      print("Попытка удалить рецепт с ID: $recipeId");
-      print("Количество рецептов до удаления: ${_box?.length}");
+      debugPrint("Попытка удалить рецепт с ID: $recipeId");
+      debugPrint("Количество рецептов до удаления: ${_box?.length}");
       
       await _box?.delete(recipeId);
       
-      print("Количество рецептов после удаления: ${_box?.length}");
-      print("Рецепт успешно удален из Hive с ID: $recipeId");
+      debugPrint("Количество рецептов после удаления: ${_box?.length}");
+      debugPrint("Рецепт успешно удален из Hive с ID: $recipeId");
       
-      // Принудительно сохраняем изменения
+      // РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ СЃРѕС…СЂР°РЅСЏРµРј РёР·РјРµРЅРµРЅРёСЏ
       await _box?.flush();
       
     } catch (e) {
-      print("Ошибка при удалении рецепта: $e");
-      rethrow; // Перебрасываем ошибку дальше
+      debugPrint("Ошибка при удалении рецепта: $e");
+      rethrow; // РџРµСЂРµР±СЂР°СЃС‹РІР°РµРј РѕС€РёР±РєСѓ РґР°Р»СЊС€Рµ
     }
   }
 
-  //Получить следующий свободный ID 
+  //РџРѕР»СѓС‡РёС‚СЊ СЃР»РµРґСѓСЋС‰РёР№ СЃРІРѕР±РѕРґРЅС‹Р№ ID 
   static int getNextId() {
     if (_box == null || _box!.isEmpty) return 1; 
 
@@ -80,16 +90,16 @@ class RecipeRepository {
       .reduce((a, b) => a > b ? a : b);
     return maxId + 1; 
   }
-  //По сути берем тут box.values т.е. Recipe(0), Recipe(1) и т.д. 
-  //И возвращаем r.id т.е. int geiId(Recipe r) {return r.id} 
-  //Но проще через лямбла написать (r) => r.id  
-  //Итог у нас есть все Id Recipe от Recipe(0) до Recipe(максимального)
-  //reduce - есди a > b то верни а, иначе врени b 
-  //Но проще написать a > b ? a : b (: - и есть вот это иначе true (а) : false (b)) 
-  //Сам reduce = свернуть весь список элементов в одно значение по определенно условию  
-  //В конце возвращаем это максимальное Id и прибовляем 1 получаем новое Id для нового рецепта   
+  //РџРѕ СЃСѓС‚Рё Р±РµСЂРµРј С‚СѓС‚ box.values С‚.Рµ. Recipe(0), Recipe(1) Рё С‚.Рґ. 
+  //Р РІРѕР·РІСЂР°С‰Р°РµРј r.id С‚.Рµ. int geiId(Recipe r) {return r.id} 
+  //РќРѕ РїСЂРѕС‰Рµ С‡РµСЂРµР· Р»СЏРјР±Р»Р° РЅР°РїРёСЃР°С‚СЊ (r) => r.id  
+  //РС‚РѕРі Сѓ РЅР°СЃ РµСЃС‚СЊ РІСЃРµ Id Recipe РѕС‚ Recipe(0) РґРѕ Recipe(РјР°РєСЃРёРјР°Р»СЊРЅРѕРіРѕ)
+  //reduce - РµСЃРґРё a > b С‚Рѕ РІРµСЂРЅРё Р°, РёРЅР°С‡Рµ РІСЂРµРЅРё b 
+  //РќРѕ РїСЂРѕС‰Рµ РЅР°РїРёСЃР°С‚СЊ a > b ? a : b (: - Рё РµСЃС‚СЊ РІРѕС‚ СЌС‚Рѕ РёРЅР°С‡Рµ true (Р°) : false (b)) 
+  //РЎР°Рј reduce = СЃРІРµСЂРЅСѓС‚СЊ РІРµСЃСЊ СЃРїРёСЃРѕРє СЌР»РµРјРµРЅС‚РѕРІ РІ РѕРґРЅРѕ Р·РЅР°С‡РµРЅРёРµ РїРѕ РѕРїСЂРµРґРµР»РµРЅРЅРѕ СѓСЃР»РѕРІРёСЋ  
+  //Р’ РєРѕРЅС†Рµ РІРѕР·РІСЂР°С‰Р°РµРј СЌС‚Рѕ РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ Id Рё РїСЂРёР±РѕРІР»СЏРµРј 1 РїРѕР»СѓС‡Р°РµРј РЅРѕРІРѕРµ Id РґР»СЏ РЅРѕРІРѕРіРѕ СЂРµС†РµРїС‚Р°   
 
-  //Заполнение начальными рецептами (заглушка)
+  //Р—Р°РїРѕР»РЅРµРЅРёРµ РЅР°С‡Р°Р»СЊРЅС‹РјРё СЂРµС†РµРїС‚Р°РјРё (Р·Р°РіР»СѓС€РєР°)
   static Future<void> _seedDefaultRecipes() async {
     final defaultRecipes = [
       Recipe(
@@ -106,7 +116,7 @@ class RecipeRepository {
           Ingredient(name: "Лимонный сок", measurement: "1.5 ст. ложки"),
           Ingredient(name: "Кукурузный крахмал", measurement: "1 ст. ложка"),
           Ingredient(name: "Растительное масло", measurement: "1 ч. ложка"),
-          Ingredient(name: "Филе лосося", measurement: "680 г"),
+          Ingredient(name: "Филе лосося", measurement: "680 Рі"),
           Ingredient(name: "Кунжут", measurement: "по вкусу"),
         ],
         prepTimeSeconds: 45 * 60,
@@ -146,7 +156,7 @@ class RecipeRepository {
         ingredients: [
           Ingredient(name: "Булочка для бургера", measurement: "1 шт."),
           Ingredient(name: "Говяжья котлета", measurement: "2 шт. (по 100 г)"),
-          Ingredient(name: "Салат", measurement: "50 г"),
+          Ingredient(name: "Салат", measurement: "50 Рі"),
           Ingredient(name: "Помидор", measurement: "1 шт."),
           Ingredient(name: "Лук", measurement: "1/2 шт."),
           Ingredient(name: "Сыр чеддер", measurement: "2 ломтика"),
@@ -189,10 +199,10 @@ class RecipeRepository {
         title: "Стейк из говядины по-грузински с кукурузой",
         description: "Классический грузинский стейк с пряными специями и сливочным соусом.",
         ingredients: [
-          Ingredient(name: "Говядина", measurement: "400 г"),
+          Ingredient(name: "Говядина", measurement: "400 Рі"),
           Ingredient(name: "Лук", measurement: "1 шт."),
           Ingredient(name: "Чеснок", measurement: "2 зубчика"),
-          Ingredient(name: "Сливочное масло", measurement: "50 г"),
+          Ingredient(name: "Сливочное масло", measurement: "50 Рі"),
           Ingredient(name: "Сливки", measurement: "100 мл"),
           Ingredient(name: "Хмели-сунели", measurement: "1 ч. ложка"),
           Ingredient(name: "Соль", measurement: "по вкусу"),
@@ -234,9 +244,9 @@ class RecipeRepository {
         title: "Пицца Маргарита домашняя",
         description: "Традиционная итальянская пицца с томатами, моцареллой и базиликом.",
         ingredients: [
-          Ingredient(name: "Тесто для пиццы", measurement: "200 г"),
-          Ingredient(name: "Моцарелла", measurement: "150 г"),
-          Ingredient(name: "Помидоры", measurement: "100 г"),
+          Ingredient(name: "Тесто для пиццы", measurement: "200 Рі"),
+          Ingredient(name: "Моцарелла", measurement: "150 Рі"),
+          Ingredient(name: "Помидоры", measurement: "100 Рі"),
           Ingredient(name: "Базилик", measurement: "5-6 листьев"),
           Ingredient(name: "Оливковое масло", measurement: "1 ст. ложка"),
           Ingredient(name: "Соль", measurement: "щепотка"),
@@ -277,9 +287,9 @@ class RecipeRepository {
         title: "Паста с морепродуктами",
         description: "Ароматная паста с креветками, мидиями и сливочным соусом.",
         ingredients: [
-          Ingredient(name: "Спагетти", measurement: "200 г"),
-          Ingredient(name: "Креветки", measurement: "150 г"),
-          Ingredient(name: "Мидии", measurement: "100 г"),
+          Ingredient(name: "Спагетти", measurement: "200 Рі"),
+          Ingredient(name: "Креветки", measurement: "150 Рі"),
+          Ingredient(name: "Мидии", measurement: "100 Рі"),
           Ingredient(name: "Сливки", measurement: "150 мл"),
           Ingredient(name: "Чеснок", measurement: "2 зубчика"),
           Ingredient(name: "Петрушка", measurement: "1 ст. ложка"),
@@ -322,11 +332,11 @@ class RecipeRepository {
         title: "Поке боул с сыром тофу",
         description: "Свежий гавайский салат с тунцом, авокадо и сырным акцентом.",
         ingredients: [
-          Ingredient(name: "Тунец", measurement: "200 г"),
+          Ingredient(name: "Тунец", measurement: "200 Рі"),
           Ingredient(name: "Авокадо", measurement: "1 шт."),
-          Ingredient(name: "Рис", measurement: "150 г"),
+          Ingredient(name: "Рис", measurement: "150 Рі"),
           Ingredient(name: "Соевый соус", measurement: "2 ст. ложки"),
-          Ingredient(name: "Сыр фета", measurement: "50 г"),
+          Ingredient(name: "Сыр фета", measurement: "50 Рі"),
           Ingredient(name: "Огурец", measurement: "1/2 шт."),
           Ingredient(name: "Кунжутное масло", measurement: "1 ч. ложка"),
           Ingredient(name: "Соль", measurement: "по вкусу"),
@@ -368,7 +378,7 @@ class RecipeRepository {
         ingredients: [
           Ingredient(name: "Хлеб для тостов", measurement: "2 ломтика"),
           Ingredient(name: "Банан", measurement: "1 шт."),
-          Ingredient(name: "Черника", measurement: "50 г"),
+          Ingredient(name: "Черника", measurement: "50 Рі"),
           Ingredient(name: "Мёд", measurement: "1 ст. ложка"),
           Ingredient(name: "Сливочное масло", measurement: "1 ч. ложка"),
           Ingredient(name: "Кокосовая стружка", measurement: "1 ч. ложка (по желанию)"),
@@ -408,5 +418,205 @@ class RecipeRepository {
     for (final recipe in defaultRecipes) {
       await _box?.put(recipe.id, recipe);
     }
+  }
+  static Future<void> _migrateRecipeMeasurements() async {
+    if (_box == null) return;
+
+    final recipes = _box!.values.toList();
+
+    for (final recipe in recipes) {
+      var changed = false;
+      final migrated = <Ingredient>[];
+
+      for (final ing in recipe.ingredients) {
+        final parsed = _parser.parse(ing.measurement);
+        if (parsed == null) {
+          migrated.add(
+            Ingredient(
+              name: ing.name,
+              measurement: '1 г',
+            ),
+          );
+          changed = true;
+          continue;
+        }
+
+        final canonical = parsed.toCanonicalString(_converter);
+        migrated.add(
+          Ingredient(
+            name: ing.name,
+            measurement: canonical,
+          ),
+        );
+        if (canonical != ing.measurement) {
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        recipe.ingredients = migrated;
+        await _box!.put(recipe.id, recipe);
+      }
+    }
+  }
+
+  static Future<void> _migrateMojibakeText() async {
+    if (_box == null) return;
+
+    final recipes = _box!.values.toList();
+
+    for (final recipe in recipes) {
+      var changed = false;
+
+      final fixedTitle = _fixMojibake(recipe.title);
+      if (fixedTitle != recipe.title) {
+        recipe.title = fixedTitle;
+        changed = true;
+      }
+
+      final fixedDescription = _fixMojibake(recipe.description);
+      if (fixedDescription != recipe.description) {
+        recipe.description = fixedDescription;
+        changed = true;
+      }
+
+      final fixedIngredients = <Ingredient>[];
+      for (final ingredient in recipe.ingredients) {
+        final fixedName = _fixMojibake(ingredient.name);
+        final fixedMeasurement = _fixMojibake(ingredient.measurement);
+        fixedIngredients.add(
+          Ingredient(
+            name: fixedName,
+            measurement: fixedMeasurement,
+          ),
+        );
+
+        if (fixedName != ingredient.name || fixedMeasurement != ingredient.measurement) {
+          changed = true;
+        }
+      }
+
+      final fixedSteps = <RecipeStep>[];
+      for (final step in recipe.steps) {
+        final fixedStepDescription = _fixMojibake(step.description);
+        fixedSteps.add(
+          RecipeStep(
+            stepNumber: step.stepNumber,
+            description: fixedStepDescription,
+            timeInSeconds: step.timeInSeconds,
+            isCompleted: step.isCompleted,
+          ),
+        );
+
+        if (fixedStepDescription != step.description) {
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        recipe.ingredients = fixedIngredients;
+        recipe.steps = fixedSteps;
+        await _box!.put(recipe.id, recipe);
+      }
+    }
+  }
+
+  static String _fixMojibake(String value) {
+    const r = '\u0420';
+    const s = '\u0421';
+    final sourceMarkers = value.split('').where((ch) => ch == r || ch == s).length;
+    if (sourceMarkers < 2) return value;
+
+    try {
+      final bytes = <int>[];
+      for (final rune in value.runes) {
+        final cpByte = _unicodeToCp1251Byte(rune);
+        if (cpByte == null) return value;
+        bytes.add(cpByte);
+      }
+
+      final fixed = utf8.decode(bytes);
+      final fixedMarkers = fixed.split('').where((ch) => ch == r || ch == s).length;
+      if (fixedMarkers < sourceMarkers) {
+        return fixed;
+      }
+    } catch (_) {
+      return value;
+    }
+
+    return value;
+  }
+
+  static int? _unicodeToCp1251Byte(int rune) {
+    if (rune >= 0x00 && rune <= 0x7F) return rune;
+    if (rune >= 0x0410 && rune <= 0x044F) return rune - 0x350;
+
+    const map = <int, int>{
+      0x0402: 0x80,
+      0x0403: 0x81,
+      0x201A: 0x82,
+      0x0453: 0x83,
+      0x201E: 0x84,
+      0x2026: 0x85,
+      0x2020: 0x86,
+      0x2021: 0x87,
+      0x20AC: 0x88,
+      0x2030: 0x89,
+      0x0409: 0x8A,
+      0x2039: 0x8B,
+      0x040A: 0x8C,
+      0x040C: 0x8D,
+      0x040B: 0x8E,
+      0x040F: 0x8F,
+      0x0452: 0x90,
+      0x2018: 0x91,
+      0x2019: 0x92,
+      0x201C: 0x93,
+      0x201D: 0x94,
+      0x2022: 0x95,
+      0x2013: 0x96,
+      0x2014: 0x97,
+      0x2122: 0x99,
+      0x0459: 0x9A,
+      0x203A: 0x9B,
+      0x045A: 0x9C,
+      0x045C: 0x9D,
+      0x045B: 0x9E,
+      0x045F: 0x9F,
+      0x00A0: 0xA0,
+      0x040E: 0xA1,
+      0x045E: 0xA2,
+      0x0408: 0xA3,
+      0x00A4: 0xA4,
+      0x0490: 0xA5,
+      0x00A6: 0xA6,
+      0x00A7: 0xA7,
+      0x0401: 0xA8,
+      0x00A9: 0xA9,
+      0x0404: 0xAA,
+      0x00AB: 0xAB,
+      0x00AC: 0xAC,
+      0x00AD: 0xAD,
+      0x00AE: 0xAE,
+      0x0407: 0xAF,
+      0x00B0: 0xB0,
+      0x00B1: 0xB1,
+      0x0406: 0xB2,
+      0x0456: 0xB3,
+      0x0491: 0xB4,
+      0x00B5: 0xB5,
+      0x00B6: 0xB6,
+      0x00B7: 0xB7,
+      0x0451: 0xB8,
+      0x2116: 0xB9,
+      0x0454: 0xBA,
+      0x00BB: 0xBB,
+      0x0458: 0xBC,
+      0x0405: 0xBD,
+      0x0455: 0xBE,
+      0x0457: 0xBF,
+    };
+
+    return map[rune];
   }
 }

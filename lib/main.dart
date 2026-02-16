@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
 import 'models/user.dart';
 import 'models/recipe.dart';
 import 'models/ingredient.dart';
 import 'models/step.dart';
-
 import 'services/recipe_repository.dart';
 import 'services/user_repository.dart';
+import 'repositories/fridge_repository.dart';
+import 'repositories/history_repository.dart';
 import 'main_screen.dart';
 
 void main() async {
@@ -15,15 +15,15 @@ void main() async {
 
   await Hive.initFlutter();
 
-  // Регистрируем ВСЕ адаптеры
   Hive.registerAdapter(UserAdapter());
   Hive.registerAdapter(IngredientAdapter());
   Hive.registerAdapter(RecipeStepAdapter());
   Hive.registerAdapter(RecipeAdapter());
 
-  // Инициализация репозиториев
   await UserRepository.init();
   await RecipeRepository.init();
+  await FridgeRepository.init();
+  await HistoryRepository.init();
 
   runApp(const MyApp());
 }

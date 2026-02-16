@@ -2,13 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../utils/time_formatter.dart';
-import 'package:flutter/services.dart';
 import '../models/comment.dart';
-import '../services/ingredient_checker.dart';
 import '../models/ingredient_check_result.dart';
-import '../models/ingredient.dart';
+import '../repositories/fridge_repository.dart';
+import '../repositories/history_repository.dart';
+import '../services/recipe_availability_service.dart';
+import '../models/history/recipe_history_entry.dart';
 import 'recipe_manager.dart';
-import 'create_screen.dart';  // Добавляем импорт CreateRecipeScreen
+import 'create_screen.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;
@@ -24,20 +25,17 @@ class RecipeDetailScreen extends StatefulWidget {
   State<RecipeDetailScreen> createState() => _RecipeDetailScreenState();
 }
 
-/*
- * RecipeDetailScreen может возвращать результаты:
- * - true: рецепт был удален
- * - "edited": рецепт был отредактирован
- * - null/false: ничего не произошло
- */
-
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
+  final RecipeAvailabilityService _availabilityService =
+      const RecipeAvailabilityService();
   bool isCooking = false;
   bool isFavorite = false;
   int remainingTime = 0;
   Timer? timer;
   List<bool> stepCompleted = [];
   String? selectedCommentImage;
+  bool _consumeOnFinish = true;
+  RecipeAvailabilityResult? _lastAvailabilityResult;
 
   @override
   void initState() {
@@ -45,17 +43,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     stepCompleted = List.generate(widget.recipe.steps.length, (index) => false);
   }
 
-  /*
-   * Метод для перезагрузки данных рецепта из Hive
-   * Теперь можно обновлять поля widget.recipe напрямую
-   */
   void _reloadRecipe() {
-    final updatedRecipe = RecipeManager()
-        .getRecipes()
-        .firstWhere((r) => r.id == widget.recipe.id);
-    
+    final updatedRecipe = RecipeManager().getRecipes().firstWhere(
+      (r) => r.id == widget.recipe.id,
+    );
+
     setState(() {
-      // Обновляем все поля рецепта актуальными данными
       widget.recipe.title = updatedRecipe.title;
       widget.recipe.description = updatedRecipe.description;
       widget.recipe.ingredients = updatedRecipe.ingredients;
@@ -63,9 +56,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       widget.recipe.prepTimeSeconds = updatedRecipe.prepTimeSeconds;
       widget.recipe.imagePath = updatedRecipe.imagePath;
       widget.recipe.isFavorite = updatedRecipe.isFavorite;
-      
-      // Обновляем список шагов для cooking mode
-      stepCompleted = List.generate(updatedRecipe.steps.length, (index) => false);
+
+      stepCompleted = List.generate(
+        updatedRecipe.steps.length,
+        (index) => false,
+      );
     });
   }
 
@@ -75,7 +70,47 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     super.dispose();
   }
 
-  void startCooking() {
+  Future<void> startCooking() async {
+    final fridgeItems = FridgeRepository.getItems();
+    final availability = _availabilityService.checkAndBuildConsumption(
+      recipeIngredients: widget.recipe.ingredients,
+      fridgeItems: fridgeItems,
+    );
+
+    _lastAvailabilityResult = availability;
+    _checkResult = availability.hasAllIngredients
+        ? IngredientCheckResult.success
+        : IngredientCheckResult.failure;
+
+    if (!availability.hasAllIngredients) {
+      final proceedWithoutConsumption = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Ингредиентов недостаточно'),
+          content: const Text(
+            'Можно продолжить, но ингредиенты не будут списаны из холодильника, и запись не попадет в историю.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Продолжить'),
+            ),
+          ],
+        ),
+      );
+
+      if (proceedWithoutConsumption != true) {
+        return;
+      }
+      _consumeOnFinish = false;
+    } else {
+      _consumeOnFinish = true;
+    }
+
     setState(() {
       isCooking = true;
       remainingTime = widget.recipe.prepTimeSeconds;
@@ -92,7 +127,23 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     });
   }
 
-  void finishCooking() {
+  Future<void> finishCooking() async {
+    if (_consumeOnFinish &&
+        _lastAvailabilityResult?.hasAllIngredients == true) {
+      await FridgeRepository.saveItems(_lastAvailabilityResult!.updatedItems);
+
+      final entry = RecipeHistoryEntry(
+        id: '${DateTime.now().microsecondsSinceEpoch}_${widget.recipe.id}',
+        createdAtMillis: DateTime.now().millisecondsSinceEpoch,
+        recipeId: widget.recipe.id,
+        recipeTitle: widget.recipe.title,
+        recipeImagePath: widget.recipe.imagePath,
+        consumedItems: _lastAvailabilityResult!.consumedSnapshot,
+      );
+
+      await HistoryRepository.saveEntry(entry);
+    }
+
     setState(() {
       isCooking = false;
       timer?.cancel();
@@ -114,14 +165,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     ),
   ];
 
-  //Комментарии
   Widget _buildComment(Comment comment) {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start, // Аватар сверху
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // АВАТАР - flex 1
           Expanded(
             flex: 1,
             child: Container(
@@ -146,7 +195,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
           SizedBox(width: 12),
 
-          // КОНТЕНТ КОММЕНТАРИЯ - flex 4
           Expanded(
             flex: 5,
             child: Container(
@@ -154,7 +202,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // РЯД: Логин и дата
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -181,7 +228,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
                   SizedBox(height: 8),
 
-                  // ТЕКСТ КОММЕНТАРИЯ
                   Text(
                     comment.text,
                     style: TextStyle(
@@ -190,10 +236,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       fontFamily: 'Roboto',
                       fontWeight: FontWeight.w400,
                     ),
-                    softWrap: true, // Автоматический перенос строк
+                    softWrap: true,
                   ),
 
-                  // ИЗОБРАЖЕНИЕ (если есть)
                   if (comment.imageUrl != null) ...[
                     SizedBox(height: 4),
                     ClipRRect(
@@ -215,24 +260,21 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
-  //Кнопка оставить комментарий
   void _openCommentInput() {
-    showModalBottomSheet(                                          //Окно которое выезжает снизу вверх
-      context: context,                                            //Передаем контекст текущего виджета
-      isScrollControlled: true,                                    // Позволяет управлять высотой окна экранной клавиатуры
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,                           //Убираем закругления - Material по умолчанию с радиусом
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       builder: (context) {
-        final bottomInset = MediaQuery.of(context).viewInsets.bottom;     //Получаем высоту клавиатуры
+        final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
         return AnimatedPadding(
           duration: const Duration(milliseconds: 150),
           curve: Curves.easeOut,
           padding: EdgeInsets.only(
-            bottom: bottomInset + (MediaQuery.of(context).size.height * 0.01), // 1% от высоты экрана
-            top: MediaQuery.of(context).size.height * 0.015, // 1.5% от высоты экрана
+            bottom: bottomInset + (MediaQuery.of(context).size.height * 0.01),
+            top: MediaQuery.of(context).size.height * 0.015,
             left: MediaQuery.of(context).size.width * 0.02,
             right: MediaQuery.of(context).size.width * 0.02,
           ),
@@ -240,20 +282,20 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             top: false,
             child: Container(
               width: double.infinity,
-              height: MediaQuery.of(context).size.height * 0.14, // ← Добавлено: фиксированная высота
+              height: MediaQuery.of(context).size.height * 0.14,
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border.all(color: Color(0xff165932), width: 3),
               ),
-              child: Stack(                                                //Располагаем виджеты друг над другом
+              child: Stack(
                 children: [
                   TextField(
-                    autofocus: true,                                          //При открытии окна курсор сразу ставится в поле ввода
+                    autofocus: true,
                     keyboardType: TextInputType.multiline,
                     minLines: 1,
-                    maxLines: 5, // Разрешаем ввод многострочного текста
-                    textAlignVertical: TextAlignVertical.top,                   // Текст начинается с верхней части поля
+                    maxLines: 5,
+                    textAlignVertical: TextAlignVertical.top,
                     decoration: InputDecoration(
                       hintText: 'Оставить комментарий',
                       border: InputBorder.none,
@@ -283,46 +325,34 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
-  IngredientCheckResult _checkResult = IngredientCheckResult.idle; //Переменная _checkResult типа IngredientCheckResult хранит статус проверки,
-  // по умолчанию idle не проверено
+  IngredientCheckResult _checkResult = IngredientCheckResult.idle;
 
-  Color _borderColor() {                    //Функция для определения цвета через статус переменной _checkResult
+  Color _borderColor() {
     switch (_checkResult) {
-      case IngredientCheckResult.success:    //В зависимости от результата проверки выставляем цвет
+      case IngredientCheckResult.success:
         return Color(0xff2ecc71);
       case IngredientCheckResult.failure:
         return Colors.red;
       case IngredientCheckResult.idle:
-        return Color(0xffa0a0a0);   //По умолчанию серый цвет
+        return Color(0xffa0a0a0);
     }
   }
 
-  //Основное условия и проверка
   void _checkIngredient() {
-    final fridgeIngredients = [
-      Ingredient(name: "Говядина", measurement: "400 г"),
-      Ingredient(name: "Лук", measurement: "1 шт."),
-      Ingredient(name: "Чеснок", measurement: "2 зубчика"),
-      Ingredient(name: "Сливочное масло", measurement: "50 г"),
-      Ingredient(name: "Сливки", measurement: "100 мл"),
-      Ingredient(name: "Хмели-сунели", measurement: "1 ч. ложка"),
-      Ingredient(name: "Соль", measurement: "по вкусу"),
-      Ingredient(name: "Перец", measurement: "по вкусу"),
-      Ingredient(name: "Масло для жарки", measurement: "2 ст. ложки"),
-    ];
-
-    //Вызываю сервис проверки
-    final hasAll = IngredientChecker.hasAllIngredients(
-      recipeIngredients: widget.recipe.ingredients,           //Входные данные для функции в ingredient_checkre.dart
-      fridgeIngredients: fridgeIngredients,
+    final fridgeItems = FridgeRepository.getItems();
+    final availability = _availabilityService.checkAndBuildConsumption(
+      recipeIngredients: widget.recipe.ingredients,
+      fridgeItems: fridgeItems,
     );
+    _lastAvailabilityResult = availability;
 
     setState(() {
-      _checkResult = hasAll ? IngredientCheckResult.success : IngredientCheckResult.failure; //Обновляем состояние в зависимости от результата провреки
+      _checkResult = availability.hasAllIngredients
+          ? IngredientCheckResult.success
+          : IngredientCheckResult.failure;
     });
-
   }
-  //Основной контент
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -337,7 +367,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ? []
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       offset: Offset(0, 3),
                       blurRadius: 2,
                     ),
@@ -373,7 +403,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         ),
         child: Column(
           children: [
-            // ТАЙМЕР
             if (isCooking)
               Container(
                 width: MediaQuery.of(context).size.width,
@@ -412,12 +441,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ),
               ),
 
-            // ОДИН ОБЩИЙ СКРОЛЛ
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // ПЕРВЫЙ БЛОК С PADDING - основной контент рецепта
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: MediaQuery.of(context).size.width * 0.0374,
@@ -426,159 +453,170 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Заголовок рецепта с иконками действий
-                          // Убрали условие if (widget.isLoggedIn) чтобы иконки всегда отображались
                           Row(
                             children: [
-                                /*
-                                 * Текст заголовка - занимает 4/7 пространства
-                                 * Уменьшили с flex: 5 до flex: 4 чтобы освободить место для иконок
-                                 */
-                                Expanded(
-                                  flex: 6,  // Уменьшили чтобы освободить место для иконок
-                                  child: Text(
-                                    widget.recipe.title,
-                                    style: TextStyle(
-                                      fontSize:
-                                          MediaQuery.of(context).size.width *
-                                          0.07,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.black,
-                                      fontFamily: 'Roboto',
-                                      height: 1.15,
+                              Expanded(
+                                flex: 6,
+                                child: Text(
+                                  widget.recipe.title,
+                                  style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                        0.07,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black,
+                                    fontFamily: 'Roboto',
+                                    height: 1.15,
+                                  ),
+                                  maxLines: null,
+                                  softWrap: true,
+                                ),
+                              ),
+
+                              Expanded(
+                                flex: 3,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Expanded(
+                                      flex: 1,
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          await RecipeManager().toggleFavorite(
+                                            widget.recipe,
+                                          );
+
+                                          setState(() {});
+                                        },
+                                        child: Image.asset(
+                                          widget.recipe.isFavorite
+                                              ? 'assets/Icons/heart_red.png'
+                                              : 'assets/Icons/heart_black.png',
+                                          width: 24,
+                                          height: 24,
+                                        ),
+                                      ),
                                     ),
-                                    maxLines: null,
-                                    softWrap: true,
-                                  ),
-                                ),
 
-                                Expanded(
-                                  flex: 3,  // 3 иконки по flex: 1 каждая
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,  // Иконки справа
-                                    children: [
-                                      // Иконка избранного (сердечко)
-                                      Expanded(
-                                        flex: 1,
-                                        child: GestureDetector(
-                                          onTap: () async {
-                                            // Переключаем состояние избранного
-                                            await RecipeManager().toggleFavorite(widget.recipe);
-                                            // Обновляем состояние виджета для отображения новой иконки
-                                            setState(() {});
-                                          },
-                                          child: Image.asset(
-                                            widget.recipe.isFavorite 
-                                                ? 'assets/Icons/heart_red.png' 
-                                                : 'assets/Icons/heart_black.png',
-                                            width: 24,
-                                            height: 24,
-                                          )
+                                    Expanded(
+                                      flex: 1,
+                                      child: IconButton(
+                                        icon: const Icon(
+                                          Icons.edit,
+                                          color: Color(0xff4d4d4d),
                                         ),
-                                      ),
-                                      // Иконка редактирования (карандаш)
-                                      Expanded(
-                                        flex: 1,
-                                        child: IconButton(
-                                          icon: const Icon(Icons.edit, color: Color(0xff4d4d4d)),
-                                          onPressed: () async {
-                                            /*
-                                             * ОТКРЫВАЕМ ЭКРАН РЕДАКТИРОВАНИЯ
-                                             * Передаем текущий рецепт (widget.recipe) в CreateRecipeScreen
-                                             * CreateRecipeScreen поймет, что это режим редактирования
-                                             * и заполнит все поля данными из рецепта
-                                             * 
-                                             * Ждем результат редактирования и обновляем UI если нужно
-                                             */
-                                            final result = await Navigator.push<bool>(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) => CreateRecipeScreen(recipe: widget.recipe),
-                                              ),
-                                            );
-                                            
-                                            /*
-                                             * ЕСЛИ РЕЦЕПТ БЫЛ ОБНОВЛЕН (result == true):
-                                             * Используем метод _reloadRecipe для обновления данных
-                                             * И возвращаем результат чтобы обновить список в RecipeListScreen
-                                             */
-                                            if (result == true) {
-                                              _reloadRecipe();
-                                              
-                                              // Возвращаемся на список с результатом редактирования
-                                              Navigator.pop(context, "edited");  // "edited" = рецепт был изменен
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                      // Иконка удаления (урна)
-                                      Expanded(
-                                        flex: 1,
-                                        child: IconButton(
-                                          icon: const Icon(Icons.delete, color: Color(0xFF4d4d4d)),
-                                          onPressed: () async {
-                                            /*
-                                             * ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ РЕЦЕПТА
-                                             * Показываем диалог подтверждения перед удалением
-                                             */
-                                            final confirmDelete = await showDialog<bool>(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: Text('Удалить рецепт?'),
-                                                content: Text('Вы уверены, что хотите удалить рецепт "${widget.recipe.title}"?'),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () => Navigator.pop(context, false),
-                                                    child: Text('Отмена'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () => Navigator.pop(context, true),
-                                                    child: Text('Удалить', style: TextStyle(color: Colors.red)),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
+                                        onPressed: () async {
+                                          final result =
+                                              await Navigator.push<bool>(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      CreateRecipeScreen(
+                                                        recipe: widget.recipe,
+                                                      ),
+                                                ),
+                                              );
+                                          if (!context.mounted) return;
 
-                                            /*
-                                             * ЕСЛИ ПОЛЬЗОВАТЕЛЬ ПОДТВЕРДИЛ УДАЛЕНИЕ:
-                                             * 1. Удаляем рецепт из базы данных
-                                             * 2. Показываем сообщение об успехе
-                                             * 3. Возвращаемся на предыдущий экран
-                                             */
-                                            if (confirmDelete == true) {
-                                              try {
-                                                await RecipeManager().deleteRecipe(widget.recipe.id);
-                                                
-                                                if (mounted) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(content: Text('Рецепт успешно удален!')),
-                                                  );
-                                                  
-                                                  // Возвращаемся на список рецептов с результатом удаления
-                                                  Navigator.pop(context, true);  // true = рецепт был удален
-                                                }
-                                              } catch (e) {
-                                                if (mounted) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(content: Text('Ошибка при удалении рецепта')),
-                                                  );
-                                                }
-                                              }
-                                            }
-                                          },
-                                        ),
+                                          if (result == true) {
+                                            _reloadRecipe();
+
+                                            Navigator.pop(context, "edited");
+                                          }
+                                        },
                                       ),
-                                    ],
-                                  ),
+                                    ),
+
+                                    Expanded(
+                                      flex: 1,
+                                      child: IconButton(
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Color(0xFF4d4d4d),
+                                        ),
+                                        onPressed: () async {
+                                          final confirmDelete =
+                                              await showDialog<bool>(
+                                                context: context,
+                                                builder: (context) => AlertDialog(
+                                                  title: Text(
+                                                    'Удалить рецепт?',
+                                                  ),
+                                                  content: Text(
+                                                    'Вы уверены, что хотите удалить рецепт "${widget.recipe.title}"?',
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                            context,
+                                                            false,
+                                                          ),
+                                                      child: Text('Отмена'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                            context,
+                                                            true,
+                                                          ),
+                                                      child: Text(
+                                                        'Удалить',
+                                                        style: TextStyle(
+                                                          color: Colors.red,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                          if (!context.mounted) return;
+
+                                          if (confirmDelete == true) {
+                                            try {
+                                              await RecipeManager()
+                                                  .deleteRecipe(
+                                                    widget.recipe.id,
+                                                  );
+
+                                              if (!context.mounted) return;
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'Рецепт успешно удален!',
+                                                  ),
+                                                ),
+                                              );
+
+                                              Navigator.pop(context, true);
+                                            } catch (e) {
+                                              if (!context.mounted) return;
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'Ошибка при удалении рецепта',
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
+                            ],
                           ),
 
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.015,
                           ),
 
-                          // Время приготовления
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -606,7 +644,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             height: MediaQuery.of(context).size.height * 0.015,
                           ),
 
-                          // Изображение рецепта
                           Container(
                             width: double.infinity,
                             height: MediaQuery.of(context).size.height * 0.28,
@@ -626,7 +663,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             height: MediaQuery.of(context).size.height * 0.02,
                           ),
 
-                          // Ингредиенты
                           Text(
                             'Ингредиенты',
                             style: TextStyle(
@@ -648,7 +684,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: _borderColor(),  //Передаем цвет контейнера изоходя из статуса проверки ingredient_checker переменной _checkResult
+                                color: _borderColor(),
                                 width: 5,
                               ),
                             ),
@@ -713,7 +749,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             height: MediaQuery.of(context).size.height * 0.02,
                           ),
 
-                          // Кнопка "Проверить наличие"
                           if (widget.isLoggedIn)
                             Center(
                               child: SizedBox(
@@ -750,7 +785,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             height: MediaQuery.of(context).size.height * 0.02,
                           ),
 
-                          // Шаги приготовления
                           Text(
                             'Шаги приготовления',
                             style: TextStyle(
@@ -904,14 +938,17 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             height: MediaQuery.of(context).size.height * 0.02,
                           ),
 
-                          // Кнопка "Начать готовить"
                           Center(
                             child: SizedBox(
                               width: MediaQuery.of(context).size.width * 0.6,
                               child: ElevatedButton(
-                                onPressed: isCooking
-                                    ? finishCooking
-                                    : startCooking,
+                                onPressed: () async {
+                                  if (isCooking) {
+                                    await finishCooking();
+                                  } else {
+                                    await startCooking();
+                                  }
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: isCooking
                                       ? Colors.white
@@ -960,123 +997,94 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         color: Colors.black,
                       ),
 
-                    // ЛИНИЯ БЕЗ PADDING - на всю ширину экрана
                     if (widget.isLoggedIn)
                       Padding(
                         padding: EdgeInsets.all(10),
                         child: Column(
                           children: [
-                            SizedBox(height: MediaQuery.of(context).size.height * 0.01,),
-                            ...comments
-                                .map((comment) => _buildComment(comment))
-                                .toList(),
-                            SizedBox(height: MediaQuery.of(context).size.height * 0.01,),
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.01,
+                            ),
+                            ...comments.map(
+                              (comment) => _buildComment(comment),
+                            ),
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.01,
+                            ),
 
-
-                                Padding(
-                                  padding: EdgeInsets.only(bottom: 15),
-                                  child: GestureDetector(
-                                  onTap: _openCommentInput,
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: MediaQuery.of(context).size.height * 0.09,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: Color(0xff165932), width: 3),
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                            left: MediaQuery.of(context,).size.width * 0.04,
-                                            right: MediaQuery.of(context,).size.width * 0.12,
-                                            top: MediaQuery.of(context,).size.height * 0.02,
-                                            bottom: MediaQuery.of(context,).size.height * 0.02,
-                                          ),
-                                          child: Text(
-                                            'Оставить комментарий',
-                                            style: TextStyle(
-                                              color: Color(0xffc2c2c2),
-                                              fontSize: MediaQuery.of(context).size.width * 0.037,
-                                            ),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: MediaQuery.of(context).size.height * 0.012,
-                                          right: MediaQuery.of(context).size.width * 0.02,
-                                          child: Image.asset(
-                                            'assets/Icons/paste_image.png',
-                                            width: MediaQuery.of(context).size.width * 0.06,
-                                          ),
-                                        ),
-                                      ],
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 15),
+                              child: GestureDetector(
+                                onTap: _openCommentInput,
+                                child: Container(
+                                  width: double.infinity,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.09,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Color(0xff165932),
+                                      width: 3,
                                     ),
                                   ),
+                                  child: Stack(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                          left:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.04,
+                                          right:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.12,
+                                          top:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.height *
+                                              0.02,
+                                          bottom:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.height *
+                                              0.02,
+                                        ),
+                                        child: Text(
+                                          'Оставить комментарий',
+                                          style: TextStyle(
+                                            color: Color(0xffc2c2c2),
+                                            fontSize:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.037,
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top:
+                                            MediaQuery.of(context).size.height *
+                                            0.012,
+                                        right:
+                                            MediaQuery.of(context).size.width *
+                                            0.02,
+                                        child: Image.asset(
+                                          'assets/Icons/paste_image.png',
+                                          width:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.06,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                ),
-
-                                // Column(
-                                //   children: [
-                                //     Container(
-                                //       height: MediaQuery.of(context).size.height * 0.14, // 0.14–0.18
-                                //       decoration: BoxDecoration(
-                                //         borderRadius: BorderRadius.circular(12),
-                                //         border: Border.all(
-                                //           color: Color(0xff165932),
-                                //           width: 3,
-                                //         ),
-                                //       ),
-                                //       child: Stack(
-                                //         children: [
-                                //           // TEXTFIELD
-                                //           TextField(
-                                //             maxLines: null,
-                                //             expands: true,
-                                //             keyboardType: TextInputType.multiline,
-                                //             textAlignVertical: TextAlignVertical.top,
-                                //             decoration: InputDecoration(
-                                //               hintText: 'Оставить комментарий',
-                                //               hintStyle: TextStyle(
-                                //                 color: Color(0xffc2c2c2),
-                                //                 fontSize: MediaQuery.of(context,).size.width * 0.037,
-                                //                 fontFamily: 'Roboto',
-                                //               ),
-                                //               border: InputBorder.none,
-                                //               contentPadding: EdgeInsets.only(
-                                //                 left: MediaQuery.of(context,).size.width * 0.04,
-                                //                 right: MediaQuery.of(context,).size.width * 0.12,
-                                //                 top: MediaQuery.of(context,).size.height * 0.02,
-                                //                 bottom: MediaQuery.of(context,).size.height * 0.02,
-                                //               ),
-                                //             ),
-                                //           ),
-                                //
-                                //           // ИКОНКА ДОБАВЛЕНИЯ ИЗОБРАЖЕНИЯ
-                                //           Positioned(
-                                //             top: MediaQuery.of(context).size.height * 0.012,
-                                //             right: MediaQuery.of(context,).size.width * 0.02,
-                                //             child: InkWell(
-                                //               onTap: () {
-                                //                 setState(() {
-                                //                   selectedCommentImage =
-                                //                       'assets/Images/salmon_in_teriyaki_sauce.png';
-                                //                 });
-                                //               },
-                                //               borderRadius: BorderRadius.circular(8),
-                                //               child: Padding(
-                                //                 padding: EdgeInsets.all(MediaQuery.of(context,).size.width * 0.015,),
-                                //                 child: Image.asset(
-                                //                   'assets/Icons/paste_image.png',
-                                //                   width: MediaQuery.of(context).size.width * 0.06,
-                                //                 ),
-                                //               ),
-                                //             ),
-                                //           ),
-                                //         ],
-                                //       ),
-                                //     ),
-                                //   ],
-                                // ),
+                              ),
+                            ),
                           ],
                         ),
                       ),

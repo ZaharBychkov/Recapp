@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../widgets/png_icon.dart'; // Импортируем новый виджет
 
 class RegistrationScreen extends StatelessWidget {
+  RegistrationScreen({super.key});
+
   final formKey = GlobalKey<FormState>();
   final loginController = TextEditingController();
   final passwordController = TextEditingController();

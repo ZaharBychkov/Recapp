@@ -12,7 +12,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> { //Создаем класс внутри стейта для работы с состоянием
   ui.Image? _backgroundImage;                         // Сюда сохраним декодированное изображение после загрузки т.е. изображение из пикселей
-  String? _errorMessage;                              // Переменная для хранения сообщения об ошибке (если загрузка провалится)
 
   @override
   void initState() {                                  // Вызывается один раз при создании состояния
@@ -30,11 +29,9 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
       if (mounted) {                                  // Проверяем, что виджет всё ещё существует, пользователь до сих пор на странице
         setState(() => _backgroundImage = frame.image); // Сохраняем изображение и вызываем перерисовку
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _errorMessage = 'Не удалось загрузить фоновую картинку');
-        // Сохраняем сообщение об ошибке и обновляем UI
-      }
+    } catch (e, st) {
+      debugPrint('Не удалось загрузить фоновую картинку: $e');
+      debugPrintStack(stackTrace: st);
     }
   }
 
@@ -89,3 +86,4 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
 
   }
 }
+
