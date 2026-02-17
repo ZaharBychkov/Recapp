@@ -38,6 +38,13 @@ class RecipeRepository {
     return _box?.values.where((r) => r.isFavorite).toList() ?? [];
   }
 
+  static ValueListenable<Box<Recipe>> recipesListenable() {
+    if (_box == null) {
+      throw Exception('RecipeRepository not initialized');
+    }
+    return _box!.listenable();
+  }
+
   // Переключаем флаг избранного.
   static Future<void> toggleFavorite(Recipe recipe) async {
     recipe.isFavorite = !recipe.isFavorite;

@@ -1,48 +1,46 @@
+﻿import 'package:flutter/foundation.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
 import 'services/recipe_repository.dart';
 import 'models/recipe.dart';
 
-
 class RecipeManager {
-  static final RecipeManager _instance = RecipeManager._internal(); //Создаем один экземпляр на одно приложение
-  factory RecipeManager() => _instance;                              //Возвращаем один экземпляр где бы мы не вызвался RecipeManager
-  RecipeManager._internal();                                         //Вызываем только внутри данного файла
+  static final RecipeManager _instance = RecipeManager._internal();
+  factory RecipeManager() => _instance;
+  RecipeManager._internal();
 
-  //Получить все рецепты из базы
   List<Recipe> getRecipes() {
     return RecipeRepository.getAllRecipes();
   }
 
-  //Получить все рецепты с пометкой isFavorite
   List<Recipe> getFavoriteRecipes() {
     return RecipeRepository.getFavoriteRecipes();
   }
 
-  //Проверить является ли рецепт isFavorite
+  ValueListenable<Box<Recipe>> recipesListenable() {
+    return RecipeRepository.recipesListenable();
+  }
+
   bool isFavorite(Recipe recipe) {
     return recipe.isFavorite;
   }
 
-  //меняем состояние isFavorite
   Future<void> toggleFavorite(Recipe recipe) async {
     await RecipeRepository.toggleFavorite(recipe);
   }
 
-  //Добавить рецепт
   Future<void> addRecipe(Recipe recipe) async {
     await RecipeRepository.addRecipe(recipe);
   }
 
-  //Обновить существующий рецепт
   Future<void> updateRecipe(Recipe recipe) async {
     await RecipeRepository.updateRecipe(recipe);
   }
 
-  //Удалить рецепт
   Future<void> deleteRecipe(int recipeId) async {
     await RecipeRepository.deleteRecipe(recipeId);
   }
 
-  //Получить Id для нового рецепта
   int getNextId() {
     return RecipeRepository.getNextId();
   }

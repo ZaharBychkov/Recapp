@@ -42,9 +42,15 @@ class _FridgeScreenState extends State<FridgeScreen> {
   }
 
   Future<void> _addIngredient() async {
-    final result = await showDialog<FridgeDialogResult>(
+    final result = await showModalBottomSheet<FridgeDialogResult>(
       context: context,
-      builder: (_) => FridgeItemDialog(existingItems: _items),
+      isDismissible: true,
+      isScrollControlled: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => FridgeItemDialog(
+        existingItems: _items,
+      ),
     );
 
     if (result == null) return;
@@ -52,21 +58,36 @@ class _FridgeScreenState extends State<FridgeScreen> {
     final name = NameSanitizer.normalize(result.name);
     final amountBase = _converter.toBase(amount: result.amount, unit: result.unit);
 
-    final normalizedName = name.toLowerCase();
-    final autoMergeIndex = _items.indexWhere(
-      (item) =>
-          item.name.toLowerCase() == normalizedName &&
-          item.unit.category == result.unit.category,
-    );
-    final shouldMerge = !result.forceCreateNew &&
-        (result.existingItemId != null || autoMergeIndex != -1);
+    if (result.existingItemId != null) {
+      final index = _items.indexWhere((e) => e.id == result.existingItemId);
+      if (index == -1) {
+        await _reload();
+        return;
+      }
 
-    if (shouldMerge) {
-      await FridgeRepository.addToExisting(
-        itemId: result.existingItemId ?? _items[autoMergeIndex].id,
-        deltaBase: amountBase,
+      final current = _items[index];
+      await FridgeRepository.updateItem(
+        current.copyWith(
+          amountBase: amountBase,
+          unit: result.unit,
+        ),
       );
     } else {
+      final hasExactDuplicate = _items.any(
+        (item) =>
+            NameSanitizer.normalize(item.name).toLowerCase() == name.toLowerCase(),
+      );
+      if (hasExactDuplicate) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Такой ингредиент уже существует. Выберите существующий.'),
+            ),
+          );
+        }
+        return;
+      }
+
       await FridgeRepository.addNew(
         name: name,
         amountBase: amountBase,
@@ -78,8 +99,12 @@ class _FridgeScreenState extends State<FridgeScreen> {
   }
 
   Future<void> _editIngredient(FridgeItem item) async {
-    final result = await showDialog<FridgeDialogResult>(
+    final result = await showModalBottomSheet<FridgeDialogResult>(
       context: context,
+      isDismissible: true,
+      isScrollControlled: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
       builder: (_) => FridgeItemDialog(
         existingItems: _items,
         editingItem: item,
@@ -89,7 +114,11 @@ class _FridgeScreenState extends State<FridgeScreen> {
     if (result == null) return;
 
     final name = NameSanitizer.normalize(result.name);
-    final hasExactDuplicate = _items.any((e) => e.id != item.id && e.name == name);
+    final hasExactDuplicate = _items.any(
+      (e) =>
+          e.id != item.id &&
+          NameSanitizer.normalize(e.name).toLowerCase() == name.toLowerCase(),
+    );
     if (hasExactDuplicate) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -115,8 +144,50 @@ class _FridgeScreenState extends State<FridgeScreen> {
   }
 
   Future<void> _deleteIngredient(FridgeItem item) async {
+    final shouldDelete = await _confirmDeleteIngredient(item);
+    if (!shouldDelete) return;
+
     await FridgeRepository.deleteItem(item.id);
     await _reload();
+  }
+
+  Future<bool> _confirmDeleteIngredient(FridgeItem item) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text(
+            'Удалить ингредиент?',
+            style: TextStyle(
+              color: Color(0xFF165932),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: Text(item.name),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF165932),
+              ),
+              child: const Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD32F2F),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Удалить'),
+            ),
+          ],
+        );
+      },
+    );
+
+    return result == true;
   }
 
   Future<void> _onReorder(int oldIndex, int newIndex) async {
