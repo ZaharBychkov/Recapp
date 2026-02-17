@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -8,7 +12,88 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String username = "avpetrov"; // Имя пользователя (можно заменить на реальное)
+  static const String _avatarPathKey = 'profile_avatar_path';
+
+  final ImagePicker _picker = ImagePicker();
+  String username = 'avpetrov';
+  String? _avatarPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvatar();
+  }
+
+  Future<void> _loadAvatar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedPath = prefs.getString(_avatarPathKey);
+
+    if (savedPath == null || savedPath.isEmpty) {
+      return;
+    }
+
+    if (!File(savedPath).existsSync()) {
+      await prefs.remove(_avatarPathKey);
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _avatarPath = savedPath;
+    });
+  }
+
+  Future<void> _saveAvatarPath(String? path) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (path == null || path.isEmpty) {
+      await prefs.remove(_avatarPathKey);
+      return;
+    }
+
+    await prefs.setString(_avatarPathKey, path);
+  }
+
+  Future<void> _pickAvatar(ImageSource source) async {
+    Navigator.of(context).pop();
+
+    final pickedFile = await _picker.pickImage(
+      source: source,
+      imageQuality: 85,
+      maxWidth: 1024,
+    );
+
+    if (pickedFile == null) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _avatarPath = pickedFile.path;
+    });
+
+    await _saveAvatarPath(pickedFile.path);
+  }
+
+  Future<void> _removeAvatar() async {
+    Navigator.of(context).pop();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _avatarPath = null;
+    });
+
+    await _saveAvatarPath(null);
+  }
 
   void _showAvatarAction(BuildContext context) {
     showModalBottomSheet(
@@ -24,29 +109,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-
               _actionItem(
                 text: 'Сфотографировать',
-                onTap: () {},
+                onTap: () => _pickAvatar(ImageSource.camera),
               ),
               const Divider(height: 1),
               _actionItem(
                 text: 'Выбрать из альбома',
-                onTap: () {},
+                onTap: () => _pickAvatar(ImageSource.gallery),
               ),
               const Divider(height: 1),
               _actionItem(
                 text: 'Удалить',
                 textColor: Colors.red,
-                onTap: () {},
+                onTap: _removeAvatar,
               ),
-
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => Navigator.of(context).pop(),
                   child: Container(
                     height: 44,
                     decoration: BoxDecoration(
@@ -73,12 +155,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
   Widget _actionItem({
     required String text,
     required VoidCallback onTap,
     Color textColor = Colors.black,
-}) {
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Padding(
@@ -90,17 +171,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: textColor,
-            )
-          )
-        )
-      )
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5F5), // Светло-серый фон
+      backgroundColor: Color(0xFFF5F5F5),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(
@@ -110,9 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-
               Center(
                 child: GestureDetector(
                   onTap: () {
@@ -124,24 +203,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Color(0xFF165932), width: 3.5),
-                      color: Colors.white, // Фоновый цвет
+                      color: Colors.white,
                     ),
-                    child: ClipOval(                      //Обрезаем изображение строго по кругу
-                      child: Padding(                    //Отступ между границей круга и изображением
-                        padding: EdgeInsets.all(20),    //Контроль размера изображения
-                        child: Image.asset(
-                          'assets/Icons/empty_avatar.png',
-                          fit: BoxFit.contain,                 //Изображение масштабируется пропорционально, полносью помещаясь внутрь
-                        )
-                      )
+                    child: ClipOval(
+                      child: _avatarPath == null
+                          ? Padding(
+                              padding: EdgeInsets.all(20),
+                              child: Image.asset(
+                                'assets/Icons/empty_avatar.png',
+                                fit: BoxFit.contain,
+                              ),
+                            )
+                          : Image.file(
+                              File(_avatarPath!),
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                 ),
               ),
-
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-
-              // Блок с логином
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -162,9 +243,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     Text(
-                      username, // Имя пользователя
+                      username,
                       style: TextStyle(
-                        color: Color(0xFF2ECC71), // Зелёный цвет
+                        color: Color(0xFF2ECC71),
                         fontSize: MediaQuery.of(context).size.width * 0.04,
                         fontFamily: 'Roboto',
                         fontWeight: FontWeight.w600,
@@ -173,10 +254,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
-
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-
-              // Кнопка "Выход"
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -188,7 +266,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Text(
                     'Выход',
                     style: TextStyle(
-                      color: Colors.red, // Красный цвет
+                      color: Colors.red,
                       fontSize: MediaQuery.of(context).size.width * 0.04,
                       fontFamily: 'Roboto',
                       fontWeight: FontWeight.w600,
@@ -203,3 +281,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
+
