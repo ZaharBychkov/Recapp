@@ -762,6 +762,83 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             ),
                           ),
 
+                          if (_checkResult == IngredientCheckResult.failure &&
+                              _lastAvailabilityResult != null &&
+                              _lastAvailabilityResult!.missingNames.isNotEmpty) ...[
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.012,
+                            ),
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFFFF5F5),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: Color(0xFFD32F2F),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Не хватает в холодильнике:',
+                                    style: TextStyle(
+                                      color: Color(0xFFD32F2F),
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                          0.036,
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height:
+                                        MediaQuery.of(context).size.height *
+                                        0.008,
+                                  ),
+                                  ..._lastAvailabilityResult!.missingNames.map((
+                                    missingName,
+                                  ) {
+                                    return Padding(
+                                      padding: EdgeInsets.only(bottom: 4),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '• ',
+                                            style: TextStyle(
+                                              color: Color(0xFFD32F2F),
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              missingName,
+                                              style: TextStyle(
+                                                color: Color(0xFF4D4D4D),
+                                                fontSize:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.035,
+                                                fontFamily: 'Roboto',
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              ),
+                            ),
+                          ],
+
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.02,
                           ),
