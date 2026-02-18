@@ -55,6 +55,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final size = MediaQuery.of(context).size;
     const activeColor = Color(0xFF2ECC71);
     const inactiveColor = Color(0xFF9E9E9E);
+    final bottomBarHeight = (size.height * 0.08).clamp(64.0, 84.0);
+    final bottomIconSize = (size.width * 0.056).clamp(18.0, 24.0);
+    final bottomTextSize = (size.width * 0.0234).clamp(9.0, 11.0);
 
     return Scaffold(
       backgroundColor: const Color(0xFF2ECC71),
@@ -146,7 +149,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         ),
       ),
       bottomNavigationBar: Container(
-        height: size.height * 0.08,
+        height: bottomBarHeight,
         color: Colors.white,
         child: Row(
           children: [
@@ -164,14 +167,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     children: [
                       Icon(
                         Icons.local_pizza_rounded,
-                        size: size.width * 0.056,
+                        size: bottomIconSize,
                         color: inactiveColor,
                       ),
                       Text(
                         'Рецепты',
                         style: TextStyle(
                           color: inactiveColor,
-                          fontSize: size.width * 0.0234,
+                          fontSize: bottomTextSize,
                           fontFamily: 'Roboto',
                           fontWeight: FontWeight.w400,
                         ),
@@ -191,14 +194,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     children: [
                       Icon(
                         Icons.person_rounded,
-                        size: size.width * 0.056,
+                        size: bottomIconSize,
                         color: activeColor,
                       ),
                       Text(
                         'Вход',
                         style: TextStyle(
                           color: activeColor,
-                          fontSize: size.width * 0.0234,
+                          fontSize: bottomTextSize,
                           fontFamily: 'Roboto',
                           fontWeight: FontWeight.w400,
                         ),
