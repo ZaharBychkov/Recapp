@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'models/user.dart';
 import 'models/recipe.dart';
@@ -12,6 +13,9 @@ import 'splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
 
   await Hive.initFlutter();
 
@@ -43,3 +47,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
