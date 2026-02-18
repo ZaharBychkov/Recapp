@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'history_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -182,6 +183,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _openHistory() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const HistoryScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -218,11 +225,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 fit: BoxFit.contain,
                               ),
                             )
-                          : Image.file(
-                              File(_avatarPath!),
-                              fit: BoxFit.cover,
-                            ),
+                          : Image.file(File(_avatarPath!), fit: BoxFit.cover),
                     ),
+                  ),
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+              GestureDetector(
+                onTap: _openHistory,
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Color(0xFFD9D9D9)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'История приготовления',
+                        style: TextStyle(
+                          color: Color(0xff165932),
+                          fontSize: MediaQuery.of(context).size.width * 0.04,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Icon(Icons.chevron_right, color: Color(0xFF2ECC71)),
+                    ],
                   ),
                 ),
               ),
@@ -285,4 +316,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-

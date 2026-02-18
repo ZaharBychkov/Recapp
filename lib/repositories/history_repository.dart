@@ -1,4 +1,4 @@
-﻿import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import '../models/history/recipe_history_entry.dart';
 
@@ -32,14 +32,39 @@ class HistoryRepository {
     return entries;
   }
 
+  static Future<void> _saveEntries(List<RecipeHistoryEntry> entries) async {
+    await _safeBox.put(_itemsKey, entries.map((e) => e.toMap()).toList());
+  }
+
   static Future<void> saveEntry(RecipeHistoryEntry entry) async {
     final entries = getEntries();
     entries.insert(0, entry);
-    await _safeBox.put(_itemsKey, entries.map((e) => e.toMap()).toList());
+    await _saveEntries(entries);
+  }
+
+  static Future<void> updateEntry(RecipeHistoryEntry entry) async {
+    final entries = getEntries();
+    final index = entries.indexWhere((e) => e.id == entry.id);
+    if (index == -1) return;
+
+    entries[index] = entry;
+    await _saveEntries(entries);
+  }
+
+  static Future<void> markRestored(String id, {int? restoredAtMillis}) async {
+    final entries = getEntries();
+    final index = entries.indexWhere((e) => e.id == id);
+    if (index == -1) return;
+
+    entries[index] = entries[index].copyWith(
+      restoredAtMillis:
+          restoredAtMillis ?? DateTime.now().millisecondsSinceEpoch,
+    );
+    await _saveEntries(entries);
   }
 
   static Future<void> deleteEntry(String id) async {
     final entries = getEntries()..removeWhere((e) => e.id == id);
-    await _safeBox.put(_itemsKey, entries.map((e) => e.toMap()).toList());
+    await _saveEntries(entries);
   }
 }

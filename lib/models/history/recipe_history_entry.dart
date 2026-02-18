@@ -7,6 +7,7 @@ class RecipeHistoryEntry {
   final String recipeTitle;
   final String recipeImagePath;
   final List<FridgeItem> consumedItems;
+  final int? restoredAtMillis;
 
   const RecipeHistoryEntry({
     required this.id,
@@ -15,7 +16,33 @@ class RecipeHistoryEntry {
     required this.recipeTitle,
     required this.recipeImagePath,
     required this.consumedItems,
+    this.restoredAtMillis,
   });
+
+  bool get isRestored => restoredAtMillis != null;
+
+  RecipeHistoryEntry copyWith({
+    String? id,
+    int? createdAtMillis,
+    int? recipeId,
+    String? recipeTitle,
+    String? recipeImagePath,
+    List<FridgeItem>? consumedItems,
+    int? restoredAtMillis,
+    bool clearRestoredAt = false,
+  }) {
+    return RecipeHistoryEntry(
+      id: id ?? this.id,
+      createdAtMillis: createdAtMillis ?? this.createdAtMillis,
+      recipeId: recipeId ?? this.recipeId,
+      recipeTitle: recipeTitle ?? this.recipeTitle,
+      recipeImagePath: recipeImagePath ?? this.recipeImagePath,
+      consumedItems: consumedItems ?? this.consumedItems,
+      restoredAtMillis: clearRestoredAt
+          ? null
+          : (restoredAtMillis ?? this.restoredAtMillis),
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -25,6 +52,7 @@ class RecipeHistoryEntry {
       'recipeTitle': recipeTitle,
       'recipeImagePath': recipeImagePath,
       'consumedItems': consumedItems.map((e) => e.toMap()).toList(),
+      'restoredAtMillis': restoredAtMillis,
     };
   }
 
@@ -41,6 +69,7 @@ class RecipeHistoryEntry {
       recipeTitle: map['recipeTitle'] as String,
       recipeImagePath: map['recipeImagePath'] as String,
       consumedItems: list,
+      restoredAtMillis: (map['restoredAtMillis'] as num?)?.toInt(),
     );
   }
 }
