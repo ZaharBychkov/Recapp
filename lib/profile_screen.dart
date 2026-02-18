@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'history_screen.dart';
+import 'registration_screen.dart';
+import 'services/user_repository.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -22,7 +25,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _loadUser();
     _loadAvatar();
+  }
+
+  void _loadUser() {
+    final user = UserRepository.getCurrentUser();
+    if (user == null) return;
+
+    setState(() {
+      username = user.login;
+    });
   }
 
   Future<void> _loadAvatar() async {
@@ -189,6 +202,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ).push(MaterialPageRoute(builder: (_) => const HistoryScreen()));
   }
 
+  Future<void> _logout() async {
+    await UserRepository.logout();
+    await _saveAvatarPath(null);
+
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const RegistrationScreen()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -290,21 +314,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Color(0xFFD9D9D9)),
-                ),
-                child: Center(
-                  child: Text(
-                    'Выход',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontSize: MediaQuery.of(context).size.width * 0.04,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w600,
+              GestureDetector(
+                onTap: _logout,
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Color(0xFFD9D9D9)),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Выход',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),

@@ -9,6 +9,7 @@ import 'services/user_repository.dart';
 import 'repositories/fridge_repository.dart';
 import 'repositories/history_repository.dart';
 import 'main_screen.dart';
+import 'registration_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +40,20 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: const MainScreen(),
+      home: const _StartupGate(),
     );
+  }
+}
+
+class _StartupGate extends StatelessWidget {
+  const _StartupGate();
+
+  @override
+  Widget build(BuildContext context) {
+    final user = UserRepository.getCurrentUser();
+    if (user == null) {
+      return const RegistrationScreen();
+    }
+    return const MainScreen();
   }
 }
