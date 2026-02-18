@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -10,6 +10,7 @@ import 'add_step_dialog.dart';
 import 'models/ingredient.dart';
 import 'models/step.dart';
 import 'models/recipe.dart';
+import 'domain/recipe_measurement_parser.dart';
 import 'recipe_manager.dart';
 import 'widgets/recipe_image.dart';
 
@@ -31,17 +32,24 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final TextEditingController _titleController = TextEditingController();    //Вводим контроллер для текстового поля
   final TextEditingController _descriptionController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
+  final RecipeMeasurementParser _measurementParser = const RecipeMeasurementParser();
   String? recipeImage;
   List<Ingredient> ingredients = [];
   List<RecipeStep> steps = [];
 
 
   bool get _canSaveRecipe =>
-      ingredients.isNotEmpty && steps.isNotEmpty;
+      _titleController.text.trim().isNotEmpty &&
+      ingredients.isNotEmpty &&
+      ingredients.every((i) => i.name.trim().isNotEmpty && (_measurementParser.parse(i.measurement)?.baseAmount ?? 0) > 0) &&
+      steps.isNotEmpty &&
+      steps.every((s) => s.description.trim().isNotEmpty);
 
   @override
   void initState() {
     super.initState();
+    _titleController.addListener(_onFormChanged);
+    _descriptionController.addListener(_onFormChanged);
     /*
      * ЕСЛИ ПЕРЕДАН РЕЦЕПТ - это режим редактирования
      * Заполняем все поля данными из существующего рецепта
@@ -58,9 +66,16 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
   @override
   void dispose() {
+    _titleController.removeListener(_onFormChanged);
+    _descriptionController.removeListener(_onFormChanged);
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  void _onFormChanged() {
+    if (!mounted) return;
+    setState(() {});
   }
 
   Future<void> _addRecipeImage() async {
@@ -93,6 +108,25 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   void _removeRecipeImage() {
     setState(() {
       recipeImage = null;
+    });
+  }
+
+  Future<void> _editRecipeImage() async {
+    if (recipeImage == null) {
+      await _addRecipeImage();
+      return;
+    }
+
+    if (recipeImage!.startsWith('assets/')) {
+      await _addRecipeImage();
+      return;
+    }
+
+    final selectedPath = await _openImagePreviewAndConfirm(recipeImage!);
+    if (selectedPath == null) return;
+    if (!mounted) return;
+    setState(() {
+      recipeImage = selectedPath;
     });
   }
 
@@ -135,6 +169,15 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     );
 
     if (result != null) {
+      final stepText = (result['step'] as String).trim();
+      if (stepText.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Описание шага не может быть пустым')),
+        );
+        return;
+      }
+
       final stepNumber = steps.length + 1; 
       final minutes = result['minutes'] as int;
       final seconds = result['seconds'] as int;
@@ -143,7 +186,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       setState(() {
         steps.add(RecipeStep(
           stepNumber: stepNumber,
-          description: result['step'] as String, 
+          description: stepText, 
           timeInSeconds: timeInSeconds,
         ));
       });
@@ -160,13 +203,22 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     );
 
     if (result != null) {
+      final stepText = (result['step'] as String).trim();
+      if (stepText.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Описание шага не может быть пустым')),
+        );
+        return;
+      }
+
       final minutes = result['minutes'] as int;
       final seconds = result['seconds'] as int;
 
       setState(() {
         steps[index] = RecipeStep(
           stepNumber: steps[index].stepNumber,
-          description: result['step'],
+          description: stepText,
           timeInSeconds: (minutes * 60) + seconds,
         );
       });
@@ -174,6 +226,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   }
 
   Future<void> _saveRecipe() async {
+    if (!_canSaveRecipe) return;
     final totalTime = steps.fold<int>(
       0,
           (sum, step) => sum + step.timeInSeconds,
@@ -185,16 +238,14 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       final existingRecipe = widget.recipe!;
 
       existingRecipe.title = _titleController.text.trim();
-      existingRecipe.description =
-      _descriptionController.text.trim().isNotEmpty
+      existingRecipe.description = _descriptionController.text.trim().isNotEmpty
           ? _descriptionController.text.trim()
           : 'Без описания';
 
       existingRecipe.ingredients = ingredients;
       existingRecipe.steps = steps;
       existingRecipe.prepTimeSeconds = totalTime;
-      existingRecipe.imagePath =
-          recipeImage ?? 'assets/Images/burger_with_two_cutlets.png';
+      existingRecipe.imagePath = recipeImage ?? '';
 
       await existingRecipe.save();   // 🔥 ВАЖНО
 
@@ -209,8 +260,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             : 'Без описания',
         ingredients: ingredients,
         prepTimeSeconds: totalTime,
-        imagePath:
-        recipeImage ?? 'assets/Images/burger_with_two_cutlets.png',
+        imagePath: recipeImage ?? '',
         steps: steps,
       );
 
@@ -365,37 +415,56 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
               ),
             )
             else
-              Stack(
-                children: [
-                  ClipRRect(                                                 //Делим дочерний элемент
-                    borderRadius: BorderRadius.circular(10),
-                    child: RecipeImage(
-                      imagePath: recipeImage!,                                        //Указываем что не меожт быть null благодаря else
-                      width: double.infinity,
-                      height: MediaQuery.of(context).size.height * 0.25,
-                      fit: BoxFit.cover,                                   //Заполняем изображеним контейнер образеая лишнее
+              GestureDetector(
+                onTap: _editRecipeImage,
+                child: Stack(
+                  children: [
+                    ClipRRect(                                                 //Делим дочерний элемент
+                      borderRadius: BorderRadius.circular(10),
+                      child: RecipeImage(
+                        imagePath: recipeImage!,                                        //Указываем что не меожт быть null благодаря else
+                        width: double.infinity,
+                        height: MediaQuery.of(context).size.height * 0.25,
+                        fit: BoxFit.cover,                                   //Заполняем изображеним контейнер образеая лишнее
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    top: MediaQuery.of(context).size.height * 0.01,
-                    right: MediaQuery.of(context).size.height * 0.01,
-                    child: GestureDetector(                                   //Обработка нажатия на крестик
-                      onTap: _removeRecipeImage,
+                    Positioned(
+                      top: MediaQuery.of(context).size.height * 0.01,
+                      left: MediaQuery.of(context).size.height * 0.01,
                       child: Container(
-                        padding: EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Color(0xAA000000),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          Icons.close,
+                        child: const Icon(
+                          Icons.edit,
                           color: Colors.white,
                           size: 20,
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    Positioned(
+                      top: MediaQuery.of(context).size.height * 0.01,
+                      right: MediaQuery.of(context).size.height * 0.01,
+                      child: GestureDetector(                                   //Обработка нажатия на крестик
+                        onTap: _removeRecipeImage,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
@@ -678,9 +747,10 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.7,
                 child: ElevatedButton(
-                  onPressed: _saveRecipe,
+                  onPressed: _canSaveRecipe ? _saveRecipe : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _canSaveRecipe ? const Color(0xff165932) : Colors.grey,
+                    backgroundColor:
+                        _canSaveRecipe ? const Color(0xFF2ECC71) : Colors.grey,
                     padding: EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -764,23 +834,11 @@ class _RecipeImagePreviewScreenState extends State<_RecipeImagePreviewScreen> {
                         maskColor: Colors.black54,
                         baseColor: Colors.black,
                         onCropped: (result) async {
-                          Uint8List? croppedData;
-                          if (result is Uint8List) {
-                            croppedData = result;
-                          } else {
-                            final dynamic maybeImage =
-                                (result as dynamic).croppedImage;
-                            if (maybeImage is Uint8List) {
-                              croppedData = maybeImage;
-                            }
-                          }
-
                           if (!mounted) return;
                           setState(() {
                             _isCropping = false;
                           });
-                          if (croppedData == null) return;
-                          await _saveCropped(croppedData);
+                          await _saveCropped(result);
                         },
                       ),
               ),
@@ -839,4 +897,6 @@ class _RecipeImagePreviewScreenState extends State<_RecipeImagePreviewScreen> {
     );
   }
 }
+
+
 

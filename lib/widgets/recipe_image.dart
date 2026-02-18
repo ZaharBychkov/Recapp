@@ -20,6 +20,14 @@ class RecipeImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (imagePath.trim().isEmpty) {
+      return Container(
+        width: width,
+        height: height,
+        color: Colors.transparent,
+      );
+    }
+
     if (_isAsset) {
       return Image.asset(
         imagePath,

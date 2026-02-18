@@ -17,6 +17,7 @@ class _AddStepDialogState extends State<AddStepDialog> {
 
   @override
   void dispose() {
+    _stepController.removeListener(_refresh);
     _stepController.dispose();
     _minutesController.dispose();
     _secondsController.dispose();
@@ -26,6 +27,7 @@ class _AddStepDialogState extends State<AddStepDialog> {
   @override
   void initState() {
     super.initState();
+    _stepController.addListener(_refresh);
 
     if(widget.step != null) {
       _stepController.text = widget.step!.description;
@@ -43,50 +45,63 @@ class _AddStepDialogState extends State<AddStepDialog> {
     return intValue.clamp(0, 59);
   }
 
+  bool get _canSubmit => _stepController.text.trim().isNotEmpty;
+
+  void _refresh() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.05,
+        horizontal: size.width * 0.05,
       ),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.45,
-        padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: size.height * 0.9,
+        ),
+        child: SingleChildScrollView(
+          child: Container(
+        width: size.width * 0.9,
+        padding: EdgeInsets.all(size.width * 0.04),
         decoration: const BoxDecoration(
           color: Colors.white,
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             /// ЗАГОЛОВОК
             Text(
               'Шаг приготовления',
               style: TextStyle(
-                fontSize: MediaQuery.of(context).size.width * 0.05,
+                fontSize: size.width * 0.05,
                 fontWeight: FontWeight.w600,
               ),
             ),
 
-            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            SizedBox(height: size.height * 0.02),
 
             /// ПОЛЕ ШАГА
             _buildStepInput(context),
 
-            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            SizedBox(height: size.height * 0.02),
 
             /// ВРЕМЯ
             Text(
               'Время приготовления',
               style: TextStyle(
                 color: const Color(0xFF165932),
-                fontSize: MediaQuery.of(context).size.width * 0.04,
+                fontSize: size.width * 0.04,
                 fontWeight: FontWeight.w600,
               ),
             ),
 
-            SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+            SizedBox(height: size.height * 0.01),
 
             /// МИНУТЫ + СЕКУНДЫ
             Row(
@@ -108,31 +123,34 @@ class _AddStepDialogState extends State<AddStepDialog> {
                     hint: '59',
                   ),
                 ),
-              ],
-            ),
+            ],
+          ),
 
-            const Spacer(),
+            SizedBox(height: size.height * 0.025),
 
             /// КНОПКА
             Center(
               child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.6,
+                width: size.width * 0.6,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: _canSubmit ? () {
+                    final stepText = _stepController.text.trim();
                     final minutes = _parseTime(_minutesController.text);
                     final seconds = _parseTime(_secondsController.text);
 
                     Navigator.pop(
                       context,
                       {
-                        'step': _stepController.text,
+                        'step': stepText,
                         'minutes': minutes,
                         'seconds': seconds,
                       },
                     );
-                  },
+                  } : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2ECC71),
+                    backgroundColor: _canSubmit
+                        ? const Color(0xFF2ECC71)
+                        : Colors.grey,
                     padding: EdgeInsets.symmetric(
                       vertical: MediaQuery.of(context).size.height * 0.02,
                     ),
@@ -150,6 +168,8 @@ class _AddStepDialogState extends State<AddStepDialog> {
               ),
             ),
           ],
+        ),
+      ),
         ),
       ),
     );
