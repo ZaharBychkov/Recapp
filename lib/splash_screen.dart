@@ -2,90 +2,74 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui show Image, instantiateImageCodec;
 
+import 'app_bootstrap.dart';
+import 'main_screen.dart';
 import 'painters/text_image_painter.dart';
 import 'registration_screen.dart';
-import 'main_screen.dart';
 import 'services/user_repository.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});                    //const для повышения производительности
+  const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState(); //Создаем стэйт типа SplashScreen под названием _SplashScreenState()
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> { //Создаем класс внутри стейта для работы с состоянием
-  ui.Image? _backgroundImage;                         // Сюда сохраним декодированное изображение после загрузки т.е. изображение из пикселей
+class _SplashScreenState extends State<SplashScreen> {
+  static const Duration _minSplashDuration = Duration(milliseconds: 900);
+
+  ui.Image? _backgroundImage;
+  late final DateTime _shownAt;
+
   bool _isExiting = false;
   bool _slideOut = false;
   bool _completed = false;
-  late final Widget _nextScreen;
+  Widget _nextScreen = const SizedBox.shrink();
 
   @override
-  void initState() {                                  // Вызывается один раз при создании состояния
-    super.initState();                                // Вызов родителя через super чтобы Flutter понял как ему инициализировать
+  void initState() {
+    super.initState();
+    _shownAt = DateTime.now();
+    _prepare();
+  }
+
+  Future<void> _prepare() async {
+    await Future.wait([
+      _loadBackgroundImage(),
+      AppBootstrap.start(),
+    ]);
+
+    if (!mounted) return;
+
     final user = UserRepository.getCurrentUser();
-    _nextScreen = user == null ? const RegistrationScreen() : const MainScreen();
-    _loadBackgroundImage();                           // Запускаем асинхронную загрузку изображения сразу
+    setState(() {
+      _nextScreen = user == null ? const RegistrationScreen() : const MainScreen();
+    });
+
+    final elapsed = DateTime.now().difference(_shownAt);
+    if (elapsed < _minSplashDuration) {
+      await Future<void>.delayed(_minSplashDuration - elapsed);
+    }
+
+    if (!mounted) return;
+    await _startExit();
   }
 
   Future<void> _loadBackgroundImage() async {
     try {
       final byteData = await rootBundle.load('assets/Images/food_background.png');
-      // Получаем байты изображения из assets (один раз!)
       final codec = await ui.instantiateImageCodec(byteData.buffer.asUint8List());
-      // Создаём декодер для работы с этими байтами
-      final frame = await codec.getNextFrame();       // Декодируем первый кадр (раз у нас готовое изображение, то единственный кадр)
-      if (mounted) {                                  // Проверяем, что виджет всё ещё существует, пользователь до сих пор на странице
-        setState(() => _backgroundImage = frame.image); // Сохраняем изображение и вызываем перерисовку
+      final frame = await codec.getNextFrame();
+      if (mounted) {
+        setState(() => _backgroundImage = frame.image);
       }
     } catch (e, st) {
-      debugPrint('Не удалось загрузить фоновую картинку: $e');
+      debugPrint('Failed to load splash background image: $e');
       debugPrintStack(stackTrace: st);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);          //Получаю размер экрана
-
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          _nextScreen,
-          if (!_completed)
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _handleTapToContinue,
-              child: AnimatedSlide(
-                offset: _slideOut ? const Offset(0, -1.2) : Offset.zero,
-                duration: const Duration(milliseconds: 380),
-                curve: Curves.easeInOutCubic,
-                child: Container(
-                  decoration: const BoxDecoration(              // const здесь — хорошая оптимизация
-                    gradient: LinearGradient(                   //градиент слева серху в право вниз
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF2ECC71), // Светлый зелёный — #2ECC71
-                        Color(0xFF165932), // Тёмный зелёный — #165932
-                      ],
-                    ),
-                  ),
-                  child: Center(
-                    child: _buildContent(size),                 // Выносим логику виджета в отдельный метод
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _handleTapToContinue() async {
+  Future<void> _startExit() async {
     if (_isExiting) return;
     _isExiting = true;
 
@@ -101,16 +85,54 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
     });
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          _nextScreen,
+          if (!_completed)
+            AnimatedSlide(
+              offset: _slideOut ? const Offset(0, -1.2) : Offset.zero,
+              duration: const Duration(milliseconds: 380),
+              curve: Curves.easeInOutCubic,
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF2ECC71),
+                      Color(0xFF165932),
+                    ],
+                  ),
+                ),
+                child: Center(child: _buildContent(size)),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildContent(Size size) {
-    if (_backgroundImage == null) {                   // Ещё не загрузилось изображение
-      return const SizedBox(                          // Компактный индикатор, а не на весь экран
-        width: 48,
-        height: 48,
-        child: CircularProgressIndicator(strokeWidth: 3),
+    if (_backgroundImage == null) {
+      return Text(
+        'OTUS\nFOOD',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: size.width * 0.17,
+          fontWeight: FontWeight.bold,
+          height: 1.0,
+        ),
       );
     }
 
-    // Когда изображение уже загружено — показываем основной контент
     return SizedBox(
       width: size.width * 0.66,
       height: size.height * 0.305,
@@ -126,4 +148,3 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
     );
   }
 }
-

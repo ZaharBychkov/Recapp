@@ -1,14 +1,12 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'models/user.dart';
-import 'models/recipe.dart';
+
+import 'app_bootstrap.dart';
 import 'models/ingredient.dart';
+import 'models/recipe.dart';
 import 'models/step.dart';
-import 'services/recipe_repository.dart';
-import 'services/user_repository.dart';
-import 'repositories/fridge_repository.dart';
-import 'repositories/history_repository.dart';
+import 'models/user.dart';
 import 'splash_screen.dart';
 
 void main() async {
@@ -24,10 +22,8 @@ void main() async {
   Hive.registerAdapter(RecipeStepAdapter());
   Hive.registerAdapter(RecipeAdapter());
 
-  await UserRepository.init();
-  await RecipeRepository.init();
-  await FridgeRepository.init();
-  await HistoryRepository.init();
+  // Do not block app launch on repositories initialization.
+  AppBootstrap.start();
 
   runApp(const MyApp());
 }
@@ -47,4 +43,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
