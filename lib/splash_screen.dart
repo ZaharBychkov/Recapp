@@ -18,10 +18,14 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
   ui.Image? _backgroundImage;                         // Сюда сохраним декодированное изображение после загрузки т.е. изображение из пикселей
   bool _isExiting = false;
   bool _slideOut = false;
+  bool _completed = false;
+  late final Widget _nextScreen;
 
   @override
   void initState() {                                  // Вызывается один раз при создании состояния
     super.initState();                                // Вызов родителя через super чтобы Flutter понял как ему инициализировать
+    final user = UserRepository.getCurrentUser();
+    _nextScreen = user == null ? const RegistrationScreen() : const MainScreen();
     _loadBackgroundImage();                           // Запускаем асинхронную загрузку изображения сразу
   }
 
@@ -47,29 +51,36 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _handleTapToContinue,
-        child: AnimatedSlide(
-          offset: _slideOut ? const Offset(0, -1.2) : Offset.zero,
-          duration: const Duration(milliseconds: 380),
-          curve: Curves.easeInOutCubic,
-          child: Container(
-            decoration: const BoxDecoration(              // const здесь — хорошая оптимизация
-              gradient: LinearGradient(                   //градиент слева серху в право вниз
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF2ECC71), // Светлый зелёный — #2ECC71
-                  Color(0xFF165932), // Тёмный зелёный — #165932
-                ],
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          _nextScreen,
+          if (!_completed)
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _handleTapToContinue,
+              child: AnimatedSlide(
+                offset: _slideOut ? const Offset(0, -1.2) : Offset.zero,
+                duration: const Duration(milliseconds: 380),
+                curve: Curves.easeInOutCubic,
+                child: Container(
+                  decoration: const BoxDecoration(              // const здесь — хорошая оптимизация
+                    gradient: LinearGradient(                   //градиент слева серху в право вниз
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF2ECC71), // Светлый зелёный — #2ECC71
+                        Color(0xFF165932), // Тёмный зелёный — #165932
+                      ],
+                    ),
+                  ),
+                  child: Center(
+                    child: _buildContent(size),                 // Выносим логику виджета в отдельный метод
+                  ),
+                ),
               ),
             ),
-            child: Center(
-              child: _buildContent(size),                 // Выносим логику виджета в отдельный метод
-            ),
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -85,16 +96,12 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
     await Future<void>.delayed(const Duration(milliseconds: 390));
     if (!mounted) return;
 
-    final user = UserRepository.getCurrentUser();
-    final next = user == null ? const RegistrationScreen() : const MainScreen();
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => next),
-    );
+    setState(() {
+      _completed = true;
+    });
   }
 
   Widget _buildContent(Size size) {
-
     if (_backgroundImage == null) {                   // Ещё не загрузилось изображение
       return const SizedBox(                          // Компактный индикатор, а не на весь экран
         width: 48,
@@ -117,7 +124,6 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
         ),
       ),
     );
-
   }
 }
 
