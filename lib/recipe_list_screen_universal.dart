@@ -76,11 +76,32 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                       onTap: () async {                                            //При нажатии открываем детальный экран рецепта
                         final result = await Navigator.push<dynamic>(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => RecipeDetailScreen(
+                          PageRouteBuilder(
+                            transitionDuration: const Duration(milliseconds: 360),
+                            reverseTransitionDuration: const Duration(milliseconds: 360),
+                            pageBuilder: (_, __, ___) => RecipeDetailScreen(
                               recipe: recipe,
                               isLoggedIn: widget.isLoggedIn,
                             ),
+                            transitionsBuilder: (_, animation, __, child) {
+                              const begin = Offset(1, 0);
+                              const end = Offset.zero;
+                              final curved = CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeInOutCubic,
+                                reverseCurve: Curves.easeInOutCubic,
+                              );
+
+                              final tween = Tween(
+                                begin: begin,
+                                end: end,
+                              );
+
+                              return SlideTransition(
+                                position: curved.drive(tween),
+                                child: child,
+                              );
+                            },
                           ),
                         );
 
