@@ -31,6 +31,10 @@ class _FridgeScreenState extends State<FridgeScreen> {
     _reload();
   }
 
+  Future<void> refreshFridge() async {
+    await _reload();
+  }
+
   Future<void> _reload() async {
     final loaded = FridgeRepository.getItems();
     if (!mounted) return;

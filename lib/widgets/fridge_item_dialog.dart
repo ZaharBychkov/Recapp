@@ -480,7 +480,13 @@ class _FridgeItemDialogState extends State<FridgeItemDialog> {
 
     final rawAmount = _amountController.text.trim().replaceAll(',', '.');
     final amount = double.tryParse(rawAmount);
-    if (amount == null || amount <= 0) return _FridgeValidation.invalidAmount;
+    if (amount == null) return _FridgeValidation.invalidAmount;
+
+    if (isEditing) {
+      if (amount < 0) return _FridgeValidation.invalidAmount;
+    } else {
+      if (amount <= 0) return _FridgeValidation.invalidAmount;
+    }
 
     if (_selectedUnit == IngredientUnit.pcs && amount % 1 != 0) {
       return _FridgeValidation.invalidPiecesAmount;
@@ -503,7 +509,9 @@ class _FridgeItemDialogState extends State<FridgeItemDialog> {
       case _FridgeValidation.emptyName:
         return 'Введите название ингредиента';
       case _FridgeValidation.invalidAmount:
-        return 'Введите корректное количество (> 0)';
+        return widget.editingItem != null
+            ? 'Введите корректное количество (>= 0)'
+            : 'Введите корректное количество (> 0)';
       case _FridgeValidation.invalidPiecesAmount:
         return 'Для "шт" укажите целое число';
       case _FridgeValidation.duplicateName:

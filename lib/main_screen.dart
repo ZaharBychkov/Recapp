@@ -17,6 +17,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final GlobalKey _recipeListKey = GlobalKey();
+  final GlobalKey _fridgeKey = GlobalKey();
   late final List<Widget> _screens;
 
   @override
@@ -28,7 +29,7 @@ class _MainScreenState extends State<MainScreen> {
         isLoggedIn: true,
         onAddRecipePressed: _openCreateRecipe,
       ),
-      const FridgeScreen(),
+      FridgeScreen(key: _fridgeKey),
       const FavoritesScreen(),
       const ProfileScreen(),
     ];
@@ -88,6 +89,10 @@ class _MainScreenState extends State<MainScreen> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
+          if (index == 1 && _fridgeKey.currentState != null) {
+            (_fridgeKey.currentState as dynamic).refreshFridge();
+          }
+
           setState(() {
             _currentIndex = index;
           });
