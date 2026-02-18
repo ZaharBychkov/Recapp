@@ -85,18 +85,33 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     if (!availability.hasAllIngredients) {
       final proceedWithoutConsumption = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Ингредиентов недостаточно'),
+        barrierDismissible: true,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text(
+            'Ингредиентов недостаточно',
+            style: TextStyle(
+              color: Color(0xFF165932),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           content: const Text(
             'Можно продолжить, но ингредиенты не будут списаны из холодильника, и запись не попадет в историю.',
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.of(ctx).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF165932),
+              ),
               child: const Text('Отмена'),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF165932),
+                foregroundColor: Colors.white,
+              ),
               child: const Text('Продолжить'),
             ),
           ],
