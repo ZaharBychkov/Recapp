@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../painters/text_image_painter.dart';
 import 'dart:ui' as ui show Image, instantiateImageCodec;
+
+import 'painters/text_image_painter.dart';
+import 'registration_screen.dart';
+import 'main_screen.dart';
+import 'services/user_repository.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});                    //const для повышения производительности
@@ -12,6 +16,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> { //Создаем класс внутри стейта для работы с состоянием
   ui.Image? _backgroundImage;                         // Сюда сохраним декодированное изображение после загрузки т.е. изображение из пикселей
+  bool _isExiting = false;
+  bool _slideOut = false;
 
   @override
   void initState() {                                  // Вызывается один раз при создании состояния
@@ -41,21 +47,49 @@ class _SplashScreenState extends State<SplashScreen> { //Создаем клас
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: const BoxDecoration(              // const здесь — хорошая оптимизация
-          gradient: LinearGradient(                   //градиент слева серху в право вниз
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF2ECC71), // Светлый зелёный — #2ECC71
-              Color(0xFF165932), // Тёмный зелёный — #165932
-            ],
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _handleTapToContinue,
+        child: AnimatedSlide(
+          offset: _slideOut ? const Offset(0, -1.2) : Offset.zero,
+          duration: const Duration(milliseconds: 380),
+          curve: Curves.easeInOutCubic,
+          child: Container(
+            decoration: const BoxDecoration(              // const здесь — хорошая оптимизация
+              gradient: LinearGradient(                   //градиент слева серху в право вниз
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF2ECC71), // Светлый зелёный — #2ECC71
+                  Color(0xFF165932), // Тёмный зелёный — #165932
+                ],
+              ),
+            ),
+            child: Center(
+              child: _buildContent(size),                 // Выносим логику виджета в отдельный метод
+            ),
           ),
         ),
-        child: Center(
-          child: _buildContent(size),                 // Выносим логику виджета в отдельный метод
-        ),
       ),
+    );
+  }
+
+  Future<void> _handleTapToContinue() async {
+    if (_isExiting) return;
+    _isExiting = true;
+
+    setState(() {
+      _slideOut = true;
+    });
+
+    await Future<void>.delayed(const Duration(milliseconds: 390));
+    if (!mounted) return;
+
+    final user = UserRepository.getCurrentUser();
+    final next = user == null ? const RegistrationScreen() : const MainScreen();
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => next),
     );
   }
 
