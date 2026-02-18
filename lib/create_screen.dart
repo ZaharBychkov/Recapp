@@ -1,4 +1,8 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:crop_your_image/crop_your_image.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:image_picker/image_picker.dart';
 import 'add_ingredient_dialog.dart';
@@ -67,11 +71,23 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     );
 
     if (pickedFile == null) return;
+    final selectedPath = await _openImagePreviewAndConfirm(pickedFile.path);
+    if (selectedPath == null) return;
     if (!mounted) return;
-
     setState(() {
-      recipeImage = pickedFile.path;
+      recipeImage = selectedPath;
     });
+  }
+
+  Future<String?> _openImagePreviewAndConfirm(String initialPath) async {
+    return Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => _RecipeImagePreviewScreen(
+          initialPath: initialPath,
+        ),
+      ),
+    );
   }
 
   void _removeRecipeImage() {
@@ -684,6 +700,139 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             ),
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecipeImagePreviewScreen extends StatefulWidget {
+  final String initialPath;
+
+  const _RecipeImagePreviewScreen({
+    required this.initialPath,
+  });
+
+  @override
+  State<_RecipeImagePreviewScreen> createState() =>
+      _RecipeImagePreviewScreenState();
+}
+
+class _RecipeImagePreviewScreenState extends State<_RecipeImagePreviewScreen> {
+  final CropController _cropController = CropController();
+  Uint8List? _imageBytes;
+  bool _isCropping = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBytes();
+  }
+
+  Future<void> _loadBytes() async {
+    final bytes = await File(widget.initialPath).readAsBytes();
+    if (!mounted) return;
+    setState(() {
+      _imageBytes = bytes;
+    });
+  }
+
+  Future<void> _saveCropped(Uint8List croppedData) async {
+    final path =
+        '${Directory.systemTemp.path}/recipe_crop_${DateTime.now().microsecondsSinceEpoch}.jpg';
+    final file = File(path);
+    await file.writeAsBytes(croppedData, flush: true);
+    if (!mounted) return;
+    Navigator.of(context).pop(path);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: _imageBytes == null
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Crop(
+                        image: _imageBytes!,
+                        controller: _cropController,
+                        maskColor: Colors.black54,
+                        baseColor: Colors.black,
+                        onCropped: (result) async {
+                          Uint8List? croppedData;
+                          if (result is Uint8List) {
+                            croppedData = result;
+                          } else {
+                            final dynamic maybeImage =
+                                (result as dynamic).croppedImage;
+                            if (maybeImage is Uint8List) {
+                              croppedData = maybeImage;
+                            }
+                          }
+
+                          if (!mounted) return;
+                          setState(() {
+                            _isCropping = false;
+                          });
+                          if (croppedData == null) return;
+                          await _saveCropped(croppedData);
+                        },
+                      ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _isCropping ? null : () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.white, width: 2),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      icon: const Icon(Icons.close),
+                      label: const Text('Отмена'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: (_imageBytes == null || _isCropping)
+                          ? null
+                          : () {
+                              setState(() {
+                                _isCropping = true;
+                              });
+                              _cropController.crop();
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2ECC71),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      icon: _isCropping
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.check),
+                      label: const Text('Готово'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

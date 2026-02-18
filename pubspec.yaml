@@ -40,6 +40,8 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   image_picker: ^1.1.2
+  image_cropper: ^9.1.0
+  crop_your_image: ^1.1.0
 
 dev_dependencies:
   flutter_test:
