@@ -368,12 +368,65 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     });
   }
 
+  Future<bool> _confirmExitWithoutFinishing() async {
+    if (!isCooking) return true;
+
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Выйти без завершения?',
+          style: TextStyle(
+            color: Color(0xFF165932),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: const Text(
+          'Рецепт еще не завершен. Если выйти сейчас, прогресс будет сброшен: ингредиенты не спишутся, а запись не попадет в историю.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF165932),
+            ),
+            child: const Text('Остаться'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD32F2F),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Выйти'),
+          ),
+        ],
+      ),
+    );
+
+    return shouldExit == true;
+  }
+
+  Future<void> _onBackPressed() async {
+    final shouldExit = await _confirmExitWithoutFinishing();
+    if (!mounted || !shouldExit) return;
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: Colors.white,
-      appBar: PreferredSize(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        await _onBackPressed();
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: Colors.white,
+        appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: Container(
           decoration: BoxDecoration(
@@ -401,7 +454,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             ),
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
+              onPressed: _onBackPressed,
             ),
             actions: [
               IconButton(
@@ -1204,6 +1257,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           ],
         ),
       ),
+    )
     );
   }
 }
