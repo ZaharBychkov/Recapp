@@ -5,6 +5,7 @@ import 'recipe_manager.dart';
 import 'models/recipe.dart';
 import 'utils/time_formatter.dart';
 import 'recipe_detail_screen.dart';
+import 'widgets/recipe_image.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -72,8 +73,8 @@ class FavoritesScreen extends StatelessWidget {
                                       topLeft: Radius.circular(10),
                                       bottomLeft: Radius.circular(10),
                                     ),
-                                    child: Image.asset(
-                                      recipe.imagePath,
+                                    child: RecipeImage(
+                                      imagePath: recipe.imagePath,
                                       fit: BoxFit.cover,
                                       height: double.infinity,
                                     ),

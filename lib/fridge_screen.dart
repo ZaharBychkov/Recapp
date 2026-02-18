@@ -5,6 +5,7 @@ import 'models/recipe.dart';
 import 'repositories/fridge_repository.dart';
 import 'recipe_manager.dart';
 import 'widgets/fridge_item_dialog.dart';
+import 'widgets/recipe_image.dart';
 import 'domain/name_sanitizer.dart';
 import 'domain/unit_converter.dart';
 import 'services/recipe_availability_service.dart';
@@ -400,8 +401,8 @@ class _FridgeScreenState extends State<FridgeScreen> {
                                   topLeft: Radius.circular(10),
                                   bottomLeft: Radius.circular(10),
                                 ),
-                                child: Image.asset(
-                                  recipe.imagePath,
+                                child: RecipeImage(
+                                  imagePath: recipe.imagePath,
                                   fit: BoxFit.cover,
                                   height: double.infinity,
                                 ),

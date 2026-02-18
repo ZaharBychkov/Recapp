@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'recipe_manager.dart';
 import 'models/recipe.dart';
 import 'utils/time_formatter.dart';
 import 'create_screen.dart';
 import 'recipe_detail_screen.dart';
+import 'widgets/recipe_image.dart';
 
 class RecipeListScreen extends StatefulWidget {
   final bool isLoggedIn;                                              //Параметр: авторизован или нет
@@ -138,8 +139,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                                   topLeft: Radius.circular(10),                   //Верхний левый
                                   bottomLeft: Radius.circular(10),                //Левый нижний
                                 ),
-                                child: Image.asset(                                 //Загружаем изображение
-                                  recipe.imagePath,                                 //Берем изображение по пути
+                                child: RecipeImage(                                 //Загружаем изображение
+                                  imagePath: recipe.imagePath,                                 //Берем изображение по пути
                                   fit: BoxFit.cover,                                //Заполняем весь контейнер обрезаем то что не влазит
                                   height: double.infinity,                          //Занимаем всю высоту  контейнера
                                 ),

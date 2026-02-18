@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:image_picker/image_picker.dart';
 import 'add_ingredient_dialog.dart';
 import 'add_step_dialog.dart';
 import 'models/ingredient.dart';
 import 'models/step.dart';
 import 'models/recipe.dart';
 import 'recipe_manager.dart';
+import 'widgets/recipe_image.dart';
 
 class CreateRecipeScreen extends StatefulWidget {
   /*
@@ -24,6 +26,7 @@ class CreateRecipeScreen extends StatefulWidget {
 class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   final TextEditingController _titleController = TextEditingController();    //Вводим контроллер для текстового поля
   final TextEditingController _descriptionController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
   String? recipeImage;
   List<Ingredient> ingredients = [];
   List<RecipeStep> steps = [];
@@ -56,12 +59,19 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     super.dispose();
   }
 
-  void _addRecipeImage() {
-    // Заглушка для добавления изображения
+  Future<void> _addRecipeImage() async {
+    final pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 2048,
+    );
+
+    if (pickedFile == null) return;
+    if (!mounted) return;
+
     setState(() {
-      recipeImage = 'assets/Images/burger_with_two_cutlets.png';
+      recipeImage = pickedFile.path;
     });
-    debugPrint("Добавить фото рецепта");
   }
 
   void _removeRecipeImage() {
@@ -343,8 +353,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 children: [
                   ClipRRect(                                                 //Делим дочерний элемент
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      recipeImage!,                                        //Указываем что не меожт быть null благодаря else
+                    child: RecipeImage(
+                      imagePath: recipeImage!,                                        //Указываем что не меожт быть null благодаря else
                       width: double.infinity,
                       height: MediaQuery.of(context).size.height * 0.25,
                       fit: BoxFit.cover,                                   //Заполняем изображеним контейнер образеая лишнее

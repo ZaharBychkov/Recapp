@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'domain/unit_converter.dart';
 import 'models/history/recipe_history_entry.dart';
 import 'repositories/fridge_repository.dart';
 import 'repositories/history_repository.dart';
+import 'widgets/recipe_image.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -179,8 +180,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: Image.asset(
-                              entry.recipeImagePath,
+                            child: RecipeImage(
+                              imagePath: entry.recipeImagePath,
                               width: 74,
                               height: 74,
                               fit: BoxFit.cover,

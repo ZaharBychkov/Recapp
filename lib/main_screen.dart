@@ -72,18 +72,19 @@ class _MainScreenState extends State<MainScreen> {
       ),
       child: Row(
         children: [
-          _buildTab(0, 'pizza'),
-          _buildTab(1, 'fridge'),
-          _buildTab(2, 'heart'),
-          _buildTab(3, 'person'),
+          _buildTab(0, Icons.local_pizza_rounded),
+          _buildTab(1, Icons.kitchen_rounded),
+          _buildTab(2, Icons.favorite_rounded),
+          _buildTab(3, Icons.person_rounded),
         ],
       ),
     );
   }
 
-  Widget _buildTab(int index, String iconName) {
+  Widget _buildTab(int index, IconData iconData) {
     final isActive = _currentIndex == index;
-    final assetPath = 'assets/Icons/${iconName}_${isActive ? 'green' : 'grey'}.png';
+    const activeColor = Color(0xFF2ECC71);
+    const inactiveColor = Color(0xFF9E9E9E);
 
     return Expanded(
       child: GestureDetector(
@@ -98,11 +99,10 @@ class _MainScreenState extends State<MainScreen> {
           });
         },
         child: Center(
-          child: Image.asset(
-            assetPath,
-            width: 26,
-            height: 26,
-            color: isActive ? const Color(0xFF2ECC71) : Colors.black54,
+          child: Icon(
+            iconData,
+            size: 28,
+            color: isActive ? activeColor : inactiveColor,
           ),
         ),
       ),

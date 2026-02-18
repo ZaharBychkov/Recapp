@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../utils/time_formatter.dart';
@@ -8,6 +8,7 @@ import '../repositories/fridge_repository.dart';
 import '../repositories/history_repository.dart';
 import '../services/recipe_availability_service.dart';
 import '../models/history/recipe_history_entry.dart';
+import '../widgets/recipe_image.dart';
 import 'recipe_manager.dart';
 import 'create_screen.dart';
 
@@ -737,8 +738,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
-                              child: Image.asset(
-                                widget.recipe.imagePath,
+                              child: RecipeImage(
+                                imagePath: widget.recipe.imagePath,
                                 fit: BoxFit.cover,
                               ),
                             ),
