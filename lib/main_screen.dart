@@ -60,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildBottomBar() {
     return Container(
-      height: 64,
+      height: 72,
       decoration: const BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -72,19 +72,20 @@ class _MainScreenState extends State<MainScreen> {
       ),
       child: Row(
         children: [
-          _buildTab(0, Icons.local_pizza_rounded),
-          _buildTab(1, Icons.kitchen_rounded),
-          _buildTab(2, Icons.favorite_rounded),
-          _buildTab(3, Icons.person_rounded),
+          _buildTab(0, Icons.local_pizza_rounded, 'Рецепты'),
+          _buildTab(1, Icons.kitchen_rounded, 'Холодильник'),
+          _buildTab(2, Icons.favorite_rounded, 'Избранное'),
+          _buildTab(3, Icons.person_rounded, 'Профиль'),
         ],
       ),
     );
   }
 
-  Widget _buildTab(int index, IconData iconData) {
+  Widget _buildTab(int index, IconData iconData, String label) {
     final isActive = _currentIndex == index;
     const activeColor = Color(0xFF2ECC71);
     const inactiveColor = Color(0xFF9E9E9E);
+    final color = isActive ? activeColor : inactiveColor;
 
     return Expanded(
       child: GestureDetector(
@@ -99,10 +100,25 @@ class _MainScreenState extends State<MainScreen> {
           });
         },
         child: Center(
-          child: Icon(
-            iconData,
-            size: 28,
-            color: isActive ? activeColor : inactiveColor,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                iconData,
+                size: 24,
+                color: color,
+              ),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 10,
+                  fontFamily: 'Roboto',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
       ),

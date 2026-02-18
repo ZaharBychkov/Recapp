@@ -525,7 +525,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           Row(
                             children: [
                               Expanded(
-                                flex: 6,
+                                flex: widget.isLoggedIn ? 6 : 9,
                                 child: Text(
                                   widget.recipe.title,
                                   style: TextStyle(
@@ -542,160 +542,161 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                 ),
                               ),
 
-                              Expanded(
-                                flex: 3,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: GestureDetector(
-                                        onTap: () async {
-                                          await RecipeManager().toggleFavorite(
-                                            widget.recipe,
-                                          );
+                              if (widget.isLoggedIn)
+                                Expanded(
+                                  flex: 3,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Expanded(
+                                        flex: 1,
+                                        child: GestureDetector(
+                                          onTap: () async {
+                                            await RecipeManager().toggleFavorite(
+                                              widget.recipe,
+                                            );
 
-                                          setState(() {});
-                                        },
-                                        child: Image.asset(
-                                          widget.recipe.isFavorite
-                                              ? 'assets/Icons/heart_red.png'
-                                              : 'assets/Icons/heart_black.png',
-                                          width: 24,
-                                          height: 24,
+                                            setState(() {});
+                                          },
+                                          child: Image.asset(
+                                            widget.recipe.isFavorite
+                                                ? 'assets/Icons/heart_red.png'
+                                                : 'assets/Icons/heart_black.png',
+                                            width: 24,
+                                            height: 24,
+                                          ),
                                         ),
                                       ),
-                                    ),
 
-                                    Expanded(
-                                      flex: 1,
-                                      child: IconButton(
-                                        icon: const Icon(
-                                          Icons.edit,
-                                          color: Color(0xff4d4d4d),
-                                        ),
-                                        onPressed: () async {
-                                          final result =
-                                              await Navigator.push<bool>(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      CreateRecipeScreen(
-                                                        recipe: widget.recipe,
-                                                      ),
-                                                ),
-                                              );
-                                          if (!context.mounted) return;
-
-                                          if (result == true) {
-                                            _reloadRecipe();
-
-                                            Navigator.pop(context, "edited");
-                                          }
-                                        },
-                                      ),
-                                    ),
-
-                                    Expanded(
-                                      flex: 1,
-                                      child: IconButton(
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: Color(0xFF4d4d4d),
-                                        ),
-                                        onPressed: () async {
-                                          final confirmDelete =
-                                              await showDialog<bool>(
-                                                context: context,
-                                                barrierDismissible: true,
-                                                builder: (ctx) => AlertDialog(
-                                                  backgroundColor: Colors.white,
-                                                  title: const Text(
-                                                    'Удалить рецепт?',
-                                                    style: TextStyle(
-                                                      color: Color(0xFF165932),
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    ),
+                                      Expanded(
+                                        flex: 1,
+                                        child: IconButton(
+                                          icon: const Icon(
+                                            Icons.edit,
+                                            color: Color(0xff4d4d4d),
+                                          ),
+                                          onPressed: () async {
+                                            final result =
+                                                await Navigator.push<bool>(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        CreateRecipeScreen(
+                                                          recipe: widget.recipe,
+                                                        ),
                                                   ),
-                                                  content: Text(
-                                                    'Вы уверены, что хотите удалить рецепт "${widget.recipe.title}"?',
-                                                  ),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.of(
-                                                            ctx,
-                                                          ).pop(false),
-                                                      style: TextButton.styleFrom(
-                                                        foregroundColor:
-                                                            const Color(
-                                                              0xFF165932,
-                                                            ),
-                                                      ),
-                                                      child: const Text('Отмена'),
-                                                    ),
-                                                    ElevatedButton(
-                                                      onPressed: () =>
-                                                          Navigator.of(
-                                                            ctx,
-                                                          ).pop(true),
-                                                      style:
-                                                          ElevatedButton.styleFrom(
-                                                            backgroundColor:
-                                                                const Color(
-                                                                  0xFFD32F2F,
-                                                                ),
-                                                            foregroundColor:
-                                                                Colors.white,
-                                                          ),
-                                                      child: const Text(
-                                                        'Удалить',
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                          if (!context.mounted) return;
+                                                );
+                                            if (!context.mounted) return;
 
-                                          if (confirmDelete == true) {
-                                            try {
-                                              await RecipeManager()
-                                                  .deleteRecipe(
-                                                    widget.recipe.id,
-                                                  );
+                                            if (result == true) {
+                                              _reloadRecipe();
 
-                                              if (!context.mounted) return;
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    'Рецепт успешно удален!',
-                                                  ),
-                                                ),
-                                              );
-
-                                              Navigator.pop(context, true);
-                                            } catch (e) {
-                                              if (!context.mounted) return;
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    'Ошибка при удалении рецепта',
-                                                  ),
-                                                ),
-                                              );
+                                              Navigator.pop(context, "edited");
                                             }
-                                          }
-                                        },
+                                          },
+                                        ),
                                       ),
-                                    ),
-                                  ],
+
+                                      Expanded(
+                                        flex: 1,
+                                        child: IconButton(
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            color: Color(0xFF4d4d4d),
+                                          ),
+                                          onPressed: () async {
+                                            final confirmDelete =
+                                                await showDialog<bool>(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  builder: (ctx) => AlertDialog(
+                                                    backgroundColor: Colors.white,
+                                                    title: const Text(
+                                                      'Удалить рецепт?',
+                                                      style: TextStyle(
+                                                        color: Color(0xFF165932),
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                    content: Text(
+                                                      'Вы уверены, что хотите удалить рецепт "${widget.recipe.title}"?',
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.of(
+                                                              ctx,
+                                                            ).pop(false),
+                                                        style: TextButton.styleFrom(
+                                                          foregroundColor:
+                                                              const Color(
+                                                                0xFF165932,
+                                                              ),
+                                                        ),
+                                                        child: const Text('Отмена'),
+                                                      ),
+                                                      ElevatedButton(
+                                                        onPressed: () =>
+                                                            Navigator.of(
+                                                              ctx,
+                                                            ).pop(true),
+                                                        style:
+                                                            ElevatedButton.styleFrom(
+                                                              backgroundColor:
+                                                                  const Color(
+                                                                    0xFFD32F2F,
+                                                                  ),
+                                                              foregroundColor:
+                                                                  Colors.white,
+                                                            ),
+                                                        child: const Text(
+                                                          'Удалить',
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                            if (!context.mounted) return;
+
+                                            if (confirmDelete == true) {
+                                              try {
+                                                await RecipeManager()
+                                                    .deleteRecipe(
+                                                      widget.recipe.id,
+                                                    );
+
+                                                if (!context.mounted) return;
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      'Рецепт успешно удален!',
+                                                    ),
+                                                  ),
+                                                );
+
+                                                Navigator.pop(context, true);
+                                              } catch (e) {
+                                                if (!context.mounted) return;
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      'Ошибка при удалении рецепта',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
 
@@ -1136,35 +1137,36 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             height: MediaQuery.of(context).size.height * 0.02,
                           ),
 
-                          Center(
-                            child: SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.6,
-                              child: ElevatedButton(
-                                onPressed: isCooking ? finishCooking : null,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: isCooking
-                                      ? Color(0xFF2ECC71)
-                                      : Colors.grey,
-                                  foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(vertical: 14),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
+                          if (widget.isLoggedIn)
+                            Center(
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.6,
+                                child: ElevatedButton(
+                                  onPressed: isCooking ? finishCooking : null,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isCooking
+                                        ? Color(0xFF2ECC71)
+                                        : Colors.grey,
+                                    foregroundColor: Colors.white,
+                                    padding: EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
                                   ),
-                                ),
-                                child: Text(
-                                  'Закончить готовить',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                        0.04,
-                                    fontFamily: 'Roboto',
-                                    fontWeight: FontWeight.w600,
+                                  child: Text(
+                                    'Закончить готовить',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                          0.04,
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
 
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.02,

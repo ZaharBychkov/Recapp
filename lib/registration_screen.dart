@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'guest_recipe_list_screen.dart';
 import 'main_screen.dart';
 import 'models/user.dart';
 import 'services/user_repository.dart';
@@ -150,48 +151,60 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         child: Row(
           children: [
             Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.local_pizza_rounded,
-                      size: size.width * 0.056,
-                      color: inactiveColor,
-                    ),
-                    Text(
-                      'Рецепты',
-                      style: TextStyle(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (_) => const GuestRecipeListScreen()),
+                  );
+                },
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.local_pizza_rounded,
+                        size: size.width * 0.056,
                         color: inactiveColor,
-                        fontSize: size.width * 0.0234,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w400,
                       ),
-                    ),
-                  ],
+                      Text(
+                        'Рецепты',
+                        style: TextStyle(
+                          color: inactiveColor,
+                          fontSize: size.width * 0.0234,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
             Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.person_rounded,
-                      size: size.width * 0.056,
-                      color: activeColor,
-                    ),
-                    Text(
-                      'Вход',
-                      style: TextStyle(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.person_rounded,
+                        size: size.width * 0.056,
                         color: activeColor,
-                        fontSize: size.width * 0.0234,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w400,
                       ),
-                    ),
-                  ],
+                      Text(
+                        'Вход',
+                        style: TextStyle(
+                          color: activeColor,
+                          fontSize: size.width * 0.0234,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
