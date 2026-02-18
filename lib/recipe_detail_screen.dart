@@ -945,6 +945,41 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             ),
 
                           SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.015,
+                          ),
+
+                          if (widget.isLoggedIn)
+                            Center(
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.6,
+                                child: ElevatedButton(
+                                  onPressed: isCooking ? null : startCooking,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isCooking
+                                        ? Colors.grey
+                                        : Color(0xFF165932),
+                                    foregroundColor: Colors.white,
+                                    padding: EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Начать готовить',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                          0.04,
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                          SizedBox(
                             height: MediaQuery.of(context).size.height * 0.02,
                           ),
 
@@ -1105,36 +1140,21 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             child: SizedBox(
                               width: MediaQuery.of(context).size.width * 0.6,
                               child: ElevatedButton(
-                                onPressed: () async {
-                                  if (isCooking) {
-                                    await finishCooking();
-                                  } else {
-                                    await startCooking();
-                                  }
-                                },
+                                onPressed: isCooking ? finishCooking : null,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: isCooking
-                                      ? Colors.white
-                                      : Color(0xFF165932),
+                                      ? Color(0xFF2ECC71)
+                                      : Colors.grey,
+                                  foregroundColor: Colors.white,
                                   padding: EdgeInsets.symmetric(vertical: 14),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
-                                    side: BorderSide(
-                                      color: isCooking
-                                          ? Color(0xFF165932)
-                                          : Colors.transparent,
-                                      width: isCooking ? 4 : 0,
-                                    ),
                                   ),
                                 ),
                                 child: Text(
-                                  isCooking
-                                      ? 'Закончить готовить'
-                                      : 'Начать готовить',
+                                  'Закончить готовить',
                                   style: TextStyle(
-                                    color: isCooking
-                                        ? Color(0xFF165932)
-                                        : Colors.white,
+                                    color: Colors.white,
                                     fontSize:
                                         MediaQuery.of(context).size.width *
                                         0.04,
