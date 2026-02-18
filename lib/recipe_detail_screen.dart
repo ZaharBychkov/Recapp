@@ -538,9 +538,16 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                           final confirmDelete =
                                               await showDialog<bool>(
                                                 context: context,
-                                                builder: (context) => AlertDialog(
-                                                  title: Text(
+                                                barrierDismissible: true,
+                                                builder: (ctx) => AlertDialog(
+                                                  backgroundColor: Colors.white,
+                                                  title: const Text(
                                                     'Удалить рецепт?',
+                                                    style: TextStyle(
+                                                      color: Color(0xFF165932),
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                    ),
                                                   ),
                                                   content: Text(
                                                     'Вы уверены, что хотите удалить рецепт "${widget.recipe.title}"?',
@@ -548,23 +555,33 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                                   actions: [
                                                     TextButton(
                                                       onPressed: () =>
-                                                          Navigator.pop(
-                                                            context,
-                                                            false,
-                                                          ),
-                                                      child: Text('Отмена'),
+                                                          Navigator.of(
+                                                            ctx,
+                                                          ).pop(false),
+                                                      style: TextButton.styleFrom(
+                                                        foregroundColor:
+                                                            const Color(
+                                                              0xFF165932,
+                                                            ),
+                                                      ),
+                                                      child: const Text('Отмена'),
                                                     ),
-                                                    TextButton(
+                                                    ElevatedButton(
                                                       onPressed: () =>
-                                                          Navigator.pop(
-                                                            context,
-                                                            true,
+                                                          Navigator.of(
+                                                            ctx,
+                                                          ).pop(true),
+                                                      style:
+                                                          ElevatedButton.styleFrom(
+                                                            backgroundColor:
+                                                                const Color(
+                                                                  0xFFD32F2F,
+                                                                ),
+                                                            foregroundColor:
+                                                                Colors.white,
                                                           ),
-                                                      child: Text(
+                                                      child: const Text(
                                                         'Удалить',
-                                                        style: TextStyle(
-                                                          color: Colors.red,
-                                                        ),
                                                       ),
                                                     ),
                                                   ],
