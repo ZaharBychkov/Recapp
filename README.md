@@ -96,3 +96,104 @@ Example:
 
 - This is an app repository, so keeping `pubspec.lock` in Git is expected.
 - Local IDE files and generated artifacts are ignored via `.gitignore`.
+
+---
+
+# OTUS Food App (Русская версия)
+
+Flutter-приложение для управления рецептами, избранным, содержимым холодильника и историей готовки с локальным офлайн-хранилищем.
+
+## Возможности
+
+- Регистрация и вход пользователя
+- Каталог рецептов с экраном подробного просмотра
+- Создание и редактирование рецептов с выбором/обрезкой изображения
+- Вкладка избранного
+- Управление продуктами в холодильнике с проверкой доступности
+- История приготовленных рецептов
+- Локальное хранение данных через Hive и SharedPreferences
+
+## Технологии
+
+- Flutter / Dart
+- Hive (`hive`, `hive_flutter`)
+- SharedPreferences
+- Image Picker + обрезка изображений (`image_picker`, `image_cropper`, `crop_your_image`)
+
+## Структура проекта
+
+```text
+lib/
+  main.dart
+  splash_screen.dart
+  registration_screen.dart
+  login_screen.dart
+  main_screen.dart
+  recipe_list_screen_universal.dart
+  recipe_detail_screen.dart
+  create_screen.dart
+  fridge_screen.dart
+  favorites_screen.dart
+  history_screen.dart
+  profile_screen.dart
+  models/
+  services/
+  repositories/
+  widgets/
+```
+
+## Быстрый старт
+
+### 1. Что нужно установить
+
+- Flutter SDK (stable)
+- Dart SDK (идет вместе с Flutter)
+- Android Studio или VS Code
+- Эмулятор или физическое устройство
+
+### 2. Установка зависимостей
+
+```bash
+flutter pub get
+```
+
+### 3. Генерация Hive-адаптеров (при необходимости)
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+### 4. Запуск приложения
+
+```bash
+flutter run
+```
+
+## Полезные команды
+
+```bash
+flutter analyze
+flutter test
+dart format lib test
+```
+
+## Сборка
+
+```bash
+flutter build apk --release
+```
+
+## Скриншоты
+
+Скриншоты можно хранить в `docs/screenshots/` и добавлять ссылки в README.
+
+Пример:
+
+```md
+![Home](docs/screenshots/01-home.png)
+```
+
+## Примечания
+
+- Это репозиторий приложения, поэтому хранить `pubspec.lock` в Git корректно.
+- Локальные файлы IDE и артефакты сборки исключены через `.gitignore`.
