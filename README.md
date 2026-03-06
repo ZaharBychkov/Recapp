@@ -82,19 +82,6 @@ dart format lib test
 flutter build apk --release
 ```
 
-## Screenshots
-
-| Screen | Preview |
-|---|---|
-| Registration | ![Registration](docs/screenshots/02-registration.png) |
-| Recipes Home | ![Recipes Home](docs/screenshots/04-recipes-home.png) |
-| Recipe Detail | ![Recipe Detail](docs/screenshots/05-recipe-detail.png) |
-| Create Recipe | ![Create Recipe](docs/screenshots/06-create-recipe.png) |
-| Favorites | ![Favorites](docs/screenshots/07-favorites.png) |
-| Fridge | ![Fridge](docs/screenshots/08-fridge.png) |
-| History | ![History](docs/screenshots/09-history.png) |
-| Profile | ![Profile](docs/screenshots/10-profile.png) |
-
 ## Notes
 
 - This is an app repository, so keeping `pubspec.lock` in Git is expected.
@@ -186,20 +173,22 @@ dart format lib test
 flutter build apk --release
 ```
 
-## Скриншоты
-
-| Экран | Превью |
-|---|---|
-| Регистрация | ![Registration](docs/screenshots/02-registration.png) |
-| Главный экран рецептов | ![Recipes Home](docs/screenshots/04-recipes-home.png) |
-| Детали рецепта | ![Recipe Detail](docs/screenshots/05-recipe-detail.png) |
-| Создание рецепта | ![Create Recipe](docs/screenshots/06-create-recipe.png) |
-| Избранное | ![Favorites](docs/screenshots/07-favorites.png) |
-| Холодильник | ![Fridge](docs/screenshots/08-fridge.png) |
-| История | ![History](docs/screenshots/09-history.png) |
-| Профиль | ![Profile](docs/screenshots/10-profile.png) |
-
 ## Примечания
 
 - Это репозиторий приложения, поэтому хранить `pubspec.lock` в Git корректно.
 - Локальные файлы IDE и артефакты сборки исключены через `.gitignore`.
+
+---
+
+## Screenshots
+
+| Screen / Экран | Preview |
+|---|---|
+| Registration / Регистрация | ![Registration](docs/screenshots/02-registration.png) |
+| Recipes Home / Главный экран рецептов | ![Recipes Home](docs/screenshots/04-recipes-home.png) |
+| Recipe Detail / Детали рецепта | ![Recipe Detail](docs/screenshots/05-recipe-detail.png) |
+| Create Recipe / Создание рецепта | ![Create Recipe](docs/screenshots/06-create-recipe.png) |
+| Favorites / Избранное | ![Favorites](docs/screenshots/07-favorites.png) |
+| Fridge / Холодильник | ![Fridge](docs/screenshots/08-fridge.png) |
+| History / История | ![History](docs/screenshots/09-history.png) |
+| Profile / Профиль | ![Profile](docs/screenshots/10-profile.png) |
