@@ -1,4 +1,4 @@
-# OTUS Food App
+﻿# OTUS Food App
 
 Flutter application for managing recipes, favorites, fridge inventory, and cooking history with local offline persistence.
 
@@ -84,13 +84,16 @@ flutter build apk --release
 
 ## Screenshots
 
-Place screenshots in `docs/screenshots/` and reference them here.
-
-Example:
-
-```md
-![Home](docs/screenshots/01-home.png)
-```
+| Screen | Preview |
+|---|---|
+| Registration | ![Registration](docs/screenshots/02-registration.png) |
+| Recipes Home | ![Recipes Home](docs/screenshots/04-recipes-home.png) |
+| Recipe Detail | ![Recipe Detail](docs/screenshots/05-recipe-detail.png) |
+| Create Recipe | ![Create Recipe](docs/screenshots/06-create-recipe.png) |
+| Favorites | ![Favorites](docs/screenshots/07-favorites.png) |
+| Fridge | ![Fridge](docs/screenshots/08-fridge.png) |
+| History | ![History](docs/screenshots/09-history.png) |
+| Profile | ![Profile](docs/screenshots/10-profile.png) |
 
 ## Notes
 
@@ -185,13 +188,16 @@ flutter build apk --release
 
 ## Скриншоты
 
-Скриншоты можно хранить в `docs/screenshots/` и добавлять ссылки в README.
-
-Пример:
-
-```md
-![Home](docs/screenshots/01-home.png)
-```
+| Экран | Превью |
+|---|---|
+| Регистрация | ![Registration](docs/screenshots/02-registration.png) |
+| Главный экран рецептов | ![Recipes Home](docs/screenshots/04-recipes-home.png) |
+| Детали рецепта | ![Recipe Detail](docs/screenshots/05-recipe-detail.png) |
+| Создание рецепта | ![Create Recipe](docs/screenshots/06-create-recipe.png) |
+| Избранное | ![Favorites](docs/screenshots/07-favorites.png) |
+| Холодильник | ![Fridge](docs/screenshots/08-fridge.png) |
+| История | ![History](docs/screenshots/09-history.png) |
+| Профиль | ![Profile](docs/screenshots/10-profile.png) |
 
 ## Примечания
 
